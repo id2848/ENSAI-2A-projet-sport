@@ -1,0 +1,84 @@
+@startuml
+!theme aws-orange
+class Utilisateur {
+  - id : int
+  - pseudo : String
+  - mot_de_passe : String <<hash>>
+  - nom : String
+  - prenom : String
+  - date_de_naissance : Date
+  - sexe : String
+
+  + creer_activite()
+  + modifier_activite()
+  + supprimer_activite()
+  + suivre_utilisateur()
+  + supprimer_utilisateur_suivi()
+  + liker_activite()
+  + commenter_activite()
+  + lister_utilisateurs_suiveurs()
+  + lister_utilisateurs_suivis()
+}
+abstract class Activite {
+  - id_activite : int
+  - id_utilisateur : int
+  - sport : Sport
+  - date_activite : DateTime
+  - distance : float
+  - duree : Time
+
+  + calcule_vitesse()
+  + lister_commentaires()
+  + lister_likes()
+}
+class Commentaire {
+  - id_commentaire : int
+  - id_activite : int
+  - id_auteur : int
+  - commentaire : String
+  - date_commentaire : DateTime
+}
+class Like {
+  - id_like : int
+  - id_activite : int
+  - id_auteur : int
+}
+
+class Abonnement {
+  - id_utilisateur_suiveur : int
+  - id_utilisateur_suivi : int
+}
+
+class Ensemble_activites {
+  + lister_activites()
+}
+class Statistiques {
+  + calcule_nombre_activites()
+  + calcule_distance_totale()
+  + calcule_duree_totale()
+}
+
+class Fil_d_actualite {
+  + creer_fil()
+}
+
+enum Sport {
+  RUNNING
+  CYCLING
+  SWIMMING
+}
+' --- Associations / multiplicités ---
+Utilisateur "1" --> "0..*" Activite : Possède
+Utilisateur "0..*" --> "0..*" Activite : Liker/commenter
+
+Activite "1" -- "0..*" Commentaire : Possède
+Activite "1" -- "0..*" Like : Possède
+Activite --> Sport
+' Abonnement référence deux rôles vers Utilisateur (suiveur / suivi)
+Abonnement "0..*" ..> "1" Utilisateur : concerne
+
+' Relations conceptuelles (dépendances / liens 1-1)
+Ensemble_activites "1" ..> "1" Utilisateur : concerne
+Statistiques "1" ..> "1" Utilisateur : renseigne
+Fil_d_actualite "1" ..> "1" Utilisateur : informe
+@enduml
