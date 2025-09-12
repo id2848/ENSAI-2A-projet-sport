@@ -8,25 +8,21 @@ class Utilisateur {
   - prenom : String
   - date_de_naissance : Date
   - sexe : String
+}
 
-  + creer_activite()
-  + liker_activite(id_activite)
-  + unliker_activite(id_activite)
-  + commenter_activite(id_activite, commentaire)
-
- }
 class Activite {
   - id_activite : int
   - id_utilisateur : int
   - sport : Sport
   - date_activite : Date
   - distance : float
-  - duree : Time
+  - duree : Duration
 
-  + calcule_vitesse(): float
-  + lister_commentaires():set
-  + lister_likes():set
+  + calcule_vitesse() : float
+  + lister_commentaires() : set
+  + lister_likes() : set
 }
+
 class Commentaire {
   - id_commentaire : int
   - id_activite : int
@@ -46,24 +42,29 @@ class Abonnement {
 }
 
 
-class Statistiques {
-  + calcule_nombre_activites(id_utilisateur): int
-  + calcule_distance_totale(id_utilisateur): float
-  + calcule_duree_totale(id_utilisateur): int
+class Service_statistiques {
+  + calcule_nombre_activites(id_utilisateur : int) : int
+  + calcule_distance_totale(id_utilisateur : int) : float
+  + calcule_duree_totale(id_utilisateur : int) : int
 }
 
 
 class Service_activite {
-  + modifier_activite(id_utilisateur)
-  + supprimer_activite(id_utilisateur)
-  + lister_activite(id_utilisateur):list
-  + creer_fil(id_utilisateur):list
+  + creer_activite(id_utilisateur : int, fichier_gpx : File, sport : Sport)
+  + modifier_activite(id_utilisateur : int)
+  + supprimer_activite(id_utilisateur : int)
+  + lister_activites(id_utilisateur : int) : list
+  + creer_fil(id_utilisateur : int) : list
+  + liker_activite(id_utilisateur : int, id_activite : int)
+  + unliker_activite(id_utilisateur : int, id_activite : int)
+  + commenter_activite(id_activite : int, id_utilisateur : int, commentaire : String)
 }
+
 class Service_abonnement {
-  + creer_abonnement(id_utilisateur)
-  + supprimer_abonnement(id_utilisateur)
-  + lister_utilisateur_suivi(id_utilisateur):list
-  + lister_utilisateur_suiveur(id_utilisateur):list
+  + creer_abonnement(id_utilisateur_suiveur : int, id_utilisateur_suivi : int)
+  + supprimer_abonnement(id_utilisateur_suiveur : int, id_utilisateur_suivi : int)
+  + lister_utilisateurs_suivis(id_utilisateur : int) : set
+  + lister_utilisateurs_suiveurs(id_utilisateur : int) : set
 }
 enum Sport {
   Course
@@ -78,13 +79,13 @@ Utilisateur "0..*" --> "0..*" Activite : Liker/commenter
 Activite "1" -- "0..*" Commentaire : Possède
 Activite "1" -- "0..*" Like : Possède
 Activite --> Sport
+Service_activite --> Sport
 ' Abonnement référence deux rôles vers Utilisateur (suiveur / suivi)
 Utilisateur "0..*" --> "1" Abonnement : suivi
 Abonnement "0..*" --> "1" Utilisateur : suit
 
 ' Relations conceptuelles (dépendances / liens 1-1)
-Statistiques  ..>  Utilisateur : renseigne
-
-Service_activite  ..>  Utilisateur : modifie/renseigne
-Service_abonnement  ..>  Utilisateur : modifie/renseigne
+Utilisateur --> Service_statistiques
+Utilisateur --> Service_activite
+Utilisateur --> Service_abonnement
 @enduml
