@@ -1,7 +1,7 @@
 @startuml
-!theme aws-orange
+!theme blueprint
 class Utilisateur {
-  - id : int
+  - id_utilisateur : int
   - pseudo : String
   - mot_de_passe : String <<hash>>
   - nom : String
@@ -10,26 +10,22 @@ class Utilisateur {
   - sexe : String
 
   + creer_activite()
-  + modifier_activite()
-  + supprimer_activite()
-  + suivre_utilisateur()
-  + supprimer_utilisateur_suivi()
-  + liker_activite()
-  + commenter_activite()
-  + lister_utilisateurs_suiveurs()
-  + lister_utilisateurs_suivis()
-}
-abstract class Activite {
+  + liker_activite(id_activite)
+  + unliker_activite(id_activite)
+  + commenter_activite(id_activite, commentaire)
+
+ }
+class Activite {
   - id_activite : int
   - id_utilisateur : int
   - sport : Sport
-  - date_activite : DateTime
+  - date_activite : Date
   - distance : float
   - duree : Time
 
-  + calcule_vitesse()
-  + lister_commentaires()
-  + lister_likes()
+  + calcule_vitesse(): float
+  + lister_commentaires():set
+  + lister_likes():set
 }
 class Commentaire {
   - id_commentaire : int
@@ -49,23 +45,31 @@ class Abonnement {
   - id_utilisateur_suivi : int
 }
 
-class Ensemble_activites {
-  + lister_activites()
-}
+
 class Statistiques {
-  + calcule_nombre_activites()
-  + calcule_distance_totale()
-  + calcule_duree_totale()
+  + calcule_nombre_activites(id_utilisateur): int
+  + calcule_distance_totale(id_utilisateur): float
+  + calcule_duree_totale(id_utilisateur): int
 }
 
-class Fil_d_actualite {
-  + creer_fil()
-}
 
+class Service_activite {
+  + modifier_activite(id_utilisateur)
+  + supprimer_activite(id_utilisateur)
+  + lister_activite(id_utilisateur):list
+  + creer_fil(id_utilisateur):list
+}
+class Service_abonnement {
+  + creer_abonnement(id_utilisateur)
+  + supprimer_abonnement(id_utilisateur)
+  + lister_utilisateur_suivi(id_utilisateur):list
+  + lister_utilisateur_suiveur(id_utilisateur):list
+}
 enum Sport {
-  RUNNING
-  CYCLING
-  SWIMMING
+  Course
+  Cyclisme
+  Natation
+  Randonnee
 }
 ' --- Associations / multiplicités ---
 Utilisateur "1" --> "0..*" Activite : Possède
@@ -75,10 +79,12 @@ Activite "1" -- "0..*" Commentaire : Possède
 Activite "1" -- "0..*" Like : Possède
 Activite --> Sport
 ' Abonnement référence deux rôles vers Utilisateur (suiveur / suivi)
-Abonnement "0..*" ..> "1" Utilisateur : concerne
+Utilisateur "0..*" --> "1" Abonnement : suivi
+Abonnement "0..*" --> "1" Utilisateur : suit
 
 ' Relations conceptuelles (dépendances / liens 1-1)
-Ensemble_activites "1" ..> "1" Utilisateur : concerne
-Statistiques "1" ..> "1" Utilisateur : renseigne
-Fil_d_actualite "1" ..> "1" Utilisateur : informe
+Statistiques  ..>  Utilisateur : renseigne
+
+Service_activite  ..>  Utilisateur : modifie/renseigne
+Service_abonnement  ..>  Utilisateur : modifie/renseigne
 @enduml
