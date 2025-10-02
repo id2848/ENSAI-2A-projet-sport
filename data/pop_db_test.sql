@@ -48,7 +48,10 @@ VALUES
 INSERT INTO abonnement (id_utilisateur_suiveur, id_utilisateur_suivi)
 VALUES 
     (1, 2),
+    (2, 1),
     (2, 3),
+    (2, 4),
+    (2, 5),
     (3, 4),
     (4, 5),
     (5, 1);
