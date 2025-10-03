@@ -41,3 +41,19 @@ class Activite :
                 f"date_activite={self.date_activite}, "
                 f"distance={self.distance} km, "
                 f"duree={self.duree})")
+    
+    def calcule_vitesse(self) -> float:
+        """Calcule la vitesse moyenne en km/h."""
+        heures = self.duree.total_seconds() / 3600
+        return self.distance / heures if heures > 0 else 0.0
+
+    def lister_commentaire(self) -> set<Commentaire> : 
+        """Retourne l'ensemble des commentaires liés à l'activité."""
+        return set(self._commentaires)
+
+    def lister_jaimes(self) -> set<Jaime> : 
+        """Retourne l'ensemble des jaimes liés à l'activité."""
+        return set(self._jaime)
+
+
+
