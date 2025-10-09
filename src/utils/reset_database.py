@@ -51,9 +51,10 @@ class ResetDatabase(metaclass=Singleton):
             raise
 
         # Appliquer le hashage des mots de passe à chaque joueur
-        joueur_service = JoueurService()
+        # A adapter plus tard
+        """joueur_service = JoueurService()
         for j in joueur_service.lister_tous(inclure_mdp=True):
-            joueur_service.modifier(j)
+            joueur_service.modifier(j)"""
 
         return True
 
