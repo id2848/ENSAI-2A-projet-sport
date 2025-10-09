@@ -1,43 +1,38 @@
 from typing import List, Optional
 from business_object.activite import Activite
+from dao.db_connection import DBConnection  # à adapter selon ton projet
+import logging
 
-#j'ai copié utilisateur dao il faut encore que je change ! 
-
-class UtilisateurDAO:
-     def creer(self, activite: Activite) -> bool: 
-        """Creation d'une activite dans la base de données
-
-        Parameters
-        ----------
-        activite : Activite
-
-        Returns
-        -------
-        created : bool
-            True si la création est un succès
-            False sinon
-        """
-          res = None
-
+class ActiviteDAO:
+    def creer(self, activite: Activite) -> bool: 
+        """Création d'une activité dans la base de données"""
+        res = None
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "INSERT INTO utilisateur(pseudo, mot_de_passe_hash, nom, prenom, date_de_naissance, sexe) VALUES        "
-                        "(%(pseudo)s, %(mot_de_passe_hash)s, %(nom)s, %(prenom)s, %(date_de_naissance)s, %(sexe)s)             "
-                        "  RETURNING id_utilisateur;                                                ",
+                        """
+                        INSERT INTO activite(
+                            id_activite, id_utilisateur, sport, date_activite, distance, duree
+                        )
+                        VALUES (%(id_activite)s, %(id_utilisateur)s, %(sport)s, %(date_activite)s, %(distance)s, %(duree)s)
+                        RETURNING id_activite;
+                        """,
                         {
-                            "sport": utilisateur.sport,
-                            "mot_de_passe_hash": utilisateur.mot_de_passe_hash,
-                            "nom": utilisateur.nom,
-                            "prenom": utilisateur.prenom,
-                            "date_de_naissance": utilisateur.date_de_naissance,
-                            "sexe": utilisateur.sexe,
+                            "id_activite": activite.id_activite,
+                            "id_utilisateur": activite.id_utilisateur,
+                            "sport": activite.sport,
+                            "date_activite": activite.date_activite,
+                            "distance": activite.distance,
+                            "duree": activite.duree,
                         },
                     )
                     res = cursor.fetchone()
+                    connection.commit()
+            return res is not None
         except Exception as e:
-            logging.info(e)
+            logging.error(f"Erreur lors de la création d'une activité : {e}")
+            return False
 
         created = False
         if res:
