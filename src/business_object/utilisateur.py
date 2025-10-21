@@ -52,7 +52,7 @@ class Utilisateur:
             f"sexe={self.sexe!r})"
         )
 
-    def age(self) -> int:
+    def calculer_age(self) -> int:
         """Calcule l'âge de l'utilisateur en années."""
         today = date.today()
         return today.year - self.date_de_naissance.year - (

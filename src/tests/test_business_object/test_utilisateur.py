@@ -19,7 +19,7 @@ def test_age_utilisateur():
     )
 
     # WHEN
-    age = u.age()
+    age = u.calculer_age()
 
     # THEN
-    assert u.age() == 25
+    assert age == 25
