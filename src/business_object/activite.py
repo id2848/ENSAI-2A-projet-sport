@@ -42,7 +42,7 @@ class Activite :
                 f"distance={self.distance} km, "
                 f"duree={self.duree})")
     
-    def calcule_vitesse(self) -> float:
+    def calculer_vitesse(self) -> float:
         """Calcule la vitesse moyenne en km/h."""
         heures = self.duree.total_seconds() / 3600
         return self.distance / heures if heures > 0 else 0.0
