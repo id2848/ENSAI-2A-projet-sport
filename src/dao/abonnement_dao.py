@@ -199,4 +199,35 @@ class AbonnementDao:
 
         return liste_abonnements
 
-        """ et supprimer un abonnemment??"""
+    @log
+    def supprimer(self, abonnement: Abonnement) -> bool:
+        """Suppression d'un abonnement dans la base de données
+
+        Parameters
+        ----------
+        abonnement : Abonnement
+            abonnement à supprimer de la base de données
+
+        Returns
+        -------
+        bool
+            True si l'abonnement a bien été supprimé
+        """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "DELETE FROM abonnement                                      "
+                        " WHERE id_utilisateur_suiveur = %(id_utilisateur_suiveur)s "
+                        "   AND id_utilisateur_suivi = %(id_utilisateur_suivi)s;    ",
+                        {
+                            "id_utilisateur_suiveur": abonnement.id_utilisateur_suiveur,
+                            "id_utilisateur_suivi": abonnement.id_utilisateur_suivi,
+                        },
+                    )
+                    res = cursor.rowcount
+        except Exception as e:
+            logging.info(e)
+            raise
+
+        return res > 0
