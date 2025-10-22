@@ -22,10 +22,10 @@ class Commentaire:
 
     def __init__(
         self,
-        id_activite : int
-        id_auteur : int
-        commentaire : str
-        date_commentaire : date
+        id_activite : int,
+        id_auteur : int,
+        commentaire : str,
+        date_commentaire : date,
         id_commentaire: Optional[int] = None
     ):
         self.id_commentaire = id_commentaire

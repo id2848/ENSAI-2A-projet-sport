@@ -1,13 +1,18 @@
+import logging
 
-from typing import List, Optional
+from utils.singleton import Singleton
+from utils.log_decorator import log
+
+from dao.db_connection import DBConnection
+
+from business_object.commentaire import Commentaire
 from business_object.utilisateur import Utilisateur
 
 
 
 class CommentaireDao:
-       """Classe contenant les méthodes pour accéder aux Commentaires de la base de données"""
-
-     def creer(self, utilisateur: Utilisateur) -> bool: 
+    """Classe contenant les méthodes pour accéder aux Commentaires de la base de données"""
+    def creer(self, utilisateur: Utilisateur) -> bool:
         """Creation d'un commentaire dans la base de données
 
         Parameters
@@ -20,7 +25,7 @@ class CommentaireDao:
             True si la création est un succès
             False sinon
         """
-          res = None
+        res = None
 
         try:
             with DBConnection().connection as connection:
@@ -47,7 +52,7 @@ class CommentaireDao:
 
         return created
     
-@log
+    @log
     def lister_par_activite(self, id_activite) -> list[Commentaire]:
         """lister tous les commentaires
 
@@ -66,8 +71,8 @@ class CommentaireDao:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "SELECT *                              "
-                        "  FROM commentaire;                        "
-                        " WHERE id_utilisateur= %(id_utilisateur)s;  ",
+                        "  FROM commentaire                        "
+                        "  WHERE id_activite= %(id_activite)s;  ",
                         {"id_activite": id_activite},
                     )
                     res = cursor.fetchall()
@@ -79,7 +84,7 @@ class CommentaireDao:
 
         if res:
             for row in res:
-                commentaire = commentaire(
+                commentaire = Commentaire(
                     id_activite=row["id_activite"],
                     id_auteur=row["id_auteur"],
                     commentaire=row["commentaire"],
@@ -92,7 +97,7 @@ class CommentaireDao:
 
 
     @log
-   def supprimer(self, commentaire) -> bool:
+    def supprimer(self, commentaire) -> bool:
         """Suppression d'un commentaire dans la base de données
 
         Parameters
