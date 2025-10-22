@@ -18,7 +18,7 @@ CREATE TABLE utilisateur (
 -----------------------------------------------------
 DROP TABLE IF EXISTS activite CASCADE ;
 
-CREATE TYPE sport AS ENUM ('course', 'natation', 'velo', 'randonnée');  
+CREATE TYPE sport AS ENUM ('course', 'natation', 'vélo', 'randonnée');  
 
 CREATE TABLE activite (
     id_activite             SERIAL PRIMARY KEY,
@@ -51,9 +51,9 @@ CREATE TABLE commentaire (
 DROP TABLE IF EXISTS jaime CASCADE ;
 
 CREATE TABLE jaime (
-    id_jaime                SERIAL PRIMARY KEY,
     id_activite             INTEGER,  
     id_auteur               INTEGER, 
+    PRIMARY KEY (id_activite, id_auteur),  
     FOREIGN KEY (id_activite) REFERENCES activite(id_activite),  
     FOREIGN KEY (id_auteur) REFERENCES utilisateur(id_utilisateur) 
 );

@@ -16,7 +16,7 @@ INSERT INTO activite (id_activite, id_utilisateur, sport, date_activite, distanc
 VALUES 
     (991, 991, 'course', '2025-09-25', 5.0, 30.0),
     (992, 992, 'natation', '2025-09-26', 2.5, 45.0),
-    (993, 993, 'velo', '2025-09-27', 20.0, 60.0),
+    (993, 993, 'vélo', '2025-09-27', 20.0, 60.0),
     (994, 994, 'randonnée', '2025-09-28', 10.0, 120.0),
     (995, 995, 'course', '2025-09-29', 10.0, 50.0);
 
@@ -31,7 +31,7 @@ VALUES
     (994, 994, 'Randonnée incroyable avec des vues magnifiques.', '2025-09-29');
 
 -----------------------------------------------------
--- Insertion des likes (jaime)
+-- Insertion des jaimes
 -----------------------------------------------------
 INSERT INTO jaime (id_activite, id_auteur)
 VALUES 
