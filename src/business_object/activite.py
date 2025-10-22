@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 class Activite : 
     """
     Classe représentant les différentes activités que l'utilisateur peut faire. 
@@ -46,10 +47,4 @@ class Activite :
         """Calcule la vitesse moyenne en km/h."""
         heures = self.duree.total_seconds() / 3600
         return self.distance / heures if heures > 0 else 0.0
-
-
-    
-
-
-
 
