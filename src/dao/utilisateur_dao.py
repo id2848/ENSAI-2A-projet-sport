@@ -1,8 +1,16 @@
-from typing import List, Optional
+import logging
+from utils.log_decorator import log
+
+from dao.db_connection import DBConnection
+
 from business_object.utilisateur import Utilisateur
 
-class UtilisateurDAO:
-     def creer(self, utilisateur: Utilisateur) -> bool: 
+class UtilisateurDao:
+    """Classe contenant les méthodes pour accéder aux utilisateurs de la base de données"""
+
+    @log
+    
+    def creer(self, utilisateur: Utilisateur) -> bool: 
         """Creation d'un utilisateur dans la base de données
 
         Parameters
@@ -15,7 +23,8 @@ class UtilisateurDAO:
             True si la création est un succès
             False sinon
         """
-          res = None
+        res = None
+
 
         try:
             with DBConnection().connection as connection:
@@ -43,6 +52,7 @@ class UtilisateurDAO:
             created = True
 
         return created
+
     @log
     def trouver_par_id(self, id_utilisateur) -> Utilisateur:
         """trouver un utilisateur grace à son id
@@ -75,16 +85,17 @@ class UtilisateurDAO:
         if res:
             utilisateur = Utilisateur(
                 pseudo=res["pseudo"],
-                nom=res["nom"]
-                prenom=res["prenom"]
+                nom=res["nom"],
+                prenom=res["prenom"],
                 date_de_naissance=res["date_de_naissance"],
                 sexe=res["sexe"],
                 id_utilisateur=res["id_utilisateur"],
+                mot_de_passe_hash=res["mot_de_passe_hash"]
             )
 
         return utilisateur
 
-         @log
+    @log
     def lister_tous(self) -> list[Utilisateur]:
         """lister tous les utilisateurs
 
@@ -119,7 +130,7 @@ class UtilisateurDAO:
                     pseudo=row["pseudo"],
                     mot_de_passe_hash=row["mot_de_passe_hash"],
                     nom=row["nom"],
-                    prenom=row["prenom"]
+                    prenom=row["prenom"],
                     date_de_naissance=row["date_de_naissance"],
                     sexe=row["sexe"],
                 )
@@ -128,7 +139,7 @@ class UtilisateurDAO:
 
         return liste_utilisateurs
 
-          @log
+    @log
     def modifier(self, utilisateur) -> bool:
         """Modification d'un utilisateur dans la base de données
 
@@ -163,7 +174,7 @@ class UtilisateurDAO:
                             "nom": utilisateur.nom,
                             "prenom": utilisateur.prenom,
                             "date_de_naissance": utilisateur.date_de_naissance,
-                            "sexe": utilisateur.sexe
+                            "sexe": utilisateur.sexe,
                             "id_utilisateur": utilisateur.id_utilisateur,
                         },
                     )
@@ -174,7 +185,7 @@ class UtilisateurDAO:
         return res == 1
 
     @log
-   def supprimer(self, utilisateur) -> bool:
+    def supprimer(self, utilisateur) -> bool:
         """Suppression d'un utilisateur dans la base de données
 
         Parameters
@@ -203,7 +214,7 @@ class UtilisateurDAO:
 
         return res > 0
 
-   @log
+    @log
     def se_connecter(self, pseudo, mot_de_passe_hash) -> Utilisateur:
         """se connecter grâce à son pseudo et son mot de passe
 
@@ -242,7 +253,7 @@ class UtilisateurDAO:
                 mot_de_passe_hash=res["mot_de_passe_hash"],
                 nom=res["nom"],
                 prenom=res["prenom"],
-                date_de_naissance=res["date_de_naissance"]
+                date_de_naissance=res["date_de_naissance"],
                 sexe=res["sexe"],
                 id_utilisateur=res["id_utilisateur"],
             )
