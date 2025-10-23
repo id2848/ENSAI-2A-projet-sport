@@ -23,12 +23,12 @@ VALUES
 -----------------------------------------------------
 -- Insertion des commentaires
 -----------------------------------------------------
-INSERT INTO commentaire (id_activite, id_auteur, commentaire, date_commentaire)
+INSERT INTO commentaire (id_commentaire, id_activite, id_auteur, commentaire, date_commentaire)
 VALUES 
-    (991, 992, 'Super activité !', '2025-09-26'),
-    (992, 993, 'Je trouve la natation relaxante, c''est parfait pour se détendre.', '2025-09-27'),
-    (993, 994, 'J''adore le vélo !', '2025-09-28'),
-    (994, 994, 'Randonnée incroyable avec des vues magnifiques.', '2025-09-29');
+    (991, 991, 992, 'Super activité !', '2025-09-26'),
+    (992, 992, 993, 'Je trouve la natation relaxante, c''est parfait pour se détendre.', '2025-09-27'),
+    (993, 993, 994, 'J''adore le vélo !', '2025-09-28'),
+    (994, 994, 994, 'Randonnée incroyable avec des vues magnifiques.', '2025-09-29');
 
 -----------------------------------------------------
 -- Insertion des jaimes
