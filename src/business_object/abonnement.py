@@ -1,3 +1,5 @@
+from business_object.utilisateur import Utilisateur
+
 class Abonnement : 
 
     """
@@ -16,16 +18,29 @@ class Abonnement :
         self._id_utilisateur_suiveur = id_utilisateur_suiveur
         self._id_utilisateur_suivi = id_utilisateur_suivi
     
-    def id_utilisateur_suiveur(self) -> int:
+    def get_id_utilisateur_suiveur(self) -> int:
         """Retourne l'ID de l'utilisateur suiveur."""
         return self._id_utilisateur_suiveur
 
-    def id_utilisateur_suivi(self) -> int:
+    def get_id_utilisateur_suivi(self) -> int:
         """Retourne l'ID de l'utilisateur suivi."""
         return self._id_utilisateur_suivi    
+        
+    def __str__(self):
+        """Retourne une représentation lisible de l'abonnement."""
+        return f"Abonnement: Utilisateur {self._id_utilisateur_suiveur} suit l'utilisateur {self._id_utilisateur_suivi}"
+
     
 # Exemple d'utilisation
 if __name__ == "__main__":
+    # Création d'un abonnement : utilisateur 1 suit utilisateur 2
+    abonnement = Abonnement(id_utilisateur_suiveur=1, id_utilisateur_suivi=2)
+    
+    # Affichage des informations
+    print(abonnement)  # Utilisation de la méthode __str__
+    print(f"Suiveur: {abonnement.get_id_utilisateur_suiveur()}")
+    print(f"Suivi: {abonnement.get_id_utilisateur_suivi()}")
+
     # Création d'un abonnement : utilisateur 1 suit utilisateur 2
     abonnement = Abonnement(id_utilisateur_suiveur=1, id_utilisateur_suivi=2)
     
