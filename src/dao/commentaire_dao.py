@@ -12,7 +12,7 @@ from business_object.utilisateur import Utilisateur
 
 class CommentaireDao:
     """Classe contenant les méthodes pour accéder aux Commentaires de la base de données"""
-    def creer(self, utilisateur: Utilisateur) -> bool:
+    def creer(self, commentaire: Commentaire) -> bool:
         """Creation d'un commentaire dans la base de données
 
         Parameters

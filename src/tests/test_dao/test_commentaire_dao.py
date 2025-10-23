@@ -23,7 +23,7 @@ def test_creer_ok():
     """Création de Commentaire réussie"""
 
     # GIVEN
-    commentaire = Commentaire(id_activite=991, id_auteur=992, commentaire="ok !", date_commentaire=2025-10-21)
+    commentaire = Commentaire(id_activite=991, id_auteur=992, commentaire='Super activité !', date_commentaire='2025-09-26')
 
     # WHEN
     creation_ok = CommentaireDao().creer(commentaire)
@@ -65,13 +65,16 @@ def test_supprimer_ok():
     """Suppression de commentaire réussie"""
 
     # GIVEN
-    commentaire = Commentaire(id_activite=993, id_auteur=994, commentaire='J''adore le vélo !', date_commentaire='2025-09-28')
+    commentaire = Commentaire(id_commentaire=991, id_activite=991, id_auteur=992, commentaire='Super activité !', date_commentaire='2025-09-26')
 
     # WHEN
     suppression_ok = CommentaireDao().supprimer(commentaire)
 
     # THEN
     assert suppression_ok
+
+
+
 
 
 def test_supprimer_ko():
