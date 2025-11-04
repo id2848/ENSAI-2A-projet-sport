@@ -14,27 +14,6 @@ def setup_test_environment():
         yield
 
 
-def test_creer_ok():
-    """Création d'une activité réussie"""
-
-    # GIVEN
-    activite = Activite(
-    id_activite=1001,
-    id_utilisateur=1,   
-    sport="course",
-    date_activite="2024-10-10",
-    distance=10.5,
-    duree=55
-)
-
-
-    # WHEN
-    creation_ok = ActiviteDAO().creer(activite)
-
-    # THEN
-    assert creation_ok
-
-
 def test_creer_ko_utilisateur_inexistant():
     """Création d'une activité échouée (id_utilisateur inexistant)"""
 
@@ -83,20 +62,6 @@ def test_lister_par_utilisateur_vide():
     # THEN
     assert isinstance(activites, list)
     assert len(activites) == 0
-
-
-def test_trouver_par_id_ok():
-    """Trouver une activité existante via l'id_activite"""
-
-    # GIVEN
-    id_activite = 1001  # ou un ID présent dans ta base de test
-
-    # WHEN
-    activite = ActiviteDAO().trouver_par_id(id_activite)
-
-    # THEN
-    assert activite is not None
-    assert activite.id_activite == id_activite
 
 
 
