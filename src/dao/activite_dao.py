@@ -40,95 +40,56 @@ class ActiviteDAO:
             logging.error(f"Erreur lors de la création d'une activité : {e}")
             return False
 
-    def trouver_par_id(self, id_utilisateur) -> Utilisateur:
-        """Trouver un utilisateur par son id"""
+    def trouver_par_id(self, id_activite) -> Activite:
+        """Trouver une activité par son id"""
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "SELECT * FROM utilisateur WHERE id_utilisateur = %(id_utilisateur)s;",
-                        {"id_utilisateur": id_utilisateur}
+                        "SELECT * FROM activite WHERE id_activite = %(id_activite)s;",
+                        {"id_activite": id_activite}
                     )
                     res = cursor.fetchone()
         except Exception as e:
             logging.info(e)
             raise
 
-        utilisateur = None
+        activite = None
         if res:
-            utilisateur = Utilisateur(
-                pseudo=res["pseudo"],
-                nom=res["nom"],
-                prenom=res["prenom"],
-                date_de_naissance=res["date_de_naissance"],
-                sexe=res["sexe"],
-                id_utilisateur=res["id_utilisateur"]
+            activite = Activite(
+                id_activite=res["id_activite"],
+                id_utilisateur=res["id_utilisateur"],
+                sport=res["sport"],
+                date_activite=res["date_activite"],
+                distance=res["distance"],
+                duree=res["duree"],
             )
-        return utilisateur
-
-    def lister_par_utilisateur(self, id_utilisateur) -> list[Activite]:
-        """Lister toutes les activités d'un utilisateur donné
-        Parameters
-        ----------
-        id_utilisateur : int
-        numéro id de l'utilisateur
-        Returns
-        ---------
-        liste_activites : list[Activite]
-        Liste de toutes les activités associées à cet utilisateur
-        """
-        try:
-                with DBConnection().connection as connection:
-                        with connection.cursor() as cursor:
-                                cursor.execute(
-                                        "SELECT * FROM activite WHERE id_utilisateur = %(id_utilisateur)s;",
-                                        {"id_utilisateur": id_utilisateur}
-                                )
-                                res = cursor.fetchall()
-        except Exception as e:
-                logging.info(e)
-                raise
-                                        
-        liste_activites = []
-        if res:
-                for row in res:
-                        activite = Activite(
-                                id_activite=row["id_activite"],
-                                id_utilisateur=row["id_utilisateur"],
-                                sport=row["sport"],
-                                date_activite=row["date_activite"],
-                                distance=row["distance"],
-                                duree=row["duree"]
-                        )
-                        liste_activites.append(activite)
-        return liste_activites
+        return activite
 
 
-    def modifier(self, utilisateur) -> bool:
-        """Modification d'un utilisateur dans la base de données"""
+    def modifier(self, activite: Activite) -> bool:
+        """Modifier une activité existante dans la base de données"""
         res = None
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
-                        UPDATE utilisateur
-                        SET pseudo=%(pseudo)s,
-                            mot_de_passe_hash=%(mot_de_passe_hash)s,
-                            nom=%(nom)s,
-                            prenom=%(prenom)s,
-                            date_de_naissance=%(date_de_naissance)s,
-                            sexe=%(sexe)s
-                        WHERE id_utilisateur=%(id_utilisateur)s;
+                        UPDATE activite
+                        SET id_utilisateur=%(id_utilisateur)s,
+                            sport=%(sport)s,
+                            date_activite=%(date_activite)s,
+                            distance=%(distance)s,
+                            duree=%(duree)s
+                        WHERE id_activite=%(id_activite)s;
                         """,
                         {
-                            "pseudo": utilisateur.pseudo,
-                            "mot_de_passe_hash": utilisateur.mot_de_passe_hash,
-                            "nom": utilisateur.nom,
-                            "prenom": utilisateur.prenom,
-                            "date_de_naissance": utilisateur.date_de_naissance,
-                            "sexe": utilisateur.sexe,
-                            "id_utilisateur": utilisateur.id_utilisateur,
+                            "id_activite": activite.id_activite,
+                            "id_utilisateur": activite.id_utilisateur,
+                            "sport": activite.sport,
+                            "date_activite": activite.date_activite,
+                            "distance": activite.distance,
+                            "duree": activite.duree
                         }
                     )
                     res = cursor.rowcount
@@ -136,14 +97,16 @@ class ActiviteDAO:
             logging.info(e)
         return res == 1
 
-    def supprimer(self, utilisateur) -> bool:
-        """Suppression d'un utilisateur dans la base de données"""
+    
+    def supprimer(self, activite: Activite) -> bool:
+        """Supprimer une activité de la base de données"""
+        res = None
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "DELETE FROM utilisateur WHERE id_utilisateur=%(id_utilisateur)s",
-                        {"id_utilisateur": utilisateur.id_utilisateur}
+                        "DELETE FROM activite WHERE id_activite=%(id_activite)s;",
+                        {"id_activite": activite.id_activite}
                     )
                     res = cursor.rowcount
         except Exception as e:
@@ -151,34 +114,31 @@ class ActiviteDAO:
             raise
         return res > 0
 
-    def se_connecter(self, pseudo, mot_de_passe_hash) -> Utilisateur:
-        """Se connecter grâce à son pseudo et son mot de passe"""
+    def lister_par_utilisateur(self, id_utilisateur) -> list[Activite]:
+        """Lister toutes les activités d'un utilisateur"""
         res = None
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        """
-                        SELECT *
-                        FROM utilisateur
-                        WHERE pseudo = %(pseudo)s
-                        AND mot_de_passe_hash = %(mot_de_passe_hash)s;
-                        """,
-                        {"pseudo": pseudo, "mot_de_passe_hash": mot_de_passe_hash}
+                        "SELECT * FROM activite WHERE id_utilisateur = %(id_utilisateur)s;",
+                        {"id_utilisateur": id_utilisateur}
                     )
-                    res = cursor.fetchone()
+                    res = cursor.fetchall()
         except Exception as e:
             logging.info(e)
+            raise
 
-        utilisateur = None
+        liste_activites = []
         if res:
-            utilisateur = Utilisateur(
-                pseudo=res["pseudo"],
-                mot_de_passe_hash=res["mot_de_passe_hash"],
-                nom=res["nom"],
-                prenom=res["prenom"],
-                date_de_naissance=res["date_de_naissance"],
-                sexe=res["sexe"],
-                id_utilisateur=res["id_utilisateur"]
-            )
-        return utilisateur
+            for row in res:
+                activite = Activite(
+                    id_activite=row["id_activite"],
+                    id_utilisateur=row["id_utilisateur"],
+                    sport=row["sport"],
+                    date_activite=row["date_activite"],
+                    distance=row["distance"],
+                    duree=row["duree"]
+                )
+                liste_activites.append(activite)
+        return liste_activites

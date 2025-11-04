@@ -19,13 +19,14 @@ def test_creer_ok():
 
     # GIVEN
     activite = Activite(
-        id_activite=1001,
-        id_utilisateur=991,  # utilisateur existant dans la base de test
-        sport="Course",
-        date_activite="2024-10-10",
-        distance=10.5,
-        duree=55
-    )
+    id_activite=1001,
+    id_utilisateur=1,   
+    sport="course",
+    date_activite="2024-10-10",
+    distance=10.5,
+    duree=55
+)
+
 
     # WHEN
     creation_ok = ActiviteDAO().creer(activite)
