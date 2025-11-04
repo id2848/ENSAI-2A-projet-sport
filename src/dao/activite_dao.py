@@ -1,10 +1,13 @@
-from typing import List, Optional
-from business_object.activite import Activite
-from dao.db_connection import DBConnection  # à adapter selon ton projet
 import logging
+from utils.log_decorator import log
+
+from dao.db_connection import DBConnection
+
+from business_object.utilisateur import Utilisateur
+from business_object.activite import Activite
 
 class ActiviteDAO:
-    def creer(self, activite: Activite) -> bool: 
+    def creer(self, activite: Activite) -> bool:
         """Création d'une activité dans la base de données"""
         res = None
         try:
@@ -15,7 +18,10 @@ class ActiviteDAO:
                         INSERT INTO activite(
                             id_activite, id_utilisateur, sport, date_activite, distance, duree
                         )
-                        VALUES (%(id_activite)s, %(id_utilisateur)s, %(sport)s, %(date_activite)s, %(distance)s, %(duree)s)
+                        VALUES (
+                            %(id_activite)s, %(id_utilisateur)s, %(sport)s,
+                            %(date_activite)s, %(distance)s, %(duree)s
+                        )
                         RETURNING id_activite;
                         """,
                         {
@@ -25,43 +31,23 @@ class ActiviteDAO:
                             "date_activite": activite.date_activite,
                             "distance": activite.distance,
                             "duree": activite.duree,
-                        },
+                        }
                     )
                     res = cursor.fetchone()
                     connection.commit()
-            return res is not None
+                    return res is not None
         except Exception as e:
             logging.error(f"Erreur lors de la création d'une activité : {e}")
             return False
 
-        created = False
-        if res:
-            utilisateur.id_utilisateur = res["id_utilisateur"]
-            created = True
-
-        return created
-    @log
     def trouver_par_id(self, id_utilisateur) -> Utilisateur:
-        """trouver un utilisateur grace à son id
-
-        Parameters
-        ----------
-        id_utilisateur : int
-            numéro id de l'utilisateur que l'on souhaite trouver
-
-        Returns
-        -------
-        utilisateur : Utilisateur
-            renvoie l'utilisateur' que l'on cherche par id
-        """
+        """Trouver un utilisateur par son id"""
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "SELECT *                           "
-                        "  FROM utilisateur                      "
-                        " WHERE id_utilisateur= %(id_utilisateur)s;  ",
-                        {"id_utilisateur": id_utilisateur},
+                        "SELECT * FROM utilisateur WHERE id_utilisateur = %(id_utilisateur)s;",
+                        {"id_utilisateur": id_utilisateur}
                     )
                     res = cursor.fetchone()
         except Exception as e:
@@ -72,178 +58,127 @@ class ActiviteDAO:
         if res:
             utilisateur = Utilisateur(
                 pseudo=res["pseudo"],
-                nom=res["nom"]
-                prenom=res["prenom"]
+                nom=res["nom"],
+                prenom=res["prenom"],
                 date_de_naissance=res["date_de_naissance"],
                 sexe=res["sexe"],
-                id_utilisateur=res["id_utilisateur"],
+                id_utilisateur=res["id_utilisateur"]
             )
-
         return utilisateur
 
-         @log
-    def lister_tous(self) -> list[Utilisateur]:
-        """lister tous les utilisateurs
-
+    def lister_par_utilisateur(self, id_utilisateur) -> list[Activite]:
+        """Lister toutes les activités d'un utilisateur donné
         Parameters
         ----------
-        None
-
+        id_utilisateur : int
+        numéro id de l'utilisateur
         Returns
-        -------
-        liste_utilisateurs : list[Utilisateur]
-            renvoie la liste de tous les joueurs dans la base de données
+        ---------
+        liste_activites : list[Activite]
+        Liste de toutes les activités associées à cet utilisateur
         """
-
         try:
-            with DBConnection().connection as connection:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "SELECT *                              "
-                        "  FROM utilisateur;                        "
-                    )
-                    res = cursor.fetchall()
+                with DBConnection().connection as connection:
+                        with connection.cursor() as cursor:
+                                cursor.execute(
+                                        "SELECT * FROM activite WHERE id_utilisateur = %(id_utilisateur)s;",
+                                        {"id_utilisateur": id_utilisateur}
+                                )
+                                res = cursor.fetchall()
         except Exception as e:
-            logging.info(e)
-            raise
-
-        liste_utilisateurs = []
-
+                logging.info(e)
+                raise
+                                        
+        liste_activites = []
         if res:
-            for row in res:
-                utilisateur = Utilisateur(
-                    id_utilisateur=row["id_utilisateur"],
-                    pseudo=row["pseudo"],
-                    mot_de_passe_hash=row["mot_de_passe_hash"],
-                    nom=row["nom"],
-                    prenom=row["prenom"]
-                    date_de_naissance=row["date_de_naissance"],
-                    sexe=row["sexe"],
-                )
+                for row in res:
+                        activite = Activite(
+                                id_activite=row["id_activite"],
+                                id_utilisateur=row["id_utilisateur"],
+                                sport=row["sport"],
+                                date_activite=row["date_activite"],
+                                distance=row["distance"],
+                                duree=row["duree"]
+                        )
+                        liste_activites.append(activite)
+        return liste_activites
 
-                liste_utilisateurs.append(utilisateur)
 
-        return liste_utilisateurs
-
-          @log
     def modifier(self, utilisateur) -> bool:
-        """Modification d'un utilisateur dans la base de données
-
-        Parameters
-        ----------
-        utilisateur : Utilisateur
-
-        Returns
-        -------
-        created : bool
-            True si la modification est un succès
-            False sinon
-        """
-
+        """Modification d'un utilisateur dans la base de données"""
         res = None
-
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "UPDATE utilisateur                                      "
-                        "   SET pseudo                     = %(pseudo)s,                   "
-                        "       mot_de_passe_hash          = %(mot_de_passe_hash)s,                      "
-                        "       nom                        = %(nom)s,                      "
-                        "       prenom                     = %(prenom)s,                      "
-                        "       date_de_naissance          = %(date_de_naissance)s,                     "
-                        "       sexe                       = %(sexe)s               "
-                        " WHERE id_utilisateur = %(id_utilisateur)s;                  ",
+                        """
+                        UPDATE utilisateur
+                        SET pseudo=%(pseudo)s,
+                            mot_de_passe_hash=%(mot_de_passe_hash)s,
+                            nom=%(nom)s,
+                            prenom=%(prenom)s,
+                            date_de_naissance=%(date_de_naissance)s,
+                            sexe=%(sexe)s
+                        WHERE id_utilisateur=%(id_utilisateur)s;
+                        """,
                         {
                             "pseudo": utilisateur.pseudo,
                             "mot_de_passe_hash": utilisateur.mot_de_passe_hash,
                             "nom": utilisateur.nom,
                             "prenom": utilisateur.prenom,
                             "date_de_naissance": utilisateur.date_de_naissance,
-                            "sexe": utilisateur.sexe
+                            "sexe": utilisateur.sexe,
                             "id_utilisateur": utilisateur.id_utilisateur,
-                        },
+                        }
                     )
                     res = cursor.rowcount
         except Exception as e:
             logging.info(e)
-
         return res == 1
 
-    @log
-   def supprimer(self, utilisateur) -> bool:
-        """Suppression d'un utilisateur dans la base de données
-
-        Parameters
-        ----------
-        utilisateur : Utilisateur
-            utilisateur à supprimer de la base de données
-
-        Returns
-        -------
-            True si l'utilisateur a bien été supprimé
-        """
-
+    def supprimer(self, utilisateur) -> bool:
+        """Suppression d'un utilisateur dans la base de données"""
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
-                    # Supprimer le compte d'un utilisateur
                     cursor.execute(
-                        "DELETE FROM utilisateur                  "
-                        " WHERE id_utilisateur=%(id_utilisateur)s      ",
-                        {"id_utilisateur": utilisateur.id_utilisateur},
+                        "DELETE FROM utilisateur WHERE id_utilisateur=%(id_utilisateur)s",
+                        {"id_utilisateur": utilisateur.id_utilisateur}
                     )
                     res = cursor.rowcount
         except Exception as e:
             logging.info(e)
             raise
-
         return res > 0
 
-   @log
     def se_connecter(self, pseudo, mot_de_passe_hash) -> Utilisateur:
-        """se connecter grâce à son pseudo et son mot de passe
-
-        Parameters
-        ----------
-        pseudo : str
-            pseudo de l'utilisateur que l'on souhaite trouver
-        mot_de_passe_hash : str
-            mot de passe de l'utilisateur
-
-        Returns
-        -------
-        utilisateur : Utilisateur
-            renvoie l'utilisateur' que l'on cherche
-        """
+        """Se connecter grâce à son pseudo et son mot de passe"""
         res = None
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "SELECT *                           "
-                        "  FROM utilisateur                      "
-                        " WHERE pseudo = %(pseudo)s         "
-                        "   AND mot_de_passe_hash = %(mot_de_passe_hash)s;              ",
-                        {"pseudo": pseudo, "mot_de_passe_hash": mot_de_passe_hash},
+                        """
+                        SELECT *
+                        FROM utilisateur
+                        WHERE pseudo = %(pseudo)s
+                        AND mot_de_passe_hash = %(mot_de_passe_hash)s;
+                        """,
+                        {"pseudo": pseudo, "mot_de_passe_hash": mot_de_passe_hash}
                     )
                     res = cursor.fetchone()
         except Exception as e:
             logging.info(e)
 
         utilisateur = None
-
         if res:
             utilisateur = Utilisateur(
                 pseudo=res["pseudo"],
                 mot_de_passe_hash=res["mot_de_passe_hash"],
                 nom=res["nom"],
                 prenom=res["prenom"],
-                date_de_naissance=res["date_de_naissance"]
+                date_de_naissance=res["date_de_naissance"],
                 sexe=res["sexe"],
-                id_utilisateur=res["id_utilisateur"],
+                id_utilisateur=res["id_utilisateur"]
             )
-
         return utilisateur
-
-   
