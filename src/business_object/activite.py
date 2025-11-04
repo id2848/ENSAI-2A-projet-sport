@@ -23,7 +23,7 @@ class Activite :
         self,
         id_activite: int, 
         id_utilisateur: int, 
-        sport, 
+        sport: str, 
         date_activite: date, 
         distance: float, 
         duree: timedelta):

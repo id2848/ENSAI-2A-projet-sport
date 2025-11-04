@@ -1,6 +1,5 @@
 from typing import List
-from datetime import datetime
-from models import Utilisateur, Activite, Commentaire, Sport  # Importez vos modèles
+from datetime import date, datetime, timedelta
 
 from utils.log_decorator import log
 from utils.securite import hash_password
@@ -21,11 +20,12 @@ from dao.jaime_dao import JaimeDao
 class ActiviteService:
     """Classe contenant les méthodes de service des activités Utilisateurs"""
 
-    def creer_activite(self, id_utilisateur: int, fichier_gpx: str, sport: Sport) -> bool:
+    def creer_activite(self, id_utilisateur: int, sport: str,date_activite: date, distance: float, 
+        duree: timedelta) -> bool:
         """ Crée une nouvelle activité """
         try:
             # Logique pour créer une nouvelle activité
-            activite = Activite(id_utilisateur=id_utilisateur, sport=sport, date_activite=datetime.now(), fichier_gpx=fichier_gpx)
+            activite = Activite(id_utilisateur=id_utilisateur, sport=sport, date_activite=datetime.now(), distance= distance, duree= duree)
             return True
         except Exception as e:
             print(f"Erreur lors de la création de l'activité : {e}")
@@ -48,7 +48,7 @@ class ActiviteService:
             print(f"Erreur lors de la suppression de l'activité : {e}")
             return False
 
-    def modifier_activite(self, id_activite: int, sport: Sport) -> bool:
+    def modifier_activite(self, id_activite: int, sport: str) -> bool:
         """ Modifie une activité existante """
         try:
             activite = ActiviteDAO.trouver_par_id(id_activite=id_activite)  # Récupère l'activité par son ID
