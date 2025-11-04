@@ -10,7 +10,6 @@ from dao.abonnement_dao import AbonnementDao
 from dao.joueur_dao import JoueurDao
 
 
-
 class AbonnementService:
     """Classe contenant les méthodes de service de Abonnement"""
 
@@ -22,7 +21,6 @@ class AbonnementService:
             id_utilisateur_suiveur=id_joueur,
             id_utilisateur_suivi=id_joueur,
         )
-
         return nouveau_abonnement if AbonnementDao().creer(nouveau_abonnement) else None
 
     @log
@@ -30,18 +28,32 @@ class AbonnementService:
         """Supprimer un abonnement"""
         return AbonnementDao().supprimer(abonnement)
 
-""" A POURSUIVRE
-
     @log
     def lister_utilisateurs_suivis(self) -> list[Joueur]:
         """Lister tous les joueurs qui sont suivis par abonnement
         """
         joueurs = JoueurDao().lister_tous()
-        if not inclure_mdp:
-            for j in joueurs:
-                j.mdp = None
-        return joueurs
+        abonnements = AbonnementDao().lister_suivis
+        utilisateurs_suivis <- set()
+        for j in joueurs:
+                id1 = j.id_joueur
+                for k in abonnements:
+                    id2 = k.id_joueur
+                    if id1 == id2:
+                        utilisateurs_suivis.add(j)
+        return utilisateurs_suivis
 
-lister_tous(self) -> list[Joueur]:
-lister_suivis(self, id_utilisateur: int) -> list[Abonnement]:
-"""
+    @log
+    def lister_utilisateurs_suiveurs(self) -> list[Joueur]:
+        """Lister tous les joueurs suiveurs par abonnement
+        """
+        joueurs = JoueurDao().lister_tous()
+        abonnements = AbonnementDao().lister_suiveurs
+        utilisateurs_suiveurs <- set()
+        for j in joueurs:
+                id1 = j.id_joueur
+                for k in abonnements:
+                    id2 = k.id_joueur
+                    if id1 == id2:
+                        utilisateurs_suiveurs.add(j)
+        return utilisateurs_suiveurs
