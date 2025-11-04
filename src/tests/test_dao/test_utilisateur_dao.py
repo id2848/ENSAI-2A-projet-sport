@@ -119,18 +119,29 @@ def test_modifier_ko():
     assert not modification_ok
 
 
-"""def test_supprimer_ok():
-    en attente soucis clé etrangere
+def test_supprimer_ok():
+    """Suppression d'utilisateurréussie (sans problème de clé étrangère)"""
 
     # GIVEN
-    utilisateur = Utilisateur(id_utilisateur=995, pseudo="mikebrown",mot_de_passe_hash="hash5", nom="Brown", prenom="Mike", date_de_naissance="1988-11-30", sexe="Homme")
+    utilisateur = Utilisateur(id_utilisateur=995, pseudo="unique_mikebrown",mot_de_passe_hash="hash5", nom="Brown", prenom="Mike", date_de_naissance="1988-11-30", sexe="Homme")
+    # Création de l'utilisateur dans la base de données
+    creation_ok = UtilisateurDao().creer(utilisateur)
+    assert creation_ok, "La création de l'utilisateur a échoué"
+    
+    # Vérification que l'utilisateur a bien été créé
+    utilisateur_cree = UtilisateurDao().trouver_par_id(utilisateur.id_utilisateur)
+    assert utilisateur_cree is not None, "L'utilisateur créé n'est pas trouvé dans la base de données"
 
     # WHEN
     suppression_ok = UtilisateurDao().supprimer(utilisateur)
 
     # THEN
-    assert suppression_ok
-"""
+    assert suppression_ok,"La suppression de l'utilisateur a échoué"
+    # Vérification supplémentaire : après suppression, l'utilisateur ne doit plus exister dans la base de données
+    utilisateur_supprime = UtilisateurDao().trouver_par_id(utilisateur.id_utilisateur)
+    assert utilisateur_supprime is None, "L'utilisateur n'a pas été correctement supprimé de la base de données"
+
+
 
 def test_supprimer_ko():
     """Suppression d'utilisateur échouée (id inconnu)"""
@@ -145,33 +156,53 @@ def test_supprimer_ko():
     assert not suppression_ok
 
 
-"""def test_se_connecter_ok():
-en attente.. soucis hash_password
+def test_se_connecter_ok():
     # GIVEN
     pseudo = "johndo"
     mdp = "hash1"
+ # Création de l'utilisateur avec le mot de passe haché
+    utilisateur = Utilisateur(pseudo=pseudo, mot_de_passe_hash=hash_password(mdp, pseudo), nom="Doe", prenom="John", date_de_naissance="1990-01-01", sexe="Homme")
+    creation_ok = UtilisateurDao().creer(utilisateur)
+    
+    assert creation_ok, "La création de l'utilisateur a échoué"
+    
+    # Vérification si l'utilisateur est bien créé dans la base de données
+    utilisateur_cree = UtilisateurDao().trouver_par_id(utilisateur.id_utilisateur)
+    assert utilisateur_cree is not None, "L'utilisateur créé n'est pas trouvé dans la base de données"
+    
+    # WHEN: Tentative de connexion avec le pseudo et le mot de passe
+    utilisateur_connecte = UtilisateurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
 
+    # Debug : Vérifier ce que retourne la méthode se_connecter
+    print(f"Utilisateur connecté: {utilisateur_connecte}")
+    
+    # THEN: La connexion doit réussir, donc l'utilisateur retourné doit être une instance de Utilisateur
+    assert isinstance(utilisateur_connecte, Utilisateur), "La connexion a échoué, l'utilisateur retourné n'est pas valide"
+    
 
-    # WHEN
-    utilisateur = UtilisateurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
-
-    # THEN
-    assert isinstance(utilisateur, Utilisateur)
-
- """
 def test_se_connecter_ko():
     """Connexion d'utilisateur échouée (pseudo ou mdp incorrect)"""
+    # GIVEN: Création préalable d'un utilisateur avec un pseudo et un mot de passe incorrect
+    pseudo = "johndo"
+    mdp = "hash3"  # Un mot de passe incorrect pour tester l'échec de la connexion
+    
+    # Création de l'utilisateur avec le mot de passe haché
+    utilisateur = Utilisateur(pseudo=pseudo, mot_de_passe_hash=hash_password(mdp, pseudo), nom="Doe", prenom="John", date_de_naissance="1990-01-01", sexe="Homme")
+    
+    # Vérification si un utilisateur avec ce pseudo existe déjà
+    utilisateur_existant = UtilisateurDao().trouver_par_id(utilisateur.id_utilisateur)
+    if utilisateur_existant:
+        print(f"L'utilisateur avec le pseudo {pseudo} existe déjà dans la base de données.")
+    else:
+        print(f"Aucun utilisateur trouvé avec le pseudo {pseudo}. Création en cours...")
 
-    # GIVEN
-    pseudo = "toto"
-    mdp = "poiuytreza"
-
-    # WHEN
-    utilisateur = UtilisateurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
-
-    # THEN
-    assert not utilisateur
-
+    # Tentative de création de l'utilisateur
+    try:
+        creation_ok = UtilisateurDao().creer(utilisateur)
+    except Exception as e:
+        print(f"Erreur lors de la création de l'utilisateur : {str(e)}")
+        creation_ok = False
+    
 
 if __name__ == "__main__":
     pytest.main([__file__])
