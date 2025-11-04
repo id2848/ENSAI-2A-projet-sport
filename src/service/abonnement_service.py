@@ -18,9 +18,11 @@ class AbonnementService:
         """Création d'un joueur à partir de ses attributs"""
 
         nouveau_abonnement = Abonnement(
-            id_utilisateur_suiveur=id_joueur,
-            id_utilisateur_suivi=id_joueur,
+            id_utilisateur_suiveur=id_utilisateur_suiveur,
+            id_utilisateur_suivi=id_utilisateur_suivi,
         )
+        test = AbonnementDao().creer(nouveau_abonnement)
+        print(test)
         return nouveau_abonnement if AbonnementDao().creer(nouveau_abonnement) else None
 
     @log
