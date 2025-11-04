@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import patch
 
 from utils.reset_database import ResetDatabase
-from dao.activite_dao import ActiviteDAO
+from dao.activite_dao import ActiviteDao
 from business_object.activite import Activite
 
 @pytest.fixture(scope="session", autouse=True)
@@ -28,7 +28,7 @@ def test_creer_ko_utilisateur_inexistant():
     )
 
     # WHEN
-    creation_ok = ActiviteDAO().creer(activite)
+    creation_ok = ActiviteDao().creer(activite)
 
     # THEN
     assert not creation_ok
@@ -41,7 +41,7 @@ def test_lister_par_utilisateur_ok():
     id_utilisateur = 991
 
     # WHEN
-    activites = ActiviteDAO().lister_par_utilisateur(id_utilisateur)
+    activites = ActiviteDao().lister_par_utilisateur(id_utilisateur)
 
     # THEN
     assert isinstance(activites, list)
@@ -57,7 +57,7 @@ def test_lister_par_utilisateur_vide():
     id_utilisateur = 9999  # id sans activité
 
     # WHEN
-    activites = ActiviteDAO().lister_par_utilisateur(id_utilisateur)
+    activites = ActiviteDao().lister_par_utilisateur(id_utilisateur)
 
     # THEN
     assert isinstance(activites, list)
@@ -72,7 +72,7 @@ def test_trouver_par_id_ko():
     id_utilisateur = 9999
 
     # WHEN
-    utilisateur = ActiviteDAO().trouver_par_id(id_utilisateur)
+    utilisateur = ActiviteDao().trouver_par_id(id_utilisateur)
 
     # THEN
     assert utilisateur is None

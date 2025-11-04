@@ -6,7 +6,7 @@ from dao.db_connection import DBConnection
 from business_object.utilisateur import Utilisateur
 from business_object.activite import Activite
 
-class ActiviteDAO:
+class ActiviteDao:
     def creer(self, activite: Activite) -> bool:
         """Création d'une activité dans la base de données"""
         res = None

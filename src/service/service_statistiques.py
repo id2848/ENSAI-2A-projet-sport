@@ -1,8 +1,8 @@
 from tabulate import tabulate
 from utils.log_decorator import log
 
-from business_object.activite import Activite
 from dao.activite_dao import ActiviteDao
+from business_object.activite import Activite
 
 
 class ServiceStatistiques:
