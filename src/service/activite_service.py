@@ -145,8 +145,7 @@ class ActiviteService:
         """ Liste tous les commentaires d'une activité """
         try:
              commentaires = CommentaireDAO.lister_par_activite(id_activite=id_activite)  # Méthode dans le DAO
-        return commentaires
-        
+             return commentaires
         except Exception as e:
             print(f"Erreur lors de la récupération des commentaires : {e}")
             return []
