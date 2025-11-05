@@ -1,5 +1,7 @@
 from datetime import date, timedelta
 
+from typing import Optional
+
 from enum import Enum
 
 class SportEnum(str, Enum):
@@ -30,13 +32,13 @@ class Activite :
 
     def __init__(
         self,
-        id_activite: int , 
         id_utilisateur: int, 
         sport: str, 
         date_activite: date, 
         distance: float, 
-        duree: timedelta):
-
+        duree: float,
+        id_activite: Optional[int] = None
+    ):
         self.id_activite = id_activite
         self.id_utilisateur = id_utilisateur
         self.sport = sport

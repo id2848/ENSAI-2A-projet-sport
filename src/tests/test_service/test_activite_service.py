@@ -14,7 +14,7 @@ import os
 from unittest.mock import patch
 from utils.reset_database import ResetDatabase
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(autouse=True)
 def setup_test_environment():
     """Initialisation des données de test dans la base de données"""
     # Assurez-vous d'utiliser un schéma de test pour éviter de modifier la vraie base de données
@@ -31,7 +31,7 @@ def test_creer_activite_ok():
     sport = 'course'
     date_activite = date(2025, 9, 25)  # Date d'activité existante
     distance = 5.0
-    duree = timedelta(minutes=30)
+    duree = 30.0
 
     # WHEN
     activite = ActiviteService().creer_activite(id_utilisateur, sport, date_activite, distance, duree)
@@ -48,7 +48,7 @@ def test_creer_activite_echec():
     sport = 'course'
     date_activite = date(2025, 9, 25)
     distance = 5.0
-    duree = timedelta(minutes=30)
+    duree = 30.0
 
     # WHEN
     activite = ActiviteService().creer_activite(id_utilisateur, sport, date_activite, distance, duree)
@@ -60,14 +60,14 @@ def test_lister_activites():
     """Test pour lister les activités d'un utilisateur"""
 
     # GIVEN
-    id_utilisateur = 991  # John Doe
+    id_utilisateur = 992
 
     # WHEN
     activites = ActiviteService().lister_activites(id_utilisateur)
 
     # THEN
     assert len(activites) == 1
-    assert activites[0].sport == 'course'  # L'activité associée à cet utilisateur doit être une course
+    assert activites[0].id_activite == 992
 
 def test_ajouter_jaime_ok():
     """Test pour l'ajout d'un 'j'aime' à une activité"""

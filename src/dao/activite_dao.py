@@ -16,16 +16,15 @@ class ActiviteDao:
                     cursor.execute(
                         """
                         INSERT INTO activite(
-                            id_activite, id_utilisateur, sport, date_activite, distance, duree
+                            id_utilisateur, sport, date_activite, distance, duree
                         )
                         VALUES (
-                            %(id_activite)s, %(id_utilisateur)s, %(sport)s,
+                            %(id_utilisateur)s, %(sport)s,
                             %(date_activite)s, %(distance)s, %(duree)s
                         )
                         RETURNING id_activite;
                         """,
                         {
-                            "id_activite": activite.id_activite,
                             "id_utilisateur": activite.id_utilisateur,
                             "sport": activite.sport,
                             "date_activite": activite.date_activite,
@@ -34,11 +33,16 @@ class ActiviteDao:
                         }
                     )
                     res = cursor.fetchone()
-                    connection.commit()
-                    return res is not None
         except Exception as e:
             logging.error(f"Erreur lors de la création d'une activité : {e}")
             return False
+        
+        created = False
+        if res:
+            activite.id_activite = res["id_activite"]
+            created = True
+
+        return created
 
     def trouver_par_id(self, id_activite) -> Activite:
         """Trouver une activité par son id"""

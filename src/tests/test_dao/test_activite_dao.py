@@ -37,7 +37,6 @@ def test_creer_ok_utilisateur_existant():
     """Création d'une activité réussie pour un utilisateur existant"""
     # GIVEN
     activite = Activite(
-        id_activite=3002,
         id_utilisateur=991,  
         sport="natation",
         date_activite="2025-01-02",
@@ -50,6 +49,7 @@ def test_creer_ok_utilisateur_existant():
 
     # THEN
     assert creation_ok
+    assert activite.id_activite
 
 
 def test_lister_par_utilisateur_ok():
@@ -95,7 +95,7 @@ def test_trouver_par_id_ko():
 def test_trouver_par_id_ok():
     """Trouver une activité existante par son id"""
     # GIVEN
-    id_activite = 3002
+    id_activite = 991
 
     # WHEN
     activite = ActiviteDao().trouver_par_id(id_activite)
@@ -109,12 +109,12 @@ def test_modifier_ok():
     """Modification d'une activité existante réussie"""
     # GIVEN
     activite = Activite(
-        id_activite=3002,
-        id_utilisateur=991,
+        id_activite=995,
+        id_utilisateur=995,
         sport="randonnée",
-        date_activite="2025-01-03",
-        distance=6.0,
-        duree=2000
+        date_activite="2025-09-29",
+        distance=10.0,
+        duree=50.0
     )
 
     # WHEN
@@ -147,14 +147,14 @@ def test_supprimer_ok():
     """Suppression d'une activité existante réussie"""
     # GIVEN
     activite = Activite(
-        id_activite=3002,
-        id_utilisateur=991,
+        id_activite=994,
+        id_utilisateur=994,
         sport="randonnée",
-        date_activite="2025-01-03",
-        distance=6.0,
-        duree=2000
+        date_activite="2025-09-28",
+        distance=10.0,
+        duree=120.0
     )
-
+    
     # WHEN
     suppression_ok = ActiviteDao().supprimer(activite)
 
