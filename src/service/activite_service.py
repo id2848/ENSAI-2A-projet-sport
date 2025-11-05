@@ -24,12 +24,7 @@ class ActiviteService:
     def creer_activite(self, id_utilisateur: int, sport: str, date_activite: date, distance: float, duree: timedelta) -> bool:
         """ Crée une nouvelle activité """
         try:
-            # Génération de l'ID de l'activité (si c'est un auto-généré dans votre logique)
-            # Par exemple, ici je suppose que l'ID pourrait être généré automatiquement, mais vous pouvez le passer en paramètre
-            id_activite = 1  # Vous pourriez également le récupérer d'une base de données ou d'un générateur d'ID
-            
             activite = Activite(
-                id_activite=id_activite,  # Ajouter l'ID d'activité ici
                 id_utilisateur=id_utilisateur,
                 sport=sport,
                 date_activite=date_activite,  # Utilisation du paramètre `date_activite` passé
@@ -37,8 +32,7 @@ class ActiviteService:
                 duree=duree
             )
             # Simuler l'enregistrement de l'activité dans la base de données
-            ActiviteDao().creer(activite)  # Appel à DAO pour l'enregistrement
-            return True
+            return ActiviteDao().creer(activite)  # Appel à DAO pour l'enregistrement
         except Exception as e:
             print(f"Erreur lors de la création de l'activité : {e}")  # Affichage de l'erreur pour le diagnostic
             return False
@@ -53,8 +47,7 @@ class ActiviteService:
                 print(f"L'activité avec ID {id_activite} n'existe pas.")
                 return False
         
-            ActiviteDao().supprimer(activite=activite)  # Effectue la suppression dans la base de données
-            return True
+            return ActiviteDao().supprimer(activite=activite)  # Effectue la suppression dans la base de données
         
         except Exception as e:
             print(f"Erreur lors de la suppression de l'activité : {e}")
@@ -70,8 +63,7 @@ class ActiviteService:
             return False
         
             activite.sport = sport  # Modification du sport de l'activité
-            ActiviteDao().modifier(activite)
-            return True
+            return ActiviteDao().modifier(activite)
         
         except Exception as e:
             print(f"Erreur lors de la modification de l'activité : {e}")
@@ -99,10 +91,8 @@ class ActiviteService:
     def ajouter_jaime(self, id_activite: int, id_utilisateur: int ) -> bool:
         """ Ajoute un "j'aime" à une activité """
         try:
-            activite = ActiviteDao().trouver_par_id(id_activite=id_activite)
-            utilisateur = UtilisateurDao().trouver_par_id(id_utilisateur=id_utilisateur)
-            JaimeDao.creer(activite, utilisateur)  # Ajoute l'utilisateur à la liste des "j'aime"
-            return True
+            jaime = Jaime(id_activite=id_activite, id_auteur=id_utilisateur)
+            return JaimeDao().creer(jaime)  # Ajoute l'utilisateur à la liste des "j'aime"
         except Exception as e:
             print(f"Erreur lors de l'ajout du 'j'aime' : {e}")
             return False
@@ -112,8 +102,7 @@ class ActiviteService:
         try:
             activite = ActiviteDao().trouver_par_id(id_activite=id_activite)
             utilisateur = UtilisateurDao().trouver_par_id(id_utilisateur=id_utilisateur)
-            JaimeDao.supprimer(activite, utilisateur)  # Retire l'utilisateur de la liste des "j'aime"
-            return True
+            return JaimeDao().supprimer(activite, utilisateur)  # Retire l'utilisateur de la liste des "j'aime"
         except Exception as e:
             print(f"Erreur lors de la suppression du 'j'aime' : {e}")
             return False
@@ -124,12 +113,12 @@ class ActiviteService:
             activite = ActiviteDao().trouver_par_id(id_activite=id_activite)
             utilisateur = UtilisateurDao().trouver_par_id(id_utilisateur=id_utilisateur)
             nouveau_commentaire = Commentaire(
-            activite=activite,
-            utilisateur=utilisateur,
-            commentaire=commentaire,
-            date_commentaire=datetime.now())
-            CommentaireDao.creer(nouveau_commentaire)
-            return True
+                id_activite=id_activite,
+                id_auteur=id_utilisateur,
+                commentaire=commentaire,
+                date_commentaire=datetime.now()
+            )
+            return CommentaireDao().creer(nouveau_commentaire)
         except Exception as e:
             print(f"Erreur lors de l'ajout du commentaire : {e}")
             return False
@@ -138,7 +127,7 @@ class ActiviteService:
         """Supprime un commentaire d'une activité"""
         try:
             # Récupérer le commentaire par son ID
-            commentaire = CommentaireDao.trouver_par_id(id_commentaire=id_commentaire)
+            commentaire = CommentaireDao().trouver_par_id(id_commentaire=id_commentaire)
 
             # Si le commentaire n'existe pas
             if commentaire is None:
@@ -146,8 +135,7 @@ class ActiviteService:
                 return False
 
             # Supprimer le commentaire de la base de données
-            CommentaireDao.supprimer(commentaire)
-            return True
+            return CommentaireDao().supprimer(commentaire)
 
         except Exception as e:
             print(f"Erreur lors de la suppression du commentaire : {e}")
@@ -162,8 +150,3 @@ class ActiviteService:
             print(f"Erreur lors de la récupération des commentaires : {e}")
             return []
 
-    def placeholder(self) -> bool:
-        """Méthode temporaire pour garder la pipeline verte
-        A supprimer quand de vraies méthodes seront créées et testées"""
-
-        return True

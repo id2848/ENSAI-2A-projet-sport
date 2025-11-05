@@ -44,7 +44,7 @@ def test_creer_activite_echec():
     """Test pour la création d'une activité échouée (par exemple, si l'utilisateur n'existe pas)"""
 
     # GIVEN
-    id_utilisateur = 999999  # Un utilisateur qui n'existe pas
+    id_utilisateur = 99999999  # Un utilisateur qui n'existe pas
     sport = 'course'
     date_activite = date(2025, 9, 25)
     distance = 5.0
@@ -73,8 +73,8 @@ def test_ajouter_jaime_ok():
     """Test pour l'ajout d'un 'j'aime' à une activité"""
 
     # GIVEN
-    id_utilisateur = 991  # John Doe
-    id_activite = 993  # Activité de Sam Smith
+    id_activite = 993
+    id_utilisateur = 992
 
     # WHEN
     result = ActiviteService().ajouter_jaime(id_activite, id_utilisateur)
@@ -86,7 +86,7 @@ def test_ajouter_jaime_echec():
     """Test pour l'échec de l'ajout d'un 'j'aime' (par exemple, si l'activité n'existe pas)"""
 
     # GIVEN
-    id_utilisateur = 999  # Un utilisateur qui n'existe pas
+    id_utilisateur = 99999  # Un utilisateur qui n'existe pas
     id_activite = 999  # Une activité qui n'existe pas
 
     # WHEN
