@@ -1,10 +1,12 @@
 coverage
 inquirerPy
 fastapi
+gpxpy
 psycopg2-binary
 pylint
 pytest
 python-dotenv
+python-multipart
 PyYAML
 regex
 requests

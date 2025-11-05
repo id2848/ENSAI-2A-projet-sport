@@ -1,108 +1,74 @@
-import logging
-
-from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+import secrets
+from fastapi import FastAPI, UploadFile, File, HTTPException
+import io
 
-from service.joueur_service import JoueurService
+import logging
 from utils.log_init import initialiser_logs
 
-app = FastAPI(title="Mon webservice")
+from service.activite_service import ActiviteService
 
+from utils import parse_strava_gpx
+
+
+app = FastAPI(title="Webservice Sports ENSAI")
 
 initialiser_logs("Webservice")
 
-joueur_service = JoueurService()
+# ------------- Authentification Basique ------------------
 
+security = HTTPBasic()
+
+USERS = {
+    "alice": {"password": "wonderland", "roles": ["admin"]},
+    "bob":   {"password": "builder",    "roles": ["user"]},
+}
+
+def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
+    username = credentials.username
+    password = credentials.password
+
+    user = USERS.get(username)
+    if not user or not secrets.compare_digest(password, user["password"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+        )
+    return {"username": username, "roles": user["roles"]}
+
+@app.get("/me")
+def me(user = Depends(get_current_user)):
+    return {"user": user}
+
+# ----------------------------------------------------------
 
 @app.get("/", include_in_schema=False)
 async def redirect_to_docs():
     """Redirect to the API documentation"""
     return RedirectResponse(url="/docs")
 
+@app.get("/activites/{id_utilisateur}")
+def activites_par_utilisateur(id_utilisateur: int, user = Depends(get_current_user)):
+    """Afficher activités utilisateur"""
+    return ActiviteService().lister_activites(id_utilisateur)
 
-@app.get("/joueur/", tags=["Joueurs"])
-async def lister_tous_joueurs():
-    """Lister tous les joueurs"""
-    logging.info("Lister tous les joueurs")
-    liste_joueurs = joueur_service.lister_tous()
+"""
+@app.post("users/{user_id}/activities")
+def creer_activite(user_id):
+    user = UtilisateurDAO().get(user_id)
+    activity = user.create_activity()
+    AcitivityDAO().save(activity)
+    # UtilisateurService().create_activity(user_id)
+"""
 
-    liste_model = []
-    for joueur in liste_joueurs:
-        liste_model.append(joueur)
-
-    return liste_model
-
-
-@app.get("/joueur/{id_joueur}", tags=["Joueurs"])
-async def joueur_par_id(id_joueur: int):
-    """Trouver un joueur à partir de son id"""
-    logging.info("Trouver un joueur à partir de son id")
-    return joueur_service.trouver_par_id(id_joueur)
-
-
-class JoueurModel(BaseModel):
-    """Définir un modèle Pydantic pour les Joueurs"""
-
-    id_joueur: int | None = None  # Champ optionnel
-    pseudo: str
-    mdp: str
-    age: int
-    mail: str
-    fan_pokemon: bool
-
-
-@app.post("/joueur/", tags=["Joueurs"])
-async def creer_joueur(j: JoueurModel):
-    """Créer un joueur"""
-    logging.info("Créer un joueur")
-    if joueur_service.pseudo_deja_utilise(j.pseudo):
-        raise HTTPException(status_code=404, detail="Pseudo déjà utilisé")
-
-    joueur = joueur_service.creer(j.pseudo, j.mdp, j.age, j.mail, j.fan_pokemon)
-    if not joueur:
-        raise HTTPException(status_code=404, detail="Erreur lors de la création du joueur")
-
-    return joueur
-
-
-@app.put("/joueur/{id_joueur}", tags=["Joueurs"])
-def modifier_joueur(id_joueur: int, j: JoueurModel):
-    """Modifier un joueur"""
-    logging.info("Modifier un joueur")
-    joueur = joueur_service.trouver_par_id(id_joueur)
-    if not joueur:
-        raise HTTPException(status_code=404, detail="Joueur non trouvé")
-
-    joueur.pseudo = j.pseudo
-    joueur.mdp = j.mdp
-    joueur.age = j.age
-    joueur.mail = j.mail
-    joueur.fan_pokemon = j.fan_pokemon
-    joueur = joueur_service.modifier(joueur)
-    if not joueur:
-        raise HTTPException(status_code=404, detail="Erreur lors de la modification du joueur")
-
-    return f"Joueur {j.pseudo} modifié"
-
-
-@app.delete("/joueur/{id_joueur}", tags=["Joueurs"])
-def supprimer_joueur(id_joueur: int):
-    """Supprimer un joueur"""
-    logging.info("Supprimer un joueur")
-    joueur = joueur_service.trouver_par_id(id_joueur)
-    if not joueur:
-        raise HTTPException(status_code=404, detail="Joueur non trouvé")
-
-    joueur_service.supprimer(joueur)
-    return f"Joueur {joueur.pseudo} supprimé"
-
-
-@app.get("/hello/{name}")
-async def hello_name(name: str):
-    """Afficher Hello"""
-    logging.info("Afficher Hello")
-    return f"message : Hello {name}"
+@app.post("/upload-gpx")
+async def upload_gpx(file: UploadFile = File(...)):
+    # Lecture du contenu du fichier (texte)
+    content = await file.read()
+    # Parsing
+    return parse_strava_gpx(content)
 
 
 # Run the FastAPI application
