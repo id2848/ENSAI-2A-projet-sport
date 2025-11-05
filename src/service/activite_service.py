@@ -13,35 +13,47 @@ from business_object.jaime import Jaime
 
 from dao.abonnement_dao import AbonnementDao
 from dao.utilisateur_dao import UtilisateurDao
-from dao.activite_dao import ActiviteDAO
+from dao.activite_dao import ActiviteDao
 from dao.commentaire_dao import CommentaireDao
 from dao.jaime_dao import JaimeDao
 
 class ActiviteService:
     """Classe contenant les méthodes de service des activités Utilisateurs"""
 
-    def creer_activite(self, id_utilisateur: int, sport: str,date_activite: date, distance: float, 
-        duree: timedelta) -> bool:
+    
+    def creer_activite(self, id_utilisateur: int, sport: str, date_activite: date, distance: float, duree: timedelta) -> bool:
         """ Crée une nouvelle activité """
         try:
-            # Logique pour créer une nouvelle activité
-            activite = Activite(id_utilisateur=id_utilisateur, sport=sport, date_activite=datetime.now(), distance= distance, duree= duree)
+            # Génération de l'ID de l'activité (si c'est un auto-généré dans votre logique)
+            # Par exemple, ici je suppose que l'ID pourrait être généré automatiquement, mais vous pouvez le passer en paramètre
+            id_activite = 1  # Vous pourriez également le récupérer d'une base de données ou d'un générateur d'ID
+            
+            activite = Activite(
+                id_activite=id_activite,  # Ajouter l'ID d'activité ici
+                id_utilisateur=id_utilisateur,
+                sport=sport,
+                date_activite=date_activite,  # Utilisation du paramètre `date_activite` passé
+                distance=distance,
+                duree=duree
+            )
+            # Simuler l'enregistrement de l'activité dans la base de données
+            ActiviteDao().creer(activite)  # Appel à DAO pour l'enregistrement
             return True
         except Exception as e:
-            print(f"Erreur lors de la création de l'activité : {e}")
+            print(f"Erreur lors de la création de l'activité : {e}")  # Affichage de l'erreur pour le diagnostic
             return False
-
+            
     def supprimer_activite(self, id_activite: int) -> bool:
         """ Supprime une activité existante """
         try:
-            activite = ActiviteDAO.trouver_par_id(id_activite=id_activite)  # Récupère l'activité par son ID
+            activite = ActiviteDao().trouver_par_id(id_activite=id_activite)  # Récupère l'activité par son ID
         
             # Si l'activité n'existe pas
             if activite is None:
                 print(f"L'activité avec ID {id_activite} n'existe pas.")
-            return False
+                return False
         
-            ActiviteDAO.supprimer(id_activite=id_activite)  # Effectue la suppression dans la base de données
+            ActiviteDao().supprimer(activite=activite)  # Effectue la suppression dans la base de données
             return True
         
         except Exception as e:
@@ -51,14 +63,14 @@ class ActiviteService:
     def modifier_activite(self, id_activite: int, sport: str) -> bool:
         """ Modifie une activité existante """
         try:
-            activite = ActiviteDAO.trouver_par_id(id_activite=id_activite)  # Récupère l'activité par son ID
+            activite = ActiviteDao().trouver_par_id(id_activite=id_activite)  # Récupère l'activité par son ID
             # Si l'activité n'existe pas
             if activite is None:
                 print(f"L'activité avec ID {id_activite} n'existe pas.")
             return False
         
             activite.sport = sport  # Modification du sport de l'activité
-            ActiviteDAO.modifier(activite)
+            ActiviteDao().modifier(activite)
             return True
         
         except Exception as e:
@@ -70,7 +82,7 @@ class ActiviteService:
         """ Liste toutes les activités d'un utilisateur donné """
         try:
             # Recherche des activités par utilisateur
-            activites = ActiviteDAO.lister_par_utilisateur(id_utilisateur=id_utilisateur)
+            activites = ActiviteDao().lister_par_utilisateur(id_utilisateur=id_utilisateur)
 
             # Vérification si aucune activité n'est trouvée
             if not activites:
@@ -87,8 +99,8 @@ class ActiviteService:
     def ajouter_jaime(self, id_activite: int, id_utilisateur: int ) -> bool:
         """ Ajoute un "j'aime" à une activité """
         try:
-            activite = ActiviteDAO.trouver_par_id(id_activite=id_activite)
-            utilisateur = UtilisateurDAO.trouver_par_id(id_utilisateur=id_utilisateur)
+            activite = ActiviteDao().trouver_par_id(id_activite=id_activite)
+            utilisateur = UtilisateurDao().trouver_par_id(id_utilisateur=id_utilisateur)
             JaimeDao.creer(activite, utilisateur)  # Ajoute l'utilisateur à la liste des "j'aime"
             return True
         except Exception as e:
@@ -98,8 +110,8 @@ class ActiviteService:
     def supprimer_jaime(self, id_utilisateur: int, id_activite: int) -> bool:
         """ Supprime un "j'aime" d'une activité """
         try:
-            activite = ActiviteDAO.trouver_par_id(id_activite=id_activite)
-            utilisateur = UtilisateurDAO.trouver_par_id(id_utilisateur=id_utilisateur)
+            activite = ActiviteDao().trouver_par_id(id_activite=id_activite)
+            utilisateur = UtilisateurDao().trouver_par_id(id_utilisateur=id_utilisateur)
             JaimeDao.supprimer(activite, utilisateur)  # Retire l'utilisateur de la liste des "j'aime"
             return True
         except Exception as e:
@@ -109,8 +121,8 @@ class ActiviteService:
     def ajouter_commentaire(self, id_utilisateur: int, id_activite: int, commentaire: str) -> bool:
         """ Ajoute un commentaire à une activité """
         try:
-            activite = ActiviteDAO.trouver_par_id(id_activite=id_activite)
-            utilisateur = UtilisateurDAO.trouver_par_id(id_utilisateur=id_utilisateur)
+            activite = ActiviteDao().trouver_par_id(id_activite=id_activite)
+            utilisateur = UtilisateurDao().trouver_par_id(id_utilisateur=id_utilisateur)
             nouveau_commentaire = Commentaire(
             activite=activite,
             utilisateur=utilisateur,
@@ -144,7 +156,7 @@ class ActiviteService:
     def lister_commentaires(self, id_activite: int) -> List[Commentaire]:
         """ Liste tous les commentaires d'une activité """
         try:
-             commentaires = CommentaireDAO.lister_par_activite(id_activite=id_activite)  # Méthode dans le DAO
+             commentaires = CommentaireDao().lister_par_activite(id_activite=id_activite)  # Méthode dans le DAO
              return commentaires
         except Exception as e:
             print(f"Erreur lors de la récupération des commentaires : {e}")
