@@ -15,7 +15,7 @@ liste_joueurs = [
 
 
 def test_creer_ok():
-    """ "Création de Joueur réussie"""
+    """Création de Joueur réussie"""
 
     # GIVEN
     pseudo, mdp, age, mail, fan_pokemon = "jp", "1234", 15, "z@mail.oo", True

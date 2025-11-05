@@ -16,34 +16,36 @@ def setup_test_environment():
 
 def test_creer_ko_utilisateur_inexistant():
     """Création d'une activité échouée (id_utilisateur inexistant)"""
-
-    # GIVEN
     activite = Activite(
-        id_activite=1002,
+        id_activite=3001,
         id_utilisateur=99999,  # utilisateur inexistant
-        sport="Natation",
-        date_activite="2024-10-10",
+        sport="Natation",       # valeur valide enum
+        date_activite="2025-01-01",
         distance=1.2,
         duree=30
     )
-
-    # WHEN
     creation_ok = ActiviteDao().creer(activite)
-
-    # THEN
     assert not creation_ok
+
+
+def test_creer_ok_utilisateur_existant():
+    """Création d'une activité réussie pour un utilisateur existant"""
+    activite = Activite(
+        id_activite=3002,
+        id_utilisateur=991,  
+        sport="Natation",
+        date_activite="2025-01-02",
+        distance=5.0,
+        duree=1800
+    )
+    creation_ok = ActiviteDao().creer(activite)
+    assert creation_ok
 
 
 def test_lister_par_utilisateur_ok():
     """Lister les activités d’un utilisateur existant"""
-
-    # GIVEN
     id_utilisateur = 991
-
-    # WHEN
     activites = ActiviteDao().lister_par_utilisateur(id_utilisateur)
-
-    # THEN
     assert isinstance(activites, list)
     for a in activites:
         assert isinstance(a, Activite)
@@ -52,27 +54,78 @@ def test_lister_par_utilisateur_ok():
 
 def test_lister_par_utilisateur_vide():
     """Lister les activités d’un utilisateur sans activité"""
-
-    # GIVEN
-    id_utilisateur = 9999  # id sans activité
-
-    # WHEN
+    id_utilisateur = 9999  # utilisateur sans activité
     activites = ActiviteDao().lister_par_utilisateur(id_utilisateur)
-
-    # THEN
     assert isinstance(activites, list)
     assert len(activites) == 0
 
 
-
 def test_trouver_par_id_ko():
-    """Trouver un utilisateur inexistant via l'id_utilisateur"""
+    """Trouver une activité inexistante via l'id_activite"""
+    id_activite = 99999
+    activite = ActiviteDao().trouver_par_id(id_activite)
+    assert activite is None
 
-    # GIVEN
-    id_utilisateur = 9999
 
-    # WHEN
-    utilisateur = ActiviteDao().trouver_par_id(id_utilisateur)
+def test_trouver_par_id_ok():
+    """Trouver une activité existante par son id"""
+    id_activite = 3002
+    activite = ActiviteDao().trouver_par_id(id_activite)
+    assert activite is not None
+    assert activite.id_activite == id_activite
 
-    # THEN
-    assert utilisateur is None
+
+def test_modifier_ok():
+    """Modification d'une activité existante réussie"""
+    activite = Activite(
+        id_activite=3002,
+        id_utilisateur=991,
+        sport="Marche",
+        date_activite="2025-01-03",
+        distance=6.0,
+        duree=2000
+    )
+    modification_ok = ActiviteDao().modifier(activite)
+    assert modification_ok
+
+
+def test_modifier_ko():
+    """Modification échouée pour une activité inexistante"""
+    activite = Activite(
+        id_activite=99999,
+        id_utilisateur=991,
+        sport="Marche",
+        date_activite="2025-01-03",
+        distance=6.0,
+        duree=2000
+    )
+    modification_ok = ActiviteDao().modifier(activite)
+    assert not modification_ok
+
+
+def test_supprimer_ok():
+    """Suppression d'une activité existante réussie"""
+    activite = Activite(
+        id_activite=3002,
+        id_utilisateur=991,
+        sport="Marche",
+        date_activite="2025-01-03",
+        distance=6.0,
+        duree=2000
+    )
+    suppression_ok = ActiviteDao().supprimer(activite)
+    assert suppression_ok
+
+
+def test_supprimer_ko():
+    """Suppression échouée pour une activité inexistante"""
+    activite = Activite(
+        id_activite=99999,
+        id_utilisateur=991,
+        sport="Natation",
+        date_activite="2025-01-03",
+        distance=3.0,
+        duree=1000
+    )
+    suppression_ok = ActiviteDao().supprimer(activite)
+    assert not suppression_ok

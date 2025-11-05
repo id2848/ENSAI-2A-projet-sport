@@ -21,7 +21,7 @@ class Activite :
 
     def __init__(
         self,
-        id_activite: int, 
+        id_activite: int , 
         id_utilisateur: int, 
         sport: str, 
         date_activite: date, 

@@ -5,11 +5,14 @@ from business_object.activite import Activite
 from service.service_statistiques import ServiceStatistiques
 from dao.activite_dao import ActiviteDao
 
-# Préparation de données fictives
+
 liste_activites = [
-    Activite(id_activite=1, id_utilisateur=1, sport="Course", date_activite=date(2025,1,1), distance=5.0, duree=timedelta(minutes=30)),
-    Activite(id_activite=2, id_utilisateur=1, sport="Course", date_activite=date(2025,1,2), distance=10.0, duree=timedelta(hours=1)),
-    Activite(id_activite=3, id_utilisateur=2, sport="Natation", date_activite=date(2025,1,3), distance=7.0, duree=timedelta(minutes=45))
+    Activite(id_activite=1, id_utilisateur=1, sport="Course", date_activite=date(2025,1,1),
+     distance=5.0, duree=timedelta(minutes=30)),
+    Activite(id_activite=2, id_utilisateur=1, sport="Course", date_activite=date(2025,1,2),
+     distance=10.0, duree=timedelta(hours=1)),
+    Activite(id_activite=3, id_utilisateur=2, sport="Natation", date_activite=date(2025,1,3),
+     distance=7.0, duree=timedelta(minutes=45))
 ]
 
 service_statistiques = ServiceStatistiques()
@@ -97,4 +100,5 @@ def test_calculer_duree_totale_ko():
 
 if __name__ == "__main__":
     import pytest
+
     pytest.main([__file__])
