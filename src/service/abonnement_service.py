@@ -21,8 +21,7 @@ class AbonnementService:
             id_utilisateur_suiveur=id_utilisateur_suiveur,
             id_utilisateur_suivi=id_utilisateur_suivi,
         )
-        test = AbonnementDao().creer(nouveau_abonnement)
-        print(test)
+        
         return nouveau_abonnement if AbonnementDao().creer(nouveau_abonnement) else None
 
     @log
