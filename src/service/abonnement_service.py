@@ -30,31 +30,21 @@ class AbonnementService:
         return AbonnementDao().supprimer(abonnement)
 
     @log
-    def lister_utilisateurs_suivis(self) -> list[Joueur]:
-        """Lister tous les joueurs qui sont suivis par abonnement
+    def lister_utilisateurs_suivis(self, id_utilisateur):
+        """Lister tous les joueurs suivis par un joueur
         """
-        joueurs = JoueurDao().lister_tous()
-        abonnements = AbonnementDao().lister_suivis
-        utilisateurs_suivis <- set()
-        for j in joueurs:
-                id1 = j.id_joueur
-                for k in abonnements:
-                    id2 = k.id_joueur
-                    if id1 == id2:
-                        utilisateurs_suivis.add(j)
+        liste_abonnements = AbonnementDao().lister_suivis(id_utilisateur)
+        utilisateurs_suivis = set()
+        for j in liste_abonnements:
+            utilisateurs_suivis.add(j.id_utilisateur_suivi)
         return utilisateurs_suivis
 
     @log
-    def lister_utilisateurs_suiveurs(self) -> list[Joueur]:
-        """Lister tous les joueurs suiveurs par abonnement
+    def lister_utilisateurs_suiveurs(self, id_utilisateur):
+        """Lister tous les joueurs suiveurs par un joueur
         """
-        joueurs = JoueurDao().lister_tous()
-        abonnements = AbonnementDao().lister_suiveurs
-        utilisateurs_suiveurs <- set()
-        for j in joueurs:
-                id1 = j.id_joueur
-                for k in abonnements:
-                    id2 = k.id_joueur
-                    if id1 == id2:
-                        utilisateurs_suiveurs.add(j)
+        liste_abonnements = AbonnementDao().lister_suiveurs(id_utilisateur)
+        utilisateurs_suiveurs = set()
+        for j in liste_abonnements:
+            utilisateurs_suiveurs.add(j.id_utilisateur_suiveur)
         return utilisateurs_suiveurs

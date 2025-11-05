@@ -1,4 +1,3 @@
-from unittest.mock import MagicMock
 
 from service.abonnement_service import AbonnementService
 
@@ -50,18 +49,28 @@ def test_creer_echec():
 
 def test_lister_utilisateurs_suivis_succes():
     """Lister les utilisateurs suivis"""
-    """# GIVEN
-    lste_abonnements = [
-    AbonnementService(123, 456),
-    AbonnementService(123, 488),
-    AbonnementService(100, 123),
-]
+
+    # GIVEN
+    id = 992
 
     # WHEN
-    res = AbonnementService().lister_utilisateurs_suivis(lste_abonnements)
+    res = AbonnementService().lister_utilisateurs_suivis(id)
 
     # THEN
-    assert res == set(456, 488, 123)"""
+    assert res == set([993, 994, 995, 991])
+
+
+def test_lister_utilisateurs_suiveurs_succes():
+    """Lister les utilisateurs suivis"""
+
+    # GIVEN
+    id = 994
+
+    # WHEN
+    res = AbonnementService().lister_utilisateurs_suiveurs(id)
+
+    # THEN
+    assert res == set([992, 993])
 
 
 if __name__ == "__main__":
