@@ -1,4 +1,13 @@
 from datetime import date, timedelta
+
+from enum import Enum
+
+class SportEnum(str, Enum):
+    NATATION = "Natation"
+    COURSE = "Course"
+    VELO = "Velo"
+    MARCHE = "Marche"
+
 class Activite : 
     """
     Classe représentant les différentes activités que l'utilisateur peut faire. 
@@ -9,7 +18,7 @@ class Activite :
         identifiant unique
     id_utilisateur : int 
         identifiant unique
-    sport : Sport 
+    sport : str
         énumeration de sport
     date_activite : DATE 
         date à laquelle a été réalisée l'activité. 
