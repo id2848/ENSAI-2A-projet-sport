@@ -146,3 +146,48 @@ class ActiviteDao:
                 )
                 liste_activites.append(activite)
         return liste_activites
+    
+    def lister_activites_filtres(self, id_utilisateur, sport=None, date_debut=None, date_fin=None) -> list[Activite]:
+        """Lister les activités d'un utilisateur avec des filtres optionnels (sport, date de début, date de fin)."""
+        
+        query = "SELECT * FROM activite WHERE id_utilisateur = %(id_utilisateur)s"
+        params = {"id_utilisateur": id_utilisateur}
+
+        if sport:
+            query += " AND sport = %(sport)s"
+            params["sport"] = sport
+        
+        if date_debut:
+            query += " AND date_activite >= %(date_debut)s"
+            params["date_debut"] = date_debut
+        
+        if date_fin:
+            query += " AND date_activite <= %(date_fin)s"
+            params["date_fin"] = date_fin
+
+        query += " ORDER BY date_activite DESC;"  
+
+        res = None
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(query, params)
+                    res = cursor.fetchall()
+        except Exception as e:
+            logging.info(e)
+            raise
+
+        liste_activites = []
+        if res:
+            for row in res:
+                activite = Activite(
+                    id_activite=row["id_activite"],
+                    id_utilisateur=row["id_utilisateur"],
+                    sport=row["sport"],
+                    date_activite=row["date_activite"],
+                    distance=row["distance"],
+                    duree=row["duree"]
+                )
+                liste_activites.append(activite)
+        
+        return liste_activites
