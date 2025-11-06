@@ -10,7 +10,7 @@ from utils.log_init import initialiser_logs
 
 from service.activite_service import ActiviteService
 
-from utils import parse_strava_gpx
+from utils.parse_strava_gpx import parse_strava_gpx
 
 # --- Configuration ---
 
