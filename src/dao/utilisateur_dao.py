@@ -95,6 +95,55 @@ class UtilisateurDao:
 
         return utilisateur
 
+
+
+
+    @log
+    def trouver_par_pseudo(self, pseudo) -> Utilisateur:
+        """trouver un utilisateur grace à son pseudo
+
+        Parameters
+        ----------
+        pseudo : str
+            pseudo de l'utilisateur que l'on souhaite trouver
+
+        Returns
+        -------
+        utilisateur : Utilisateur
+            renvoie l'utilisateur' que l'on cherche par pseudo
+        """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT *                           "
+                        "  FROM utilisateur                      "
+                        " WHERE pseudo= %(pseudo)s;  ",
+                        {"pseudo": pseudo},
+                    )
+                    res = cursor.fetchone()
+        except Exception as e:
+            logging.info(e)
+            raise
+
+        utilisateur = None
+        if res:
+            utilisateur = Utilisateur(
+                pseudo=res["pseudo"],
+                nom=res["nom"],
+                prenom=res["prenom"],
+                date_de_naissance=res["date_de_naissance"],
+                sexe=res["sexe"],
+                id_utilisateur=res["id_utilisateur"],
+                mot_de_passe_hash=res["mot_de_passe_hash"]
+            )
+
+        return utilisateur
+
+
+
+
+
     @log
     def lister_tous(self) -> list[Utilisateur]:
         """lister tous les utilisateurs

@@ -1,36 +1,32 @@
-import logging
+import gpxpy
+import os  
 
-import dotenv
-
-from utils.log_init import initialiser_logs
-from view.accueil.accueil_vue import AccueilVue
 
 if __name__ == "__main__":
-    # On charge les variables d'envionnement
-    dotenv.load_dotenv(override=True)
+    print("Répertoire actuel:", os.getcwd())
+    with open("./src/strava_trail_run_12k.gpx", "r", encoding="utf-8") as f:
+        gpx = gpxpy.parse(f)
 
-    initialiser_logs("Application")
 
-    vue_courante = AccueilVue("Bienvenue")
-    nb_erreurs = 0
+    # Distance totale en 3D (mètres)
+    distance_m = gpx.length_3d()
 
-    while vue_courante:
-        if nb_erreurs > 100:
-            print("Le programme recense trop d'erreurs et va s'arrêter")
-            break
-        try:
-            # Affichage du menu
-            vue_courante.afficher()
+    # Dénivelé positif/négatif
+    up_m, down_m = gpx.get_uphill_downhill()
 
-            # Affichage des choix possibles
-            vue_courante = vue_courante.choisir_menu()
-        except Exception as e:
-            logging.info(e)
-            nb_erreurs += 1
-            vue_courante = AccueilVue("Une erreur est survenue, retour au menu principal")
+    # Durée totale (secondes)
+    duration_s = gpx.get_duration()
 
-    # Lorsque l on quitte l application
-    print("----------------------------------")
-    print("Au revoir")
+    # Temps/distance/vitesse en mouvement
+    moving = gpx.get_moving_data()
 
-    logging.info("Fin de l'application")
+    print("=== Résumé activité ===")
+    print(f"Nom:   {gpx.tracks[0].name if gpx.tracks else '-'}")
+    print(f"Type:  {gpx.tracks[0].type if gpx.tracks else '-'}")
+    print(f"Distance totale: {distance_m/1000:.2f} km")
+    print(f"D+: {up_m:.1f} m / D-: {down_m:.1f} m")
+    print(f"Durée totale: {duration_s/60:.1f} min")
+    print(f"Temps en mouvement: {moving.moving_time/60:.1f} min")
+    print(f"Distance en mouvement: {moving.moving_distance/1000:.2f} km")
+    print(f"Vitesse moyenne (moving): {moving.moving_distance/moving.moving_time*3.6:.2f} km/h")
+    print(f"Vitesse max: {moving.max_speed*3.6:.2f} km/h")

@@ -1,6 +1,7 @@
 import os
 import pytest
 from unittest.mock import patch
+from datetime import datetime
 
 from utils.reset_database import ResetDatabase
 from dao.activite_dao import ActiviteDao
@@ -179,3 +180,70 @@ def test_supprimer_ko():
 
     # THEN
     assert not suppression_ok
+
+def test_lister_activites_filtres_par_sport():
+    """Lister les activités d’un utilisateur filtrées par sport"""
+    # GIVEN
+    id_utilisateur = 991
+    sport_filtre = "natation"  # Exemple de filtre
+
+    # WHEN
+    activites = ActiviteDao().lister_activites_filtres(id_utilisateur, sport=sport_filtre)
+
+    # THEN
+    assert isinstance(activites, list)
+    for a in activites:
+        assert isinstance(a, Activite)
+        assert a.sport == sport_filtre
+
+def test_lister_activites_filtres_par_date():
+    """Lister les activités d’un utilisateur filtrées par plage de dates"""
+    # GIVEN
+    id_utilisateur = 991
+    date_debut = "2025-01-01"
+    date_fin = "2025-12-31"
+    # Convertir les dates en objets datetime.date
+    date_debut = datetime.strptime(date_debut, "%Y-%m-%d").date()
+    date_fin = datetime.strptime(date_fin, "%Y-%m-%d").date()
+    # WHEN
+    activites = ActiviteDao().lister_activites_filtres(id_utilisateur, date_debut=date_debut, date_fin=date_fin)
+
+    # THEN
+    assert isinstance(activites, list)
+    for a in activites:
+        assert isinstance(a, Activite)
+        assert date_debut <= a.date_activite <= date_fin
+
+def test_lister_activites_filtres_par_sport_et_date():
+    """Lister les activités d’un utilisateur filtrées par sport et plage de dates"""
+    # GIVEN
+    id_utilisateur = 991
+    sport_filtre = "natation"
+    date_debut = "2025-01-01"
+    date_fin = "2025-12-31"
+    # Convertir les dates en objets datetime.date
+    date_debut = datetime.strptime(date_debut, "%Y-%m-%d").date()
+    date_fin = datetime.strptime(date_fin, "%Y-%m-%d").date()
+    # WHEN
+    activites = ActiviteDao().lister_activites_filtres(id_utilisateur, sport=sport_filtre, date_debut=date_debut, date_fin=date_fin)
+
+    # THEN
+    assert isinstance(activites, list)
+    for a in activites:
+        assert isinstance(a, Activite)
+        assert a.sport == sport_filtre
+        assert date_debut <= a.date_activite <= date_fin
+
+def test_lister_activites_filtres_sans_filtre():
+    """Lister toutes les activités d’un utilisateur sans appliquer de filtres"""
+    # GIVEN
+    id_utilisateur = 991
+
+    # WHEN
+    activites = ActiviteDao().lister_activites_filtres(id_utilisateur)
+
+    # THEN
+    assert isinstance(activites, list)
+    for a in activites:
+        assert isinstance(a, Activite)
+        assert a.id_utilisateur == id_utilisateur
