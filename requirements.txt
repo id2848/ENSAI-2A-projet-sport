@@ -12,3 +12,4 @@ regex
 requests
 tabulate
 uvicorn
+bcrypt
