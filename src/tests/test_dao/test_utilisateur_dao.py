@@ -45,6 +45,34 @@ def test_trouver_par_id_non_existant():
     assert utilisateur is None
 
 
+def test_trouver_par_pseudo_ok():
+    """Recherche par pseudo d'un utilisateur existant"""
+
+    # GIVEN
+    pseudo = 'samsmith'
+
+    # WHEN
+    utilisateur = UtilisateurDao().trouver_par_pseudo(pseudo)
+
+    # THEN
+    assert utilisateur is not None
+
+
+def test_trouver_par_pseudo_ko():
+    """Recherche par pseudo d'un utilisateur n'existant pas"""
+
+    # GIVEN
+    pseudo = 'iiiiii'
+
+    # WHEN
+    utilisateur = UtilisateurDao().trouver_par_pseudo(pseudo)
+
+    # THEN
+    assert utilisateur is None
+
+
+
+
 def test_lister_tous():
     """Vérifie que la méthode renvoie une liste d'utilisateur
     de taille supérieure ou égale à 2
@@ -60,6 +88,7 @@ def test_lister_tous():
     for j in utilisateurs:
         assert isinstance(j, Utilisateur)
     assert len(utilisateurs) >= 2
+
 
 
 def test_creer_ok():
