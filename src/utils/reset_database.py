@@ -8,7 +8,7 @@ from utils.log_decorator import log
 from utils.singleton import Singleton
 from dao.db_connection import DBConnection
 
-from service.joueur_service import JoueurService
+from utils.securite import hash_password, generer_salt
 
 
 class ResetDatabase(metaclass=Singleton):
@@ -46,17 +46,36 @@ class ResetDatabase(metaclass=Singleton):
                     cursor.execute(create_schema)
                     cursor.execute(init_db_as_string)
                     cursor.execute(pop_db_as_string)
+
+                    # Récupérer tous les credentials et remplacer les mots de passe bruts
+                    cursor.execute("SELECT id_utilisateur, mot_de_passe_hash FROM credentials;")
+                    credentials = cursor.fetchall()
+
+                    for cred in credentials:
+                        # mot_de_passe_hash contient temporairement le mot de passe en clair (ex: "mdp1")
+                        mot_de_passe_clair = cred["mot_de_passe_hash"]
+                        sel = generer_salt()
+                        mot_de_passe_hash = hash_password(mot_de_passe_clair, sel)
+
+                        cursor.execute(
+                            """
+                            UPDATE credentials
+                            SET mot_de_passe_hash = %(hash)s, sel = %(sel)s
+                            WHERE id_utilisateur = %(id)s;
+                            """,
+                            {
+                                "hash": mot_de_passe_hash,
+                                "sel": sel,
+                                "id": cred["id_utilisateur"],
+                            },
+                        )
+
+            logging.info("Base de données réinitialisée avec succès")
+            return True
+
         except Exception as e:
-            logging.info(e)
+            logging.error(f"Erreur lors du reset de la base de données : {e}")
             raise
-
-        # Appliquer le hashage des mots de passe à chaque joueur
-        # A adapter plus tard
-        """joueur_service = JoueurService()
-        for j in joueur_service.lister_tous(inclure_mdp=True):
-            joueur_service.modifier(j)"""
-
-        return True
 
 
 if __name__ == "__main__":

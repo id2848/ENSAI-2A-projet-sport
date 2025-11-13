@@ -11,7 +11,6 @@ def test_age_utilisateur():
     u = Utilisateur(
         id_utilisateur=1,
         pseudo="jean_dupont",
-        mot_de_passe_hash="hash",
         nom="Dupont",
         prenom="Jean",
         date_de_naissance=birthdate,

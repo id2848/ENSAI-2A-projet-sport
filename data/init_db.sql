@@ -5,12 +5,22 @@ DROP TABLE IF EXISTS utilisateur CASCADE ;
 
 CREATE TABLE utilisateur (
     id_utilisateur          SERIAL PRIMARY KEY,
-    pseudo                  VARCHAR(30) UNIQUE,
-    mot_de_passe_hash       VARCHAR(256),
+    pseudo                  VARCHAR(30) UNIQUE NOT NULL,
     nom                     VARCHAR(50),
     prenom                  VARCHAR(30),
     date_de_naissance       DATE,
     sexe                    VARCHAR(10)
+);
+
+-----------------------------------------------------
+-- Credentials (authentification)
+-----------------------------------------------------
+DROP TABLE IF EXISTS credentials CASCADE;
+
+CREATE TABLE credentials (
+    id_utilisateur          INTEGER PRIMARY KEY REFERENCES utilisateur(id_utilisateur) ON DELETE CASCADE,
+    mot_de_passe_hash       VARCHAR(256) NOT NULL,
+    sel                     VARCHAR(64) NOT NULL
 );
 
 -----------------------------------------------------

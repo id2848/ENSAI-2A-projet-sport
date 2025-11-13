@@ -214,7 +214,7 @@ def test_se_connecter_ok():
     """Test de la connexion avec un pseudo et un mot de passe correct"""
     
     # GIVEN
-    pseudo = "johndo"
+    pseudo = "johndoe"
     mdp = "hash1"
     # Création de l'utilisateur avec le mot de passe haché
     utilisateur = Utilisateur(pseudo=pseudo, mot_de_passe_hash=hash_password(mdp, pseudo), nom="Doe", prenom="John", date_de_naissance="1990-01-01", sexe="Homme")

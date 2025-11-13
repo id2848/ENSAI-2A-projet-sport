@@ -1,4 +1,4 @@
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import secrets
@@ -9,6 +9,8 @@ import logging
 from utils.log_init import initialiser_logs
 
 from service.activite_service import ActiviteService
+
+#from dao.utilisateur_dao import UtilisateurDao
 
 from utils.parse_strava_gpx import parse_strava_gpx
 
@@ -31,17 +33,24 @@ def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     username = credentials.username
     password = credentials.password
 
+    #utilisateur = UtilisateurDao().se_connecter(username, password)
+    #if not utilisateur:
     user = USERS.get(username)
     if not user or not secrets.compare_digest(password, user["password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
         )
+    #return utilisateur
     return {"username": username, "roles": user["roles"]}
 
 @app.get("/me")
 def me(user = Depends(get_current_user)):
     return {"user": user}
+
+@app.get("/logout")
+async def logout(creds: HTTPBasicCredentials = Depends(security)):
+    return HTMLResponse(content="Vous vous êtes déconnecté", status_code=status.HTTP_401_UNAUTHORIZED)
 
 # ----------------------------------------------------------
 
