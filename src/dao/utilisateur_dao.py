@@ -29,65 +29,62 @@ class UtilisateurDao:
             return False
 
 
-    # Méthode dans `UtilisateurDao` pour créer un utilisateur
+    @log
+    def creer(self, utilisateur: Utilisateur, mot_de_passe: str) -> bool:
+        """Création d'un utilisateur et de ses credentials associés"""
+        try:
+            # Vérification si le pseudo existe déjà
+            if self.verifier_pseudo_existant(utilisateur.pseudo):
+                logging.error(f"L'utilisateur avec le pseudo {utilisateur.pseudo} existe déjà.")
+                return False
 
-  
-@log
-def creer(self, utilisateur: Utilisateur, mot_de_passe: str) -> bool:
-    """Création d'un utilisateur et de ses credentials associés"""
-    try:
-        # Vérification si le pseudo existe déjà
-        if self.verifier_pseudo_existant(utilisateur.pseudo):
-            logging.error(f"L'utilisateur avec le pseudo {utilisateur.pseudo} existe déjà.")
+            # Générer un sel et le hash correspondant
+            sel = generer_salt()
+            mot_de_passe_hash = hash_password(mot_de_passe, sel)
+
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    # Étape 1 : création de l'utilisateur (id auto-généré)
+                    cursor.execute(
+                        """
+                        INSERT INTO utilisateur (pseudo, nom, prenom, date_de_naissance, sexe)
+                        VALUES (%(pseudo)s, %(nom)s, %(prenom)s, %(date_de_naissance)s, %(sexe)s)
+                        RETURNING id_utilisateur;
+                        """,
+                        {
+                            "pseudo": utilisateur.pseudo,
+                            "nom": utilisateur.nom,
+                            "prenom": utilisateur.prenom,
+                            "date_de_naissance": utilisateur.date_de_naissance,
+                            "sexe": utilisateur.sexe,
+                        },
+                    )
+                    res = cursor.fetchone()
+                    if not res:
+                        raise Exception("Échec de la création de l'utilisateur.")
+
+                    # Récupération de l'id auto-généré
+                    utilisateur.id_utilisateur = res["id_utilisateur"]
+
+                    # Étape 2 : insérer les credentials
+                    cursor.execute(
+                        """
+                        INSERT INTO credentials (id_utilisateur, mot_de_passe_hash, sel)
+                        VALUES (%(id_utilisateur)s, %(mot_de_passe_hash)s, %(sel)s);
+                        """,
+                        {
+                            "id_utilisateur": utilisateur.id_utilisateur,
+                            "mot_de_passe_hash": mot_de_passe_hash,
+                            "sel": sel,
+                        },
+                    )
+
+            logging.info(f"Utilisateur {utilisateur.pseudo} créé avec succès (id={utilisateur.id_utilisateur}).")
+            return True
+
+        except Exception as e:
+            logging.error(f"Erreur lors de la création de l'utilisateur {utilisateur.pseudo}: {e}")
             return False
-
-        # Générer un sel et le hash correspondant
-        sel = generer_salt
-        mot_de_passe_hash = hash_password(mot_de_passe, sel)
-
-        with DBConnection().connection as connection:
-            with connection.cursor() as cursor:
-                # Étape 1 : création de l'utilisateur (id auto-généré)
-                cursor.execute(
-                    """
-                    INSERT INTO utilisateur (pseudo, nom, prenom, date_de_naissance, sexe)
-                    VALUES (%(pseudo)s, %(nom)s, %(prenom)s, %(date_de_naissance)s, %(sexe)s)
-                    RETURNING id_utilisateur;
-                    """,
-                    {
-                        "pseudo": utilisateur.pseudo,
-                        "nom": utilisateur.nom,
-                        "prenom": utilisateur.prenom,
-                        "date_de_naissance": utilisateur.date_de_naissance,
-                        "sexe": utilisateur.sexe,
-                    },
-                )
-                res = cursor.fetchone()
-                if not res:
-                    raise Exception("Échec de la création de l'utilisateur.")
-
-                # Récupération de l'id auto-généré
-                utilisateur.id_utilisateur = res["id_utilisateur"]
-
-                # Étape 2 : insérer les credentials
-                cursor.execute(
-                    """
-                    INSERT INTO credentials (id_utilisateur, mot_de_passe_hash, sel)
-                    VALUES (%(id_utilisateur)s, %(mot_de_passe_hash)s, %(sel)s);
-                    """,
-                    {
-                        "id_utilisateur": utilisateur.id_utilisateur,
-                        "mot_de_passe_hash": mot_de_passe_hash,
-                        "sel": sel,
-                    },
-                )
-
-        logging.info(f"Utilisateur {utilisateur.pseudo} créé avec succès (id={utilisateur.id_utilisateur}).")
-        return True
-
-    except Exception as e:
-        logging.error(f"Erreur lors de la création de l'utilisateur {utilisateur.pseudo}: {e}")
-        return False
 
 
     @log
@@ -265,46 +262,46 @@ def creer(self, utilisateur: Utilisateur, mot_de_passe: str) -> bool:
         return res > 0
 
 
-@log
-def se_connecter(self, pseudo: str, mot_de_passe: str) -> Utilisateur | None:
-    """Authentification d'un utilisateur via pseudo et mot de passe"""
-    try:
-        with DBConnection().connection as connection:
-            with connection.cursor() as cursor:
-                # Récupérer l'utilisateur et son mot de passe haché via jointure
-                cursor.execute(
-                    """
-                    SELECT u.id_utilisateur, u.pseudo, u.nom, u.prenom, u.date_de_naissance, u.sexe,
-                           c.mot_de_passe_hash, c.sel
-                    FROM utilisateur u
-                    JOIN credentials c ON u.id_utilisateur = c.id_utilisateur
-                    WHERE u.pseudo = %(pseudo)s;
-                    """,
-                    {"pseudo": pseudo},
-                )
-                res = cursor.fetchone()
+    @log
+    def se_connecter(self, pseudo: str, mot_de_passe: str) -> Utilisateur | None:
+        """Authentification d'un utilisateur via pseudo et mot de passe"""
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    # Récupérer l'utilisateur et son mot de passe haché via jointure
+                    cursor.execute(
+                        """
+                        SELECT u.id_utilisateur, u.pseudo, u.nom, u.prenom, u.date_de_naissance, u.sexe,
+                            c.mot_de_passe_hash, c.sel
+                        FROM utilisateur u
+                        JOIN credentials c ON u.id_utilisateur = c.id_utilisateur
+                        WHERE u.pseudo = %(pseudo)s;
+                        """,
+                        {"pseudo": pseudo},
+                    )
+                    res = cursor.fetchone()
 
-        if not res:
-            logging.warning(f"Aucun utilisateur trouvé avec le pseudo {pseudo}")
+            if not res:
+                logging.warning(f"Aucun utilisateur trouvé avec le pseudo {pseudo}")
+                return None
+
+            # Vérification du mot de passe
+            if not verifier_mot_de_passe(mot_de_passe, res["sel"], res["mot_de_passe_hash"]):
+                logging.warning(f"Mot de passe incorrect pour {pseudo}")
+                return None
+
+            # Création de l’objet métier Utilisateur
+            utilisateur = Utilisateur(
+                id_utilisateur=res["id_utilisateur"],
+                pseudo=res["pseudo"],
+                nom=res["nom"],
+                prenom=res["prenom"],
+                date_de_naissance=res["date_de_naissance"],
+                sexe=res["sexe"],
+            )
+
+            return utilisateur
+
+        except Exception as e:
+            logging.error(f"Erreur lors de la connexion avec pseudo {pseudo}: {e}")
             return None
-
-        # Vérification du mot de passe
-        if not verifier_mot_de_passe(mot_de_passe, res["sel"], res["mot_de_passe_hash"]):
-            logging.warning(f"Mot de passe incorrect pour {pseudo}")
-            return None
-
-        # Création de l’objet métier Utilisateur (sans mot de passe)
-        utilisateur = Utilisateur(
-            id_utilisateur=res["id_utilisateur"],
-            pseudo=res["pseudo"],
-            nom=res["nom"],
-            prenom=res["prenom"],
-            date_de_naissance=res["date_de_naissance"],
-            sexe=res["sexe"],
-        )
-
-        return utilisateur
-
-    except Exception as e:
-        logging.error(f"Erreur lors de la connexion avec pseudo {pseudo}: {e}")
-        return None

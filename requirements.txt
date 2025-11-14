@@ -1,3 +1,4 @@
+bcrypt
 coverage
 inquirerPy
 fastapi
@@ -10,6 +11,6 @@ python-multipart
 PyYAML
 regex
 requests
+streamlit
 tabulate
 uvicorn
-bcrypt

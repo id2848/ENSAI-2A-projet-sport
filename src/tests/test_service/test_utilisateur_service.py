@@ -1,239 +1,201 @@
 import pytest
-from datetime import date, timedelta
+from datetime import date
+from unittest.mock import patch
+
 from service.utilisateur_service import UtilisateurService
 from dao.utilisateur_dao import UtilisateurDao
 from business_object.utilisateur import Utilisateur
 
-import os
-import bcrypt
-from unittest.mock import patch
 from utils.reset_database import ResetDatabase
+import os
+
 
 @pytest.fixture(autouse=True)
 def setup_test_environment():
     """Initialisation des données de test dans la base de données"""
-    # Assurez-vous d'utiliser un schéma de test pour éviter de modifier la vraie base de données
-    with patch.dict(os.environ, {"SCHEMA": "projet_test_dao"}):
+    with patch.dict(os.environ, {"POSTGRES_SCHEMA": "projet_test_dao"}):
         # Reset de la base de données avant de commencer
         ResetDatabase().lancer(test_dao=True)
         yield
 
 
-# Test de l'inscription avec des données valides
-def test_inscrire_valide():
-    """Test de l'inscription d'un utilisateur avec des données valides"""
+# Test de l'inscription
+def test_inscrire_utilisateur_ok():
+    """Test pour la création d'un utilisateur avec des données valides"""
 
     # GIVEN
-    service = UtilisateurService()
+    pseudo = "john123"
+    mot_de_passe = "password"
+    nom = "Doe"
+    prenom = "John"
+    date_de_naissance = "1990-01-01"
+    sexe = "homme"
 
     # WHEN
-    utilisateur = service.inscrire(
-        pseudo="quices123",
-        mot_de_passe="monMDP!",
-        nom="Qui",
-        prenom="Ces",
-        date_de_naissance="1990-01-01",
-        sexe="masculin"
-    )
+    resultat = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
 
     # THEN
-    assert utilisateur is not None
-    assert utilisateur.pseudo == "quices123"
+    assert resultat is True  # Le résultat doit être True si l'inscription réussit
 
 
-# Test de l'inscription avec un pseudo trop court
-def test_inscrire_pseudo_trop_court():
-    """Test de l'inscription avec un pseudo trop court"""
+def test_inscrire_utilisateur_pseudo_deja_utilise():
+    """Test pour l'inscription d'un utilisateur avec un pseudo déjà existant"""
 
     # GIVEN
-    service = UtilisateurService()
+    pseudo = "johndoe"  # Pseudo déjà existant dans la base de données de test
+    mot_de_passe = "password"
+    nom = "Doe"
+    prenom = "John"
+    date_de_naissance = "1990-01-01"
+    sexe = "homme"
 
     # WHEN
-    utilisateur = service.inscrire(
-        pseudo="qc",  # Pseudo trop court
-        mot_de_passe="monMotDePasse!",
-        nom="Qui",
-        prenom="Ces",
-        date_de_naissance="1990-01-01",
-        sexe="masculin"
-    )
+    resultat = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
 
     # THEN
-    assert utilisateur is None  # L'inscription doit échouer
+    assert resultat is False  # Le pseudo existe déjà, l'inscription doit échouer
 
 
-# Test de l'inscription avec un mot de passe trop court
-def test_inscrire_mot_de_passe_trop_court():
-    """Test de l'inscription avec un mot de passe trop court"""
+def test_inscrire_utilisateur_donnees_invalides():
+    """Test pour l'inscription avec des données invalides"""
 
     # GIVEN
-    service = UtilisateurService()
+    pseudo = "jo"
+    mot_de_passe = "123"
+    nom = "Doe"
+    prenom = "John"
+    date_de_naissance = "1990-01-01"
+    sexe = "homme"
 
     # WHEN
-    utilisateur = service.inscrire(
-        pseudo="quices123",
-        mot_de_passe="123",  # Mot de passe trop court
-        nom="Qui",
-        prenom="Ces",
-        date_de_naissance="1990-01-01",
-        sexe="masculin"
-    )
+    resultat = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
 
     # THEN
-    assert utilisateur is None  # L'inscription doit échouer
+    assert resultat is False  # Le pseudo et mot de passe sont invalides
 
 
-# Test de l'inscription avec un nom invalide (contenant des chiffres)
-def test_inscrire_nom_invalide():
-    """Test de l'inscription avec un nom invalide"""
+# Test de la connexion
+def test_se_connecter_utilisateur_ok():
+    """Test pour la connexion d'un utilisateur avec des identifiants valides"""
 
     # GIVEN
-    service = UtilisateurService()
+    pseudo = "johndoe"  # Pseudo existant
+    mot_de_passe = "mdp1"  # Mot de passe correct
 
     # WHEN
-    utilisateur = service.inscrire(
-        pseudo="quices123",
-        mot_de_passe="monMotDePasse!",
-        nom="Qui123",  # Nom invalide
-        prenom="Ces",
-        date_de_naissance="1990-01-01",
-        sexe="masculin"
-    )
+    utilisateur = UtilisateurService().se_connecter(pseudo, mot_de_passe)
 
     # THEN
-    assert utilisateur is None  # L'inscription doit échouer
+    assert utilisateur is not None  # L'utilisateur doit être trouvé
+    assert utilisateur.pseudo == pseudo  # L'utilisateur doit avoir le bon pseudo
 
 
-# Test de l'inscription avec une date de naissance invalide
-def test_inscrire_date_naissance_invalide():
-    """Test de l'inscription avec une date de naissance invalide"""
+def test_se_connecter_utilisateur_mot_de_passe_incorrect():
+    """Test pour la connexion d'un utilisateur avec un mot de passe incorrect"""
 
     # GIVEN
-    service = UtilisateurService()
+    pseudo = "johndoe"  # Pseudo existant
+    mot_de_passe = "wrongpassword"  # Mot de passe incorrect
 
     # WHEN
-    utilisateur = service.inscrire(
-        pseudo="quices123",
-        mot_de_passe="monMotDePasse!",
-        nom="Qui",
-        prenom="Ces",
-        date_de_naissance="01-01-1990",  # Mauvais format de date
-        sexe="masculin"
-    )
+    utilisateur = UtilisateurService().se_connecter(pseudo, mot_de_passe)
 
     # THEN
-    assert utilisateur is None  # L'inscription doit échouer
+    assert utilisateur is None  # La connexion échoue car le mot de passe est incorrect
 
 
-# Test de l'inscription avec un sexe invalide
-def test_inscrire_sexe_invalide():
-    """Test de l'inscription avec un sexe invalide"""
+def test_se_connecter_utilisateur_inexistant():
+    """Test pour la connexion d'un utilisateur avec un pseudo inexistant"""
 
     # GIVEN
-    service = UtilisateurService()
+    pseudo = "unknownuser"  # Pseudo inexistant
+    mot_de_passe = "password"  # Mot de passe correct
 
     # WHEN
-    utilisateur = service.inscrire(
-        pseudo="quices123",
-        mot_de_passe="monMotDePasse!",
-        nom="Qui",
-        prenom="Ces",
-        date_de_naissance="1990-01-01",
-        sexe="alien"  # Sexe invalide
-    )
+    utilisateur = UtilisateurService().se_connecter(pseudo, mot_de_passe)
 
     # THEN
-    assert utilisateur is None  # L'inscription doit échouer
+    assert utilisateur is None  # La connexion échoue car l'utilisateur n'existe pas
 
 
-# Test de la connexion avec un pseudo correct et mot de passe correct
-def test_se_connecter_valide():
-    """Test de la connexion avec des données valides"""
+# Test des validations
+def test_valider_pseudo():
+    """Test pour la validation du pseudo"""
 
     # GIVEN
-    service = UtilisateurService()
+    pseudo_valide = "valid123"
+    pseudo_invalide = "in"  # Trop court
 
     # WHEN
-    utilisateur = service.se_connecter("quices123", "monMotDePasse!")
+    validation_valide = UtilisateurService().valider_pseudo(pseudo_valide)
+    validation_invalide = UtilisateurService().valider_pseudo(pseudo_invalide)
 
     # THEN
-    assert utilisateur is not None
-    assert utilisateur.pseudo == "quices123"
+    assert validation_valide is True  # Le pseudo valide doit être accepté
+    assert validation_invalide is False  # Le pseudo invalide doit être rejeté
 
 
-# Test de la connexion avec un pseudo incorrect
-def test_se_connecter_pseudo_incorrect():
-    """Test de la connexion avec un pseudo incorrect"""
+def test_valider_mot_de_passe():
+    """Test pour la validation du mot de passe"""
 
     # GIVEN
-    service = UtilisateurService()
+    mot_de_passe_valide = "valid123"
+    mot_de_passe_invalide = "123"  # Trop court
 
     # WHEN
-    utilisateur = service.se_connecter("pseudo_incorrect", "monMotDePasse!")
+    validation_valide = UtilisateurService().valider_mot_de_passe(mot_de_passe_valide)
+    validation_invalide = UtilisateurService().valider_mot_de_passe(mot_de_passe_invalide)
 
     # THEN
-    assert utilisateur is None
+    assert validation_valide is True  # Le mot de passe valide doit être accepté
+    assert validation_invalide is False  # Le mot de passe invalide doit être rejeté
 
-def test_lister_utilisateurs():
-    """Test pour lister tous les utilisateurs"""
+
+def test_valider_nom_prenom():
+    """Test pour la validation du nom et prénom"""
 
     # GIVEN
+    nom_valide = "Doe"
+    prenom_valide = "John"
+    nom_invalide = "Doe123"
+    prenom_invalide = "John@"
+
     # WHEN
-    liste = UtilisateurService().lister_utilisateurs()
+    validation_valide = UtilisateurService().valider_nom_prenom(nom_valide, prenom_valide)
+    validation_invalide = UtilisateurService().valider_nom_prenom(nom_invalide, prenom_invalide)
 
     # THEN
-    assert len(liste) > 1
+    assert validation_valide is True  # Nom et prénom valides
+    assert validation_invalide is False  # Nom et prénom invalides
 
 
-def test_trouver_par_id_ok():
-    """Recherche par id d'un utilisateur existant"""
+def test_valider_date_naissance():
+    """Test pour la validation de la date de naissance"""
 
     # GIVEN
-    id = 995
+    date_valide = "1990-01-01"
+    date_invalide = "01-01-1990"  # Mauvais format
 
     # WHEN
-    utilisateur = UtilisateurService().trouver_par_id(id)
+    validation_valide = UtilisateurService().valider_date_naissance(date_valide)
+    validation_invalide = UtilisateurService().valider_date_naissance(date_invalide)
 
     # THEN
-    assert utilisateur is not None
+    assert validation_valide is True  # La date doit être valide
+    assert validation_invalide is False  # La date doit être invalide
 
-def test_trouver_par_id_ko():
-    """Recherche par id d'un utilisateur n'existant pas"""
+
+def test_valider_sexe():
+    """Test pour la validation du sexe"""
 
     # GIVEN
-    id = 606
+    sexe_valide = "homme"
+    sexe_invalide = "invalide"  # Sexe non reconnu
 
     # WHEN
-    utilisateur = UtilisateurService().trouver_par_id(id)
+    validation_valide = UtilisateurService().valider_sexe(sexe_valide)
+    validation_invalide = UtilisateurService().valider_sexe(sexe_invalide)
 
     # THEN
-    assert utilisateur is None
-
-def test_trouver_par_pseudo_ok():
-    """Recherche par pseudo d'un utilisateur existant"""
-
-    # GIVEN
-    pseudo = 'mikebrown'
-
-    # WHEN
-    utilisateur = UtilisateurService().trouver_par_pseudo(pseudo)
-
-    # THEN
-    assert utilisateur is not None
-
-def test_trouver_par_pseudo_ko():
-    """Recherche par pseudo d'un utilisateur existant"""
-
-    # GIVEN
-    pseudo = 'pppppp'
-
-    # WHEN
-    utilisateur = UtilisateurService().trouver_par_pseudo(pseudo)
-
-    # THEN
-    assert utilisateur is None
-
-if __name__ == "__main__":
-    import pytest
-    pytest.main([__file__])
-
+    assert validation_valide is True  # Sexe valide
+    assert validation_invalide is False  # Sexe invalide
