@@ -70,9 +70,11 @@ def activites_par_utilisateur(id_utilisateur: int, user = Depends(get_current_us
 async def creer_activite(file: UploadFile = File(...), sport: str = "randonnée", user = Depends(get_current_user)):
     """Créer une nouvelle activité avec un fichier GPX."""
     content = await file.read()
-    activite = parse_strava_gpx(content, sport)
-    ActiviteService().creer_activite(user["username"], activite)
-    return {"message": "Activité créée", "activite": activite}
+    activite_parsed = parse_strava_gpx(content)
+    # à mettre à jour
+    date_activite, distance, duree = "2000-01-01", activite_parsed["distance totale"], activite_parsed["durée totale"]
+    success = ActiviteService().creer_activite(user["id_utilisateur"], sport, date_activite, distance, duree)
+    return {"succès": success}
 
 @app.put("/activites/{id_activite}")
 def modifier_activite(id_activite: int, sport: str, user = Depends(get_current_user)):
