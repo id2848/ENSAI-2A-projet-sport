@@ -71,7 +71,7 @@ class ActiviteService:
 
 
     def lister_activites(self, id_utilisateur: int) -> List[Activite]:
-        """ Liste toutes les activités d'un utilisateur donné """
+        """Liste toutes les activités d'un utilisateur donné"""
         try:
             # Recherche des activités par utilisateur
             activites = ActiviteDao().lister_par_utilisateur(id_utilisateur=id_utilisateur)
@@ -85,6 +85,23 @@ class ActiviteService:
         except Exception as e:
             # Gestion des exceptions : affichage du message d'erreur
             print(f"Erreur lors de la récupération des activités pour l'utilisateur {id_utilisateur}: {e}")
+            return []  # Retourne une liste vide en cas d'erreur
+
+    def lister_activites_filtres(self, id_utilisateur: int, sport: str = None, date_debut: str = None, date_fin: str = None) -> List[Activite]:
+        """Liste les activités d'un utilisateur avec des filtres optionnels (sport, date_debut, date_fin)"""
+        try:
+            # Recherche des activités filtrées
+            activites = ActiviteDao().lister_activites_filtres(id_utilisateur=id_utilisateur, sport=sport, date_debut=date_debut, date_fin=date_fin)
+
+            # Vérification si aucune activité filtrée n'est trouvée
+            if not activites:
+                print(f"Aucune activité trouvée pour l'utilisateur avec ID {id_utilisateur} avec les filtres spécifiés.")
+
+            return activites  # Retourne la liste des activités filtrées (peut être vide)
+
+        except Exception as e:
+            # Gestion des exceptions : affichage du message d'erreur
+            print(f"Erreur lors de la récupération des activités filtrées pour l'utilisateur {id_utilisateur}: {e}")
             return []  # Retourne une liste vide en cas d'erreur
 
 

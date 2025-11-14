@@ -58,7 +58,7 @@ def test_creer_activite_echec():
 
 def test_lister_activites():
     """Test pour lister les activités d'un utilisateur"""
-
+    
     # GIVEN
     id_utilisateur = 992
 
@@ -66,8 +66,62 @@ def test_lister_activites():
     activites = ActiviteService().lister_activites(id_utilisateur)
 
     # THEN
-    assert len(activites) == 1
-    assert activites[0].id_activite == 992
+    assert len(activites) == 1  # Vérifier qu'il y a 1 activité pour l'utilisateur 992
+    assert activites[0].id_activite == 992  # Vérifier que l'activité retournée est celle de l'utilisateur 992
+    assert activites[0].sport == 'natation'  # Vérifier que le sport de l'activité est "natation"
+    assert activites[0].date_activite == date(2025, 9, 26)  # Vérifier que la date de l'activité est correcte
+    assert activites[0].distance == 2.5  # Vérifier la distance de l'activité
+    assert activites[0].duree == 45.0  # Vérifier la durée de l'activité
+
+def test_lister_activites_filtres_sport():
+    """Test pour lister les activités d'un utilisateur filtrées par sport"""
+
+    # GIVEN
+    id_utilisateur = 992
+    sport_filtree = 'course'  # On cherche des activités de sport "course"
+
+    # WHEN
+    activites = ActiviteService().lister_activites_filtres(id_utilisateur, sport=sport_filtree)
+
+    # THEN
+    assert len(activites) == 0  # Aucun résultat car l'utilisateur 992 n'a pas d'activité "course"
+
+def test_lister_activites_filtres_date():
+    """Test pour lister les activités d'un utilisateur filtrées par plage de dates"""
+    
+    # GIVEN
+    id_utilisateur = 993
+    date_debut = '2025-09-25'
+    date_fin = '2025-09-28'
+
+    # WHEN
+    activites = ActiviteService().lister_activites_filtres(id_utilisateur, date_debut=date_debut, date_fin=date_fin)
+
+    # THEN
+    assert len(activites) == 1  # Il y a une activité pour "samsmith" dans cette plage de dates (le 2025-09-27)
+    assert activites[0].id_activite == 993  # Vérifier que l'activité correspond à celle de "samsmith"
+    assert activites[0].sport == 'vélo'  # Vérifier que le sport de l'activité est "vélo"
+    assert activites[0].date_activite == date(2025, 9, 27)  # Vérifier la date de l'activité
+
+def test_lister_activites_filtres_sport_et_date():
+    """Test pour lister les activités d'un utilisateur filtrées par sport et dates"""
+    
+    # GIVEN
+    id_utilisateur = 992
+    sport_filtree = 'natation'
+    date_debut = '2025-09-25'
+    date_fin = '2025-09-28'
+
+    # WHEN
+    activites = ActiviteService().lister_activites_filtres(id_utilisateur, sport=sport_filtree, date_debut=date_debut, date_fin=date_fin)
+
+    # THEN
+    assert len(activites) == 1  # Une seule activité de sport "natation" pour "janedoe" dans cette plage de dates
+    assert activites[0].id_activite == 992  # Vérifier que l'activité correspond à celle de "janedoe"
+    assert activites[0].sport == 'natation'  # Vérifier que le sport de l'activité est "natation"
+    assert activites[0].date_activite == date(2025, 9, 26)  # Vérifier la date de l'activité
+    assert activites[0].distance == 2.5  # Vérifier la distance de l'activité
+    assert activites[0].duree == 45.0  # Vérifier la durée de l'activité
 
 def test_ajouter_jaime_ok():
     """Test pour l'ajout d'un 'j'aime' à une activité"""

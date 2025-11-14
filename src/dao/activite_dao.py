@@ -1,6 +1,8 @@
 import logging
 from utils.log_decorator import log
 
+from typing import List
+
 from dao.db_connection import DBConnection
 
 from business_object.utilisateur import Utilisateur
@@ -118,7 +120,7 @@ class ActiviteDao:
             raise
         return res > 0
 
-    def lister_par_utilisateur(self, id_utilisateur) -> list[Activite]:
+    def lister_par_utilisateur(self, id_utilisateur) -> List[Activite]:
         """Lister toutes les activités d'un utilisateur"""
         res = None
         try:
@@ -147,7 +149,7 @@ class ActiviteDao:
                 liste_activites.append(activite)
         return liste_activites
     
-    def lister_activites_filtres(self, id_utilisateur, sport=None, date_debut=None, date_fin=None) -> list[Activite]:
+    def lister_activites_filtres(self, id_utilisateur, sport=None, date_debut=None, date_fin=None) -> List[Activite]:
         """Lister les activités d'un utilisateur avec des filtres optionnels (sport, date de début, date de fin)."""
         
         query = "SELECT * FROM activite WHERE id_utilisateur = %(id_utilisateur)s"
