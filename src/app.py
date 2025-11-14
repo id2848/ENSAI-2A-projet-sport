@@ -46,7 +46,7 @@ def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
 
 @app.get("/me")
 def me(user = Depends(get_current_user)):
-    return {"user": user}
+    return user
 
 @app.get("/logout")
 async def logout(creds: HTTPBasicCredentials = Depends(security)):
