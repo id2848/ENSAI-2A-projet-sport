@@ -1,6 +1,5 @@
 import os
 import pytest
-from datetime import date
 from unittest.mock import patch
 
 from utils.reset_database import ResetDatabase
@@ -16,194 +15,99 @@ def setup_test_environment():
         ResetDatabase().lancer(test_dao=True)
         yield
 
-def test_calculer_nombre_activites_totale_ok():
-    """Nombre d'activités par sport correct pour un utilisateur existant"""
-
+def test_verifier_utilisateur_existant():
+    """Test pour vérifier si un utilisateur existe"""
+    
     # GIVEN
-    id_utilisateur = 991
-    service = ServiceStatistiques()
+    id_existant = 992  # Utilisateur avec ID 992 existe dans la base
+    id_inexistant = 9999999  # Utilisateur qui n'existe pas
+    
+    # WHEN / THEN
+    assert ServiceStatistiques().verifier_utilisateur_existant(id_existant) is True
+    assert ServiceStatistiques().verifier_utilisateur_existant(id_inexistant) is False
 
-    # WHEN
-    resultat = service.calculer_nombre_activites_totale(id_utilisateur)
-
-    # THEN
-    assert isinstance(resultat, dict)
-    if resultat:
-        assert all(isinstance(k, str) for k in resultat.keys())
-        assert all(isinstance(v, int) for v in resultat.values())
-    else:
-        pytest.skip("Aucune activité trouvée pour cet utilisateur.")
-
-
-def test_calculer_nombre_activites_totale_ko():
-    """Aucune activité pour un utilisateur inexistant"""
-
+def test_verifier_date():
+    """Test pour vérifier si la date est au bon format"""
+    
     # GIVEN
-    id_utilisateur = 9999
-    service = ServiceStatistiques()
+    date_valide = "2025-09-26"
+    date_invalide = "26-09-2025"  # Format incorrect
+    
+    # WHEN / THEN
+    assert ServiceStatistiques().verifier_date(date_valide) is True
+    assert ServiceStatistiques().verifier_date(date_invalide) is False
 
-    # WHEN
-    resultat = service.calculer_nombre_activites_totale(id_utilisateur)
-
-    # THEN
-    assert isinstance(resultat, dict)
-    assert resultat == {}
-
-
-def test_calculer_distance_totale_ok():
-    """Distance totale correcte pour un utilisateur existant"""
-
+def test_calculer_nombre_activites_total():
+    """Test pour calculer le nombre total d'activités par sport"""
+    
     # GIVEN
-    id_utilisateur = 991
-    service = ServiceStatistiques()
-
+    id_utilisateur = 992  # Utilisateur existant dans la base
+    
     # WHEN
-    resultat = service.calculer_distance_totale(id_utilisateur)
-
+    stats = ServiceStatistiques().calculer_nombre_activites_total(id_utilisateur)
+    
     # THEN
-    assert isinstance(resultat, (int, float))
-    assert resultat >= 0.0
+    assert stats == {'natation': 1}  # 1 activité de natation pour l'utilisateur 992
 
-
-def test_calculer_distance_totale_ko():
-    """Distance totale pour un utilisateur sans activité"""
-
+def test_calculer_distance_totale():
+    """Test pour calculer la distance totale parcourue par l'utilisateur"""
+    
     # GIVEN
-    id_utilisateur = 9999
-    service = ServiceStatistiques()
-
+    id_utilisateur = 992  # Utilisateur existant
+    
     # WHEN
-    resultat = service.calculer_distance_totale(id_utilisateur)
-
+    distance_totale = ServiceStatistiques().calculer_distance_totale(id_utilisateur)
+    
     # THEN
-    assert isinstance(resultat, (int, float))
-    assert resultat == 0.0
+    assert distance_totale == 2.5  # La distance de l'utilisateur 992 est 2.5 km pour la natation
 
-
-def test_calculer_duree_totale_ok():
-    """Durée totale correcte pour un utilisateur existant"""
-
+def test_calculer_duree_totale():
+    """Test pour calculer la durée totale des activités de l'utilisateur"""
+    
     # GIVEN
-    id_utilisateur = 991
-    service = ServiceStatistiques()
-
+    id_utilisateur = 992  # Utilisateur existant
+    
     # WHEN
-    resultat = service.calculer_duree_totale(id_utilisateur)
-
+    duree_totale = ServiceStatistiques().calculer_duree_totale(id_utilisateur)
+    
     # THEN
-    assert isinstance(resultat, int)
-    assert resultat >= 0
+    assert duree_totale == 2700  # Durée totale = 45 minutes * 60 secondes = 2700 secondes
 
-
-def test_calculer_duree_totale_ko():
-    """Durée totale pour un utilisateur sans activité"""
-
+def test_calculer_nombre_activites_semaine():
+    """Test pour calculer le nombre d'activités par sport dans une semaine donnée"""
+    
     # GIVEN
-    id_utilisateur = 9999
-    service = ServiceStatistiques()
-
+    id_utilisateur = 992  # Utilisateur existant
+    date_reference = "2025-09-26"  # Date dans la semaine
+    
     # WHEN
-    resultat = service.calculer_duree_totale(id_utilisateur)
-
+    stats = ServiceStatistiques().calculer_nombre_activites_semaine(id_utilisateur, date_reference)
+    
     # THEN
-    assert isinstance(resultat, int)
-    assert resultat == 0
+    assert stats == {'natation': 1}  # 1 activité de natation dans la semaine du 26 septembre
 
-def test_calculer_nombre_activites_semaine_ok():
-    """Nombre d'activités par sport correct pour une semaine donnée"""
-
+def test_calculer_distance_semaine():
+    """Test pour calculer la distance totale parcourue dans la semaine"""
+    
     # GIVEN
-    id_utilisateur = 991
-    date_reference = date.today()
-    service = ServiceStatistiques()
-
+    id_utilisateur = 992  # Utilisateur existant
+    date_reference = "2025-09-26"  # Date dans la semaine
+    
     # WHEN
-    resultat = service.calculer_nombre_activites_semaine(id_utilisateur, date_reference)
-
+    distance_semaine = ServiceStatistiques().calculer_distance_semaine(id_utilisateur, date_reference)
+    
     # THEN
-    assert isinstance(resultat, dict)
-    if resultat:
-        assert all(isinstance(k, str) for k in resultat.keys())
-        assert all(isinstance(v, int) for v in resultat.values())
-    else:
-        assert resultat == {}
+    assert distance_semaine == 2.5  # 2.5 km pour l'activité de natation cette semaine
 
-
-def test_calculer_nombre_activites_semaine_ko():
-    """Aucune activité pour un utilisateur inexistant"""
-
+def test_calculer_duree_semaine():
+    """Test pour calculer la durée totale des activités dans la semaine"""
+    
     # GIVEN
-    id_utilisateur = 9999
-    date_reference = date.today()
-    service = ServiceStatistiques()
-
+    id_utilisateur = 992  # Utilisateur existant
+    date_reference = "2025-09-26"  # Date dans la semaine
+    
     # WHEN
-    resultat = service.calculer_nombre_activites_semaine(id_utilisateur, date_reference)
-
+    duree_semaine = ServiceStatistiques().calculer_duree_semaine(id_utilisateur, date_reference)
+    
     # THEN
-    assert isinstance(resultat, dict)
-    assert resultat == {}
-
-
-def test_calculer_distance_semaine_ok():
-    """Distance hebdomadaire correcte pour un utilisateur existant"""
-
-    # GIVEN
-    id_utilisateur = 991
-    date_reference = date.today()
-    service = ServiceStatistiques()
-
-    # WHEN
-    resultat = service.calculer_distance_semaine(id_utilisateur, date_reference)
-
-    # THEN
-    assert isinstance(resultat, (int, float))
-    assert resultat >= 0.0
-
-
-def test_calculer_distance_semaine_ko():
-    """Distance hebdomadaire pour un utilisateur sans activité"""
-
-    # GIVEN
-    id_utilisateur = 9999
-    date_reference = date.today()
-    service = ServiceStatistiques()
-
-    # WHEN
-    resultat = service.calculer_distance_semaine(id_utilisateur, date_reference)
-
-    # THEN
-    assert isinstance(resultat, (int, float))
-    assert resultat == 0.0
-
-
-def test_calculer_duree_semaine_ok():
-    """Durée hebdomadaire correcte pour un utilisateur existant"""
-
-    # GIVEN
-    id_utilisateur = 991
-    date_reference = date.today()
-    service = ServiceStatistiques()
-
-    # WHEN
-    resultat = service.calculer_duree_semaine(id_utilisateur, date_reference)
-
-    # THEN
-    assert isinstance(resultat, int)
-    assert resultat >= 0
-
-
-def test_calculer_duree_semaine_ko():
-    """Durée hebdomadaire pour un utilisateur sans activité"""
-
-    # GIVEN
-    id_utilisateur = 9999
-    date_reference = date.today()
-    service = ServiceStatistiques()
-
-    # WHEN
-    resultat = service.calculer_duree_semaine(id_utilisateur, date_reference)
-
-    # THEN
-    assert isinstance(resultat, int)
-    assert resultat == 0
+    assert duree_semaine == 2700  # Durée totale pour l'activité de natation = 45 minutes = 2700 secondes

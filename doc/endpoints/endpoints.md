@@ -143,16 +143,31 @@ Ce fichier présente les différents endpoints à implémenter dans l'API.
 
 ## Statistiques
 
-### `GET /statistiques/activites/{id_utilisateur}`
-- **Description** : Récupère les statistiques des activités d'un utilisateur.
-- **Paramètres** : 
-  - `id_utilisateur` (int) : ID de l'utilisateur
-- **Réponse** : 
-  - Distance totale, durée totale, nombre d'heures d'activités.
+### `GET /statistiques/total/{id_utilisateur}`
 
-### `GET /statistiques/hebdomadaire/{id_utilisateur}`
-- **Description** : Récupère les statistiques hebdomadaires détaillées (par sport, distance, durée).
-- **Paramètres** : 
+- **Description** : Récupère les statistiques globales (totales) d'un utilisateur.
+- **Paramètres** :
   - `id_utilisateur` (int) : ID de l'utilisateur
-- **Réponse** : 
-  - Par semaine : distance parcourue, nombre d'heures d'activités, nombre d'activités par sport.
+- **Réponse** :
+  ```json
+  {
+    "distance_totale": float,  // Distance totale parcourue (en km)
+    "duree_totale": int,       // Durée totale des activités (en secondes)
+    "nombre_activites_total": int  // Nombre total d'activités
+  }
+  ```
+
+### `GET /statistiques/semaine/{id_utilisateur}`
+
+- **Description** : Récupère les statistiques d'une semaine spécifique pour un utilisateur donné.
+- **Paramètres** :
+  - `id_utilisateur` (int) : ID de l'utilisateur
+  - `date_reference` (string, format : `YYYY-MM-DD`) : Date de référence pour calculer la semaine (par exemple, pour obtenir les statistiques de la semaine du 1er janvier, utiliser `2025-01-01`)
+- **Réponse** :
+  ```json
+  {
+    "distance_semaine": float,  // Distance parcourue cette semaine (en km)
+    "duree_semaine": int,       // Durée des activités de la semaine (en secondes)
+    "nombre_activites_semaine": int  // Nombre d'activités de la semaine
+  }
+  ```

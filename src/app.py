@@ -10,7 +10,9 @@ from utils.log_init import initialiser_logs
 
 from service.activite_service import ActiviteService
 
-#from dao.utilisateur_dao import UtilisateurDao
+from service.service_statistiques import ServiceStatistiques
+
+from service.utilisateur_service import UtilisateurService
 
 from utils.parse_strava_gpx import parse_strava_gpx
 
@@ -33,7 +35,7 @@ def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     username = credentials.username
     password = credentials.password
 
-    #utilisateur = UtilisateurDao().se_connecter(username, password)
+    #utilisateur = UtilisateurService().se_connecter(username, password)
     #if not utilisateur:
     user = USERS.get(username)
     if not user or not secrets.compare_digest(password, user["password"]):
@@ -44,23 +46,29 @@ def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     #return utilisateur
     return user
 
+# ----------------------------------------------------------
+
+# --- Endpoints Authentification ---
+
 @app.get("/me")
 def me(user = Depends(get_current_user)):
     return user
 
 @app.get("/logout")
-async def logout(creds: HTTPBasicCredentials = Depends(security)):
+async def logout(creds: HTTPBasicCredentials = Depends(get_current_user)):
     return HTMLResponse(content="Vous vous êtes déconnecté", status_code=status.HTTP_401_UNAUTHORIZED)
 
-# ----------------------------------------------------------
 
 # --- Endpoints de base ---
+
 @app.get("/", include_in_schema=False)
 async def redirect_to_docs():
     """Redirige vers la documentation de l'API."""
     return RedirectResponse(url="/docs")
 
+
 # --- Endpoints Gestion des activités ---
+
 @app.get("/activites/{id_utilisateur}")
 def activites_par_utilisateur(id_utilisateur: int, user = Depends(get_current_user)):
     """Lister les activités d'un utilisateur donné."""
@@ -92,7 +100,9 @@ def supprimer_activite(id_activite: int, user = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Activité non trouvée")
     return {"message": "Activité supprimée"}
 
+
 # --- Endpoints Interactions avec les activités ---
+
 @app.post("/jaimes")
 def ajouter_jaime(id_activite: int, user = Depends(get_current_user)):
     """L'utilisateur ajoute un jaime à une activité."""
@@ -117,7 +127,9 @@ def supprimer_commentaire(id_commentaire: int, user = Depends(get_current_user))
     ActiviteService().supprimer_commentaire(id_commentaire)
     return {"message": "Commentaire supprimé"}
 
+
 # --- Endpoints Abonnements ---
+
 @app.post("/abonnements")
 def creer_abonnement(id_utilisateur_suiveur: int, id_utilisateur_suivi: int, user = Depends(get_current_user)):
     """S'abonner à un utilisateur."""
@@ -142,27 +154,52 @@ def lister_abonnements_suiveurs(id_utilisateur: int, user = Depends(get_current_
     suiveurs = AbonnementService().lister_utilisateurs_suiveurs(id_utilisateur)
     return {"suiveurs": suiveurs}
 
+
 # --- Endpoints Fil d'actualité ---
+
 @app.get("/fil-dactualite/{id_utilisateur}")
 def fil_dactualite(id_utilisateur: int, user = Depends(get_current_user)):
     """Afficher le fil d'actualités de l'utilisateur."""
     activites = ServiceFilDactualite().creer_fil_dactualite(id_utilisateur)
     return {"fil_dactualite": activites}
 
-# --- Endpoints Statistiques ---
-@app.get("/statistiques/activites/{id_utilisateur}")
-def statistiques_activites(id_utilisateur: int, user = Depends(get_current_user)):
-    """Statistiques des activités d'un utilisateur (par semaine et par sport)."""
-    activites_count = ServiceStatistiques().calculer_nombre_activites(id_utilisateur)
-    return {"nombre_activites": activites_count}
 
-@app.get("/statistiques/hebdomadaire/{id_utilisateur}")
-def statistiques_hebdomadaire(id_utilisateur: int, user = Depends(get_current_user)):
-    """Statistiques hebdomadaires détaillées de l'utilisateur."""
-    # A METTRE A JOUR
-    activites = ServiceStatistiques().calculer_distance_totale(id_utilisateur)
-    duree = ServiceStatistiques().calculer_duree_totale(id_utilisateur)
-    return {"distance_totale": activites, "duree_totale": duree}
+# --- Endpoints Statistiques ---
+
+@app.get("/statistiques/total/{id_utilisateur}")
+def statistiques_totales(id_utilisateur: int, user = Depends(get_current_user)):
+    """Récupérer les statistiques globales (totales) d'un utilisateur."""
+    
+    service = ServiceStatistiques()
+    
+    # Récupérer les données nécessaires via les méthodes de ServiceStatistiques
+    nombre_activites = service.calculer_nombre_activites_total(id_utilisateur)
+    distance_totale = service.calculer_distance_totale(id_utilisateur)
+    duree_totale = service.calculer_duree_totale(id_utilisateur)
+    
+    return {
+        "nombre_activites_total": nombre_activites,
+        "distance_totale": distance_totale,
+        "duree_totale": duree_totale
+    }
+
+@app.get("/statistiques/semaine/{id_utilisateur}")
+def statistiques_semaine(id_utilisateur: int, date_reference: str, user = Depends(get_current_user)):
+    """Récupérer les statistiques d'une semaine spécifique d'un utilisateur."""
+    
+    service = ServiceStatistiques()
+    
+    # Récupérer les données de la semaine demandée via les méthodes de ServiceStatistiques
+    nombre_activites_semaine = service.calculer_nombre_activites_semaine(id_utilisateur, date_reference)
+    distance_semaine = service.calculer_distance_semaine(id_utilisateur, date_reference)
+    duree_semaine = service.calculer_duree_semaine(id_utilisateur, date_reference)
+    
+    return {
+        "nombre_activites_semaine": nombre_activites_semaine,
+        "distance_semaine": distance_semaine,
+        "duree_semaine": duree_semaine
+    }
+
 
 # --- Endpoint Upload GPX ---
 @app.post("/upload-gpx")
