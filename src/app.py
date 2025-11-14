@@ -25,8 +25,8 @@ initialiser_logs("Webservice")
 security = HTTPBasic()
 
 USERS = {
-    "alice": {"password": "wonderland", "roles": ["admin"]},
-    "bob":   {"password": "builder",    "roles": ["user"]},
+    "alice": {"id_utilisateur": 991, "password": "wonderland", "prenom": "Alice"},
+    "bob":   {"id_utilisateur": 992, "password": "builder", "prenom": "Bob"},
 }
 
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
@@ -42,7 +42,7 @@ def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
             detail="Invalid credentials",
         )
     #return utilisateur
-    return {"username": username, "roles": user["roles"]}
+    return user
 
 @app.get("/me")
 def me(user = Depends(get_current_user)):
