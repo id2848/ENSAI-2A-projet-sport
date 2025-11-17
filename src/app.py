@@ -14,7 +14,7 @@ from service.service_statistiques import ServiceStatistiques
 
 from service.utilisateur_service import UtilisateurService
 
-from utils.parse_strava_gpx import parse_strava_gpx
+from utils.gpx_parser import parse_gpx
 
 # --- Configuration ---
 
@@ -78,9 +78,14 @@ def activites_par_utilisateur(id_utilisateur: int, user = Depends(get_current_us
 async def creer_activite(file: UploadFile = File(...), sport: str = "randonnée", user = Depends(get_current_user)):
     """Créer une nouvelle activité avec un fichier GPX."""
     content = await file.read()
-    activite_parsed = parse_strava_gpx(content)
-    # à mettre à jour
-    date_activite, distance, duree = "2000-01-01", activite_parsed["distance totale"], activite_parsed["durée totale"]
+    try:
+        parsed_activite = parse_gpx(content)
+    except Exception as e:
+        logging.error(f"Erreur lors du parsing du fichier GPX : {e}")
+        return {"message": "Erreur lors du parsing du fichier GPX"}
+    date_activite = parsed_activite["date"]
+    distance = parsed_activite["distance totale"]
+    duree = activite_parsed["durée totale"]
     success = ActiviteService().creer_activite(user["id_utilisateur"], sport, date_activite, distance, duree)
     return {"succès": success}
 
@@ -206,7 +211,11 @@ def statistiques_semaine(id_utilisateur: int, date_reference: str, user = Depend
 async def upload_gpx(file: UploadFile = File(...)):
     """Upload et parsing d'un fichier GPX."""
     content = await file.read()
-    parsed_activite = parse_strava_gpx(content)
+    try:
+        parsed_activite = parse_gpx(content)
+    except Exception as e:
+        logging.error(f"Erreur lors du parsing du fichier GPX : {e}")
+        return {"message": "Erreur lors du parsing du fichier GPX"}
     return {"message": "Fichier GPX analysé", "activite": parsed_activite}
 
 
