@@ -134,7 +134,7 @@ class ActiviteService:
             print(f"Erreur lors de la suppression du 'j'aime' : {e}")
             return False
 
-    def ajouter_commentaire(self, id_utilisateur: int, id_activite: int, commentaire: str) -> bool:
+    def ajouter_commentaire(self, id_utilisateur: int, id_activite: int, contenu: str) -> bool:
         """Ajoute un commentaire à une activité"""
         try:
             activite = ActiviteDao().trouver_par_id(id_activite=id_activite)
@@ -142,7 +142,7 @@ class ActiviteService:
             nouveau_commentaire = Commentaire(
                 id_activite=id_activite,
                 id_auteur=id_utilisateur,
-                commentaire=commentaire,
+                contenu=contenu,
                 date_commentaire=datetime.now()
             )
             return CommentaireDao().creer(nouveau_commentaire)

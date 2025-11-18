@@ -182,7 +182,7 @@ def test_lister_commentaires():
 
     # THEN
     assert len(commentaires) == 1
-    assert commentaires[0].commentaire == "J'adore le vélo !"  # Le commentaire de Sam
+    assert commentaires[0].contenu == "J'adore le vélo !"  # Le commentaire de Sam
 
 def test_ajouter_commentaire_ok():
     """Test pour ajouter un commentaire à une activité"""
@@ -190,10 +190,10 @@ def test_ajouter_commentaire_ok():
     # GIVEN
     id_utilisateur = 991  # John Doe
     id_activite = 994  # Activité de Emily Jones
-    commentaire = "Très belle randonnée !"
+    contenu = "Très belle randonnée !"
 
     # WHEN
-    result = ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, commentaire)
+    result = ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, contenu)
 
     # THEN
     assert result is True
@@ -204,10 +204,10 @@ def test_ajouter_commentaire_echec():
     # GIVEN
     id_utilisateur = 999  # Un utilisateur qui n'existe pas
     id_activite = 999  # Une activité qui n'existe pas
-    commentaire = "Super activité !"
+    contenu = "Super activité !"
 
     # WHEN
-    result = ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, commentaire)
+    result = ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, contenu)
 
     # THEN
     assert result is False

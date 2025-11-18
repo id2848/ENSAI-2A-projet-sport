@@ -14,8 +14,8 @@ class Commentaire:
         identifiant unique
     id_auteur : int
         identifiant unique
-    commentaire : str
-        texte du commentaire
+    contenu : str
+        contenu (texte) du commentaire
     date_commentaire : date
         date et heure du commentaire
     """
@@ -24,14 +24,14 @@ class Commentaire:
         self,
         id_activite : int,
         id_auteur : int,
-        commentaire : str,
+        contenu : str,
         date_commentaire : date,
         id_commentaire: Optional[int] = None
     ):
         self.id_commentaire = id_commentaire
         self.id_activite = id_activite
         self.id_auteur = id_auteur
-        self.commentaire = commentaire
+        self.contenu = contenu
         self.date_commentaire = date_commentaire
         
     def __repr__(self) -> str:
@@ -39,6 +39,6 @@ class Commentaire:
             f"Commentaire(id_commentaire={self.id_commentaire!r}, "
             f"id_activite={self.id_activite!r}, "
             f"id_auteur={self.id_auteur!r}, "
-            f"commentaire={self.commentaire!r}, "
+            f"contenu={self.contenu!r}, "
             f"date_commentaire={self.date_commentaire!r} "
         )

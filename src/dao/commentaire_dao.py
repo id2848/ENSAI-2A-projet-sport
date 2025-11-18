@@ -31,13 +31,13 @@ class CommentaireDao:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "INSERT INTO commentaire(id_activite, id_auteur, commentaire, date_commentaire) VALUES        "
-                        "(%(id_activite)s, %(id_auteur)s, %(commentaire)s, %(date_commentaire)s)             "
+                        "INSERT INTO commentaire(id_activite, id_auteur, contenu, date_commentaire) VALUES        "
+                        "(%(id_activite)s, %(id_auteur)s, %(contenu)s, %(date_commentaire)s)             "
                         "  RETURNING id_commentaire;                                                ",
                         {
                             "id_activite": commentaire.id_activite,
                             "id_auteur": commentaire.id_auteur,
-                            "commentaire": commentaire.commentaire,
+                            "contenu": commentaire.contenu,
                             "date_commentaire": commentaire.date_commentaire,
                         },
                     )
@@ -87,7 +87,7 @@ class CommentaireDao:
                 commentaire = Commentaire(
                     id_activite=row["id_activite"],
                     id_auteur=row["id_auteur"],
-                    commentaire=row["commentaire"],
+                    contenu=row["contenu"],
                     date_commentaire=row["date_commentaire"],
                 )
 
@@ -146,7 +146,7 @@ class CommentaireDao:
                 id_commentaire=res["id_commentaire"],
                 id_activite=res["id_activite"],
                 id_auteur=res["id_auteur"],
-                commentaire=res["commentaire"],
+                contenu=res["contenu"],
                 date_commentaire=res["date_commentaire"]
             )
         return commentaire

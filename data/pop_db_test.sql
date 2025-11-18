@@ -35,7 +35,7 @@ VALUES
 -----------------------------------------------------
 -- Insertion des commentaires
 -----------------------------------------------------
-INSERT INTO commentaire (id_commentaire, id_activite, id_auteur, commentaire, date_commentaire)
+INSERT INTO commentaire (id_commentaire, id_activite, id_auteur, contenu, date_commentaire)
 VALUES 
     (991, 991, 992, 'Super activité !', '2025-09-26'),
     (992, 992, 993, 'Je trouve la natation relaxante, c''est parfait pour se détendre.', '2025-09-27'),
