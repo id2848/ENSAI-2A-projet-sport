@@ -1,6 +1,5 @@
 from typing import List
-from datetime import date, datetime, timedelta
-import re
+from datetime import date, timedelta
 
 from utils.log_decorator import log
 
@@ -9,9 +8,10 @@ from business_object.utilisateur import Utilisateur
 from dao.utilisateur_dao import UtilisateurDao
 import logging
 
+from utils.verifier_date import verifier_date
+
 class UtilisateurService:
     """Classe contenant les méthodes de service d'Utilisateurs"""
-
 
     @log
     def inscrire(
@@ -30,24 +30,28 @@ class UtilisateurService:
 
         try:
             # 1) Validations
-            if not self.valider_pseudo(pseudo):
-                logging.error(f"Pseudo invalide : {pseudo}")
+            if not Utilisateur.valider_pseudo(pseudo):
+                logging.error(f"Pseudo invalide.")
+                return False
+            
+            if UtilisateurDao().verifier_pseudo_existant(pseudo):
+                logging.error(f"Pseudo déjà existant.")
                 return False
 
-            if not self.valider_mot_de_passe(mot_de_passe):
-                logging.error("Mot de passe invalide.")
-                return False
-
-            if not self.valider_nom_prenom(nom, prenom):
+            if not Utilisateur.valider_nom_prenom(nom, prenom):
                 logging.error("Nom ou prénom invalide.")
                 return False
 
-            if not self.valider_date_naissance(date_de_naissance):
+            if not verifier_date(date_de_naissance):
                 logging.error("Date de naissance invalide.")
                 return False
 
-            if not self.valider_sexe(sexe):
+            if not Utilisateur.valider_sexe(sexe):
                 logging.error("Sexe invalide.")
+                return False
+
+            if not len(mot_de_passe) >= 5 and len(mot_de_passe) <= 10:
+                logging.error("Mot de passe invalide.")
                 return False
 
             # 2) Construction objet métier utilisateur
@@ -89,34 +93,6 @@ class UtilisateurService:
         except Exception as e:
             logging.error(f"Erreur lors de la connexion de l'utilisateur {pseudo} : {e}")
             return None
-
-    def valider_pseudo(self, pseudo: str) -> bool:
-        """Valider que le pseudo est valide et unique (entre 5 et 10 caractères)"""
-        if len(pseudo) < 5 or len(pseudo) > 10 or not pseudo.isalnum():
-            return False
-        return not UtilisateurDao().verifier_pseudo_existant(pseudo)
-
-    def valider_mot_de_passe(self, mot_de_passe: str) -> bool:
-        """Valider que le mot de passe est assez fort (entre 5 et 10 caractères)"""
-        return len(mot_de_passe) >= 5 and len(mot_de_passe) <= 10
-
-    def valider_nom_prenom(self, nom: str, prenom: str) -> bool:
-        """Valider que le nom et prénom ne contiennent que des lettres et des espaces"""
-        pattern = "^[A-Za-zÀ-ÿ ]+$"  # Autorise les lettres et les espaces
-        return bool(re.match(pattern, nom)) and bool(re.match(pattern, prenom))
-
-    def valider_date_naissance(self, date_de_naissance: str) -> bool:
-        """Valider que la date de naissance est au format YYYY-MM-DD"""
-        try:
-            datetime.strptime(date_de_naissance, "%Y-%m-%d")
-            return True
-        except ValueError:
-            return False
-
-    def valider_sexe(self, sexe: str) -> bool:
-        """Valider que le sexe est homme, femme ou autre autre"""
-        return sexe.lower() in ['homme', 'femme', 'autre']
-
 
     def lister_utilisateurs(self) -> List[Utilisateur]:
         """ Liste toutes les utilisateurs  """
