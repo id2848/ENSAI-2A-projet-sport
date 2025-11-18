@@ -1,17 +1,14 @@
 import os
 import pytest
-
 from unittest.mock import patch
-
 from utils.reset_database import ResetDatabase
-from utils.securite import hash_password
 
 from dao.commentaire_dao import CommentaireDao
 
 from business_object.commentaire import Commentaire
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(autouse=True)
 def setup_test_environment():
     """Initialisation des données de test"""
     with patch.dict(os.environ, {"SCHEMA": "projet_test_dao"}):
@@ -73,10 +70,6 @@ def test_supprimer_ok():
     # THEN
     assert suppression_ok
 
-
-
-
-
 def test_supprimer_ko():
     """Suppression de commentaire échouée (id inconnu)"""
 
@@ -88,6 +81,29 @@ def test_supprimer_ko():
 
     # THEN
     assert not suppression_ok
+
+def test_trouver_par_id_ko():
+    """Trouver un commentaire inexistant via l'id_activite"""
+    # GIVEN
+    id_commentaire = 99999
+
+    # WHEN
+    commentaire = CommentaireDao().trouver_par_id(id_commentaire)
+
+    # THEN
+    assert commentaire is None
+
+def test_trouver_par_id_ok():
+    """Trouver un commentaire existant par son id"""
+    # GIVEN
+    id_commentaire = 992
+
+    # WHEN
+    commentaire = CommentaireDao().trouver_par_id(id_commentaire)
+
+    # THEN
+    assert commentaire is not None
+    assert commentaire.id_commentaire == id_commentaire
 
 
 if __name__ == "__main__":

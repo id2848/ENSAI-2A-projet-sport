@@ -1,18 +1,16 @@
+import os
 import pytest
+from unittest.mock import patch
+from utils.reset_database import ResetDatabase
+
 from datetime import date, timedelta
+
 from service.activite_service import ActiviteService
-from dao.activite_dao import ActiviteDao
-from dao.jaime_dao import JaimeDao
-from dao.commentaire_dao import CommentaireDao
-from dao.utilisateur_dao import UtilisateurDao
+
 from business_object.activite import Activite
 from business_object.jaime import Jaime
 from business_object.commentaire import Commentaire
 from business_object.utilisateur import Utilisateur
-
-import os
-from unittest.mock import patch
-from utils.reset_database import ResetDatabase
 
 @pytest.fixture(autouse=True)
 def setup_test_environment():
@@ -123,6 +121,30 @@ def test_lister_activites_filtres_sport_et_date():
     assert activites[0].distance == 2.5  # Vérifier la distance de l'activité
     assert activites[0].duree == 45.0  # Vérifier la durée de l'activité
 
+def test_trouver_activite_par_id_ko():
+    """Trouver une activité inexistante via l'id_activite"""
+    # GIVEN
+    id_activite = 99999
+
+    # WHEN
+    activite = ActiviteService().trouver_activite_par_id(id_activite)
+
+    # THEN
+    assert activite is None
+
+
+def test_trouver_activite_par_id_ok():
+    """Trouver une activité existante par son id"""
+    # GIVEN
+    id_activite = 991
+
+    # WHEN
+    activite = ActiviteService().trouver_activite_par_id(id_activite)
+
+    # THEN
+    assert activite is not None
+    assert activite.id_activite == id_activite
+
 def test_ajouter_jaime_ok():
     """Test pour l'ajout d'un 'j'aime' à une activité"""
 
@@ -206,13 +228,36 @@ def test_supprimer_activite_echec():
     """Test pour l'échec de la suppression d'une activité (par exemple, si l'activité n'existe pas)"""
 
     # GIVEN
-    id_activite = 999  # Une activité qui n'existe pas
+    id_activite = 9999  # Une activité qui n'existe pas
 
     # WHEN
     result = ActiviteService().supprimer_activite(id_activite)
 
     # THEN
     assert result is False
+
+def test_trouver_commentaire_par_id_ko():
+    """Trouver un commentaire inexistant via l'id_activite"""
+    # GIVEN
+    id_commentaire = 99999
+
+    # WHEN
+    commentaire = ActiviteService().trouver_commentaire_par_id(id_commentaire)
+
+    # THEN
+    assert commentaire is None
+
+def test_trouver_commentaire_par_id_ok():
+    """Trouver un commentaire existant par son id"""
+    # GIVEN
+    id_commentaire = 992
+
+    # WHEN
+    commentaire = ActiviteService().trouver_commentaire_par_id(id_commentaire)
+
+    # THEN
+    assert commentaire is not None
+    assert commentaire.id_commentaire == id_commentaire
 
 if __name__ == "__main__":
     import pytest

@@ -125,3 +125,29 @@ class CommentaireDao:
             raise
 
         return res > 0
+
+    def trouver_par_id(self, id_commentaire) -> Commentaire:
+        """Trouver un commentaire par son id"""
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT * FROM commentaire WHERE id_commentaire = %(id_commentaire)s;",
+                        {"id_commentaire": id_commentaire}
+                    )
+                    res = cursor.fetchone()
+        except Exception as e:
+            logging.info(e)
+            raise
+
+        commentaire = None
+        if res:
+            commentaire = Commentaire(
+                id_commentaire=res["id_commentaire"],
+                id_activite=res["id_activite"],
+                id_auteur=res["id_auteur"],
+                commentaire=res["commentaire"],
+                date_commentaire=res["date_commentaire"]
+            )
+        return commentaire
+        

@@ -9,9 +9,7 @@ import logging
 from utils.log_init import initialiser_logs
 
 from service.activite_service import ActiviteService
-
 from service.service_statistiques import ServiceStatistiques
-
 from service.utilisateur_service import UtilisateurService
 
 from utils.gpx_parser import parse_gpx
@@ -41,7 +39,7 @@ def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     if not user or not secrets.compare_digest(password, user["password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
+            detail="Identifiants invalides",
         )
     #return utilisateur
     return user
@@ -76,7 +74,7 @@ def activites_par_utilisateur(id_utilisateur: int, user = Depends(get_current_us
 
 @app.post("/activites")
 async def creer_activite(file: UploadFile = File(...), sport: str = "randonnée", user = Depends(get_current_user)):
-    """Créer une nouvelle activité avec un fichier GPX."""
+    """Créer une nouvelle activité avec un fichier GPX pour l'utilisateur connecté."""
     content = await file.read()
     try:
         parsed_activite = parse_gpx(content)
@@ -85,13 +83,18 @@ async def creer_activite(file: UploadFile = File(...), sport: str = "randonnée"
         return {"message": "Erreur lors du parsing du fichier GPX"}
     date_activite = parsed_activite["date"]
     distance = parsed_activite["distance totale"]
-    duree = activite_parsed["durée totale"]
+    duree = parsed_activite["durée totale"]
     success = ActiviteService().creer_activite(user["id_utilisateur"], sport, date_activite, distance, duree)
     return {"succès": success}
 
 @app.put("/activites/{id_activite}")
 def modifier_activite(id_activite: int, sport: str, user = Depends(get_current_user)):
-    """Modifier une activité existante."""
+    """Modifier une activité existante appartenant à l'utilisateur connecté."""
+    activite = ActiviteService().trouver_activite_par_id(id_activite)
+    if not activite:
+        return {"message": "Cette activité n'existe pas"}
+    if not activite.id_utilisateur == user["id_utilisateur"]:
+        return {"message": "Cette activité ne vous appartient pas"}
     updated_activite = ActiviteService().modifier_activite(id_activite, sport)
     if not updated_activite:
         raise HTTPException(status_code=404, detail="Activité non trouvée")
@@ -99,7 +102,12 @@ def modifier_activite(id_activite: int, sport: str, user = Depends(get_current_u
 
 @app.delete("/activites/{id_activite}")
 def supprimer_activite(id_activite: int, user = Depends(get_current_user)):
-    """Supprimer une activité."""
+    """Supprimer une activité appartenant à l'utilisateur connecté."""
+    activite = ActiviteService().trouver_activite_par_id(id_activite)
+    if not activite:
+        return {"message": "Cette activité n'existe pas"}
+    if not activite.id_utilisateur == user["id_utilisateur"]:
+        return {"message": "Cette activité ne vous appartient pas"}
     success = ActiviteService().supprimer_activite(id_activite)
     if not success:
         raise HTTPException(status_code=404, detail="Activité non trouvée")
@@ -110,25 +118,30 @@ def supprimer_activite(id_activite: int, user = Depends(get_current_user)):
 
 @app.post("/jaimes")
 def ajouter_jaime(id_activite: int, user = Depends(get_current_user)):
-    """L'utilisateur ajoute un jaime à une activité."""
-    Jaime = ActiviteService().ajouter_jaime(user["username"], id_activite)
-    return {"message": "Like ajouté", "jaime": Jaime}
+    """Ajouter un jaime à une activité pour l'utilisateur connecté."""
+    Jaime = ActiviteService().ajouter_jaime(user["id_utilisateur"], id_activite)
+    return {"message": "Jaime ajouté", "jaime": Jaime}
 
 @app.delete("/jaimes/{id_activite}/{id_utilisateur}")
-def supprimer_jaime(id_activite: int, id_utilisateur: int, user = Depends(get_current_user)):
-    """L'utilisateur supprime son jaime d'une activité."""
-    ActiviteService().supprimer_jaime(id_activite, id_utilisateur)
-    return {"message": "Like supprimé"}
+def supprimer_jaime(id_activite: int, user = Depends(get_current_user)):
+    """Supprimer le jaime appartenant à l'utilisateur connecté d'une activité."""
+    ActiviteService().supprimer_jaime(id_activite, user["id_utilisateur"])
+    return {"message": "Jaime supprimé"}
 
 @app.post("/commentaires")
 def ajouter_commentaire(id_activite: int, commentaire: str, user = Depends(get_current_user)):
-    """Ajouter un commentaire à une activité."""
-    commentaire_objet = ActiviteService().ajouter_commentaire(user["username"], id_activite, commentaire)
+    """Ajouter un commentaire à une activité pour l'utilisateur connecté."""
+    commentaire_objet = ActiviteService().ajouter_commentaire(user["id_utilisateur"], id_activite, commentaire)
     return {"message": "Commentaire ajouté", "commentaire": commentaire_objet}
 
 @app.delete("/commentaires/{id_commentaire}")
 def supprimer_commentaire(id_commentaire: int, user = Depends(get_current_user)):
-    """Supprimer un commentaire."""
+    """Supprimer un commentaire appartenant à l'utilisateur connecté."""
+    commentaire = ActiviteService().trouver_commentaire_par_id(id_commentaire)
+    if not commentaire:
+        return {"message": "Ce commentaire n'existe pas"}
+    if not commentaire.id_auteur == user["id_utilisateur"]:
+        return {"message": "Ce commentaire ne vous appartient pas"}
     ActiviteService().supprimer_commentaire(id_commentaire)
     return {"message": "Commentaire supprimé"}
 
@@ -137,13 +150,14 @@ def supprimer_commentaire(id_commentaire: int, user = Depends(get_current_user))
 
 @app.post("/abonnements")
 def creer_abonnement(id_utilisateur_suiveur: int, id_utilisateur_suivi: int, user = Depends(get_current_user)):
-    """S'abonner à un utilisateur."""
+    """S'abonner à un utilisateur par l'utilisateur connecté."""
+    
     AbonnementService().creer_abonnement(id_utilisateur_suiveur, id_utilisateur_suivi)
     return {"message": "Abonnement créé"}
 
 @app.delete("/abonnements")
 def supprimer_abonnement(id_utilisateur_suiveur: int, id_utilisateur_suivi: int, user = Depends(get_current_user)):
-    """Se désabonner d'un utilisateur."""
+    """Se désabonner d'un utilisateur par l'utilisateur connecté."""
     AbonnementService().supprimer_abonnement(id_utilisateur_suiveur, id_utilisateur_suivi)
     return {"message": "Abonnement supprimé"}
 
