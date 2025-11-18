@@ -8,6 +8,7 @@ from business_object.activite import Activite
 from dao.utilisateur_dao import UtilisateurDao
 
 from datetime import datetime
+from utils.verifier_date import verifier_date
 
 
 class ServiceStatistiques:
@@ -22,14 +23,6 @@ class ServiceStatistiques:
         # Logique pour vérifier si l'utilisateur existe. Exemple :
         utilisateur = self.utilisateur_dao.trouver_par_id(id_utilisateur)
         return utilisateur is not None
-
-    def verifier_date(self, date: str) -> bool:
-        """Vérifie que la date est au format YYYY-MM-DD"""
-        try:
-            datetime.strptime(date, "%Y-%m-%d")
-            return True
-        except ValueError:
-            return False
 
     @log
     def calculer_nombre_activites_total(self, id_utilisateur: int) -> dict:
@@ -82,7 +75,7 @@ class ServiceStatistiques:
             return None
         
         # Validation du format de la date
-        if not self.verifier_date(date_reference):
+        if not verifier_date(date_reference):
             logging.error(f"Le format de la date {date_reference} est incorrect. Utilisez le format YYYY-MM-DD.")
             return None
         
@@ -96,7 +89,7 @@ class ServiceStatistiques:
             if a.date_activite.isocalendar().week == semaine_ref
             and a.date_activite.isocalendar().year == annee_ref
         ]
-
+        
         stats = {}
         for a in activites_semaine:
             stats[a.sport] = stats.get(a.sport, 0) + 1
@@ -111,7 +104,7 @@ class ServiceStatistiques:
             return None
         
         # Validation du format de la date
-        if not self.verifier_date(date_reference):
+        if not verifier_date(date_reference):
             logging.error(f"Le format de la date {date_reference} est incorrect. Utilisez le format YYYY-MM-DD.")
             return None
         
@@ -137,7 +130,7 @@ class ServiceStatistiques:
             return None
         
         # Validation du format de la date
-        if not self.verifier_date(date_reference):
+        if not verifier_date(date_reference):
             logging.error(f"Le format de la date {date_reference} est incorrect. Utilisez le format YYYY-MM-DD.")
             return None
         

@@ -259,6 +259,60 @@ def test_trouver_commentaire_par_id_ok():
     assert commentaire is not None
     assert commentaire.id_commentaire == id_commentaire
 
+def test_jaime_existe_ok():
+    """Vérifier qu'un jaime existe pour une activité et un auteur donnés"""
+
+    # GIVEN
+    id_activite=991
+    id_auteur=993
+
+    # WHEN
+    existe = ActiviteService().jaime_existe(id_activite=id_activite, id_auteur=id_auteur)
+
+    # THEN
+    assert existe
+
+
+def test_jaime_existe_ko():
+    """Vérifier qu'un jaime n'existe pas"""
+
+    # GIVEN
+    id_activite = 991
+    id_auteur = 995
+
+    # WHEN
+    existe = ActiviteService().jaime_existe(id_activite=id_activite, id_auteur=id_auteur)
+
+    # THEN
+    assert (not existe)
+
+def test_abonnement_existe_ok():
+    """Vérifier qu'un abonnement existe pour une activité et un auteur donnés"""
+
+    # GIVEN
+    id_utilisateur_suiveur=991
+    id_utilisateur_suivi=992
+
+    # WHEN
+    existe = ActiviteService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
+
+    # THEN
+    assert existe
+
+
+def test_abonnement_existe_ko():
+    """Vérifier qu'un abonnement n'existe pas"""
+
+    # GIVEN
+    id_utilisateur_suiveur = 991
+    id_utilisateur_suivi = 995
+
+    # WHEN
+    existe = ActiviteService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
+
+    # THEN
+    assert (not existe)
+
 if __name__ == "__main__":
     import pytest
     pytest.main([__file__])
