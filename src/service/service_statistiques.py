@@ -159,3 +159,4 @@ class ServiceStatistiques:
             else:
                 duree_totale += int(a.duree.total_seconds())
         return duree_totale
+        

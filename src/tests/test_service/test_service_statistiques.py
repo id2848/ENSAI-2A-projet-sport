@@ -111,3 +111,4 @@ def test_calculer_duree_semaine():
     
     # THEN
     assert duree_semaine == 2700  # Durée totale pour l'activité de natation = 45 minutes = 2700 secondes
+    
