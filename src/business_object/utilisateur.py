@@ -58,8 +58,8 @@ class Utilisateur:
 
     @staticmethod
     def valider_pseudo(pseudo: str) -> bool:
-        """Valider que le pseudo est valide (entre 5 et 10 caractères)"""
-        return len(pseudo) >= 5 and len(pseudo) <= 10 and pseudo.isalnum()
+        """Valider que le pseudo est valide (entre 4 et 16 caractères)"""
+        return len(pseudo) >= 4 and len(pseudo) <= 16 and pseudo.isalnum()
     
     @staticmethod
     def valider_nom_prenom(nom: str, prenom: str) -> bool:

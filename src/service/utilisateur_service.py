@@ -22,39 +22,34 @@ class UtilisateurService:
         prenom: str,
         date_de_naissance: str,
         sexe: str,
-    ) -> bool:
+    ):
         """
         Inscrit un nouvel utilisateur.
-        Retourne True si réussite, False en cas d'erreur.
+        Retourne un dict standardisé :
+        { success: bool, result: utilisateur | None, error: message | None }
         """
 
         try:
-            # 1) Validations
+            # --- 1) Validations ---
             if not Utilisateur.valider_pseudo(pseudo):
-                logging.error(f"Pseudo invalide.")
-                return False
-            
+                return {"success": False, "result": None, "error": "Pseudo invalide. Il doit être alphanumérique et contenir entre 4 et 16 caractères."}
+
             if UtilisateurDao().verifier_pseudo_existant(pseudo):
-                logging.error(f"Pseudo déjà existant.")
-                return False
+                return {"success": False, "result": None, "error": "Pseudo déjà existant"}
 
             if not Utilisateur.valider_nom_prenom(nom, prenom):
-                logging.error("Nom ou prénom invalide.")
-                return False
+                return {"success": False, "result": None, "error": "Nom ou prénom invalide"}
 
             if not verifier_date(date_de_naissance):
-                logging.error("Date de naissance invalide.")
-                return False
+                return {"success": False, "result": None, "error": "Date de naissance invalide. Utilisez le format YYYY-MM-DD"}
 
             if not Utilisateur.valider_sexe(sexe):
-                logging.error("Sexe invalide.")
-                return False
+                return {"success": False, "result": None, "error": "Sexe invalide. Il doit être 'homme', 'femme' ou 'autre'"}
 
-            if not len(mot_de_passe) >= 5 and len(mot_de_passe) <= 10:
-                logging.error("Mot de passe invalide.")
-                return False
+            if not (4 <= len(mot_de_passe) <= 32):
+                return {"success": False, "result": None, "error": "Mot de passe invalide. Il doit contenir entre 4 et 32 caractères."}
 
-            # 2) Construction objet métier utilisateur
+            # 2) Construire l'objet utilisateur
             utilisateur = Utilisateur(
                 pseudo=pseudo,
                 nom=nom,
@@ -63,14 +58,30 @@ class UtilisateurService:
                 sexe=sexe,
             )
 
-            # 3) Utiliser la DAO
-            resultat = UtilisateurDao().creer(utilisateur, mot_de_passe)
+            # 3) DAO
+            creation = UtilisateurDao().creer(utilisateur, mot_de_passe)
 
-            # creer() renvoie True ou False donc directement retour
-            return resultat
+            if not creation:
+                return {
+                    "success": False,
+                    "result": None,
+                    "error": "Erreur lors de la création en base de données",
+                }
+
+            return {
+                "success": True,
+                "result": utilisateur,
+                "error": None,
+            }
+
         except Exception as e:
             logging.error(f"Erreur lors de la création de l'utilisateur : {e}")
-            return False
+            return {
+                "success": False,
+                "result": None,
+                "error": "Erreur interne lors de l'inscription",
+            }
+
 
     @log
     def se_connecter(self, pseudo: str, mot_de_passe: str) -> Utilisateur | None:

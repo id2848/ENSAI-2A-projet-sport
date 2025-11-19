@@ -32,10 +32,10 @@ def test_inscrire_utilisateur_ok():
     sexe = "homme"
 
     # WHEN
-    resultat = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
+    sortie = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
 
     # THEN
-    assert resultat is True  # Le résultat doit être True si l'inscription réussit
+    assert sortie["success"] is True  # Le résultat doit être True si l'inscription réussit
 
 
 def test_inscrire_utilisateur_pseudo_deja_utilise():
@@ -50,28 +50,32 @@ def test_inscrire_utilisateur_pseudo_deja_utilise():
     sexe = "homme"
 
     # WHEN
-    resultat = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
+    sortie = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
 
     # THEN
-    assert resultat is False  # Le pseudo existe déjà, l'inscription doit échouer
+    # Le pseudo existe déjà, l'inscription doit échouer
+    assert sortie["success"] is False
+    assert sortie["error"] == "Pseudo déjà existant"
 
 
 def test_inscrire_utilisateur_donnees_invalides():
     """Test pour l'inscription avec des données invalides"""
 
     # GIVEN
-    pseudo = "jo"
-    mot_de_passe = "123"
+    pseudo = "joe°°°"
+    mot_de_passe = "123456"
     nom = "Doe"
     prenom = "John"
     date_de_naissance = "1990-01-01"
     sexe = "homme"
 
     # WHEN
-    resultat = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
+    sortie = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
 
     # THEN
-    assert resultat is False  # Le pseudo et mot de passe sont invalides
+    # Le pseudo est invalide, l'inscription doit échouer
+    assert sortie["success"] is False
+    assert sortie["error"] == "Pseudo invalide. Il doit être alphanumérique et contenir entre 4 et 16 caractères."
 
 
 # Test de la connexion

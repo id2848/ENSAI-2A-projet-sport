@@ -171,6 +171,32 @@ def test_ajouter_jaime_echec():
     # THEN
     assert result is False
 
+def test_supprimer_jaime_ok():
+    """Suppression d'un jaime réussie"""
+
+    # GIVEN
+    id_activite = 993
+    id_auteur = 991
+
+    # WHEN
+    suppression_ok = ActiviteService().supprimer_jaime(id_activite, id_auteur)
+
+    # THEN
+    assert suppression_ok
+
+def test_supprimer_ko():
+    """Suppression d'un jaime échouée (jaime inexistant)"""
+
+    # GIVEN
+    id_activite = 991
+    id_auteur = 995
+
+    # WHEN
+    suppression_ok = ActiviteService().supprimer_jaime(id_activite, id_auteur)
+
+    # THEN
+    assert not suppression_ok
+
 def test_lister_commentaires():
     """Test pour lister les commentaires d'une activité"""
 

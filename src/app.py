@@ -69,8 +69,10 @@ def inscription(
     sexe: str,
 ):
     """Créer un nouveau compte utilisateur.
-    La date de naissance doit être au format YYYY-MM-DD"""
-    succes = UtilisateurService().inscrire(
+    La date de naissance doit être au format YYYY-MM-DD
+    """
+
+    res = UtilisateurService().inscrire(
         pseudo=pseudo,
         mot_de_passe=mot_de_passe,
         nom=nom,
@@ -79,11 +81,8 @@ def inscription(
         sexe=sexe,
     )
 
-    if not succes:
-        raise HTTPException(
-            status_code=400,
-            detail="Impossible d'inscrire l'utilisateur (pseudo peut-être déjà utilisé)",
-        )
+    if not res["success"]:
+        raise HTTPException(status_code=400, detail=res["error"])
 
     return {"message": "Utilisateur inscrit avec succès"}
 
@@ -117,10 +116,14 @@ def activites_par_utilisateur_filtres(
     date_fin: str = None,
     user = Depends(get_current_user),
 ):
-    """Lister les activités d'un utilisateur avec filtres facultatifs."""
+    """Lister les activités d'un utilisateur avec filtres facultatifs.
+    Les dates doivent être au format YYYY-MM-DD"""
     utilisateur = UtilisateurService().trouver_par_id(id_utilisateur)
     if not utilisateur:
         return {"message": "Cet utilisateur n'existe pas"}
+
+    if not verifier_date(date_debut) or not verifier_date(date_fin):
+        return {"message": f"Le format de l'une des dates est incorrect. Utilisez le format YYYY-MM-DD."}
 
     try:
         liste_activites = ActiviteService().lister_activites_filtres(
@@ -220,13 +223,16 @@ def ajouter_jaime(id_activite: int, user = Depends(get_current_user)):
     """Ajouter un jaime à une activité pour l'utilisateur connecté."""
     activite = ActiviteService().trouver_activite_par_id(id_activite)
     if not activite:
-        return {"message": "Cette activité n'existe pas"}
-    jaime_cree = ActiviteService().ajouter_jaime(user["id_utilisateur"], id_activite)
+        raise HTTPException(status_code=400, detail="Cette activité n'existe pas")
+    id_auteur = user["id_utilisateur"]
+    if ActiviteService().jaime_existe(id_activite, id_auteur):
+        raise HTTPException(status_code=400, detail="Vous avez déjà ajouté un jaime à cette activité")
+    jaime_cree = ActiviteService().ajouter_jaime(id_activite, id_auteur)
     if not jaime_cree:
         raise HTTPException(status_code=400, detail="Erreur lors de l'ajout du jaime")
-    return {"message": "Jaime ajouté", "jaime": jaime_cree}
+    return {"message": "Jaime ajouté"}
 
-@app.delete("/jaimes/{id_activite}/{id_utilisateur}")
+@app.delete("/jaimes/{id_activite}")
 def supprimer_jaime(id_activite: int, user = Depends(get_current_user)):
     """Supprimer le jaime appartenant à l'utilisateur connecté d'une activité."""
     activite = ActiviteService().trouver_activite_par_id(id_activite)
@@ -234,7 +240,7 @@ def supprimer_jaime(id_activite: int, user = Depends(get_current_user)):
         return {"message": "Cette activité n'existe pas"}
     jaime = ActiviteService().jaime_existe(id_activite, user["id_utilisateur"])
     if not jaime:
-        return {"message": "Ce jaime n'existe pas"}
+        return {"message": "Vous n'avez pas ajouté de jaime à cette activité"}
     supprime = ActiviteService().supprimer_jaime(id_activite, user["id_utilisateur"])
     if not supprime:
         raise HTTPException(status_code=400, detail="Erreur lors de la suppression du jaime")
@@ -397,7 +403,8 @@ def statistiques_totales(id_utilisateur: int, user = Depends(get_current_user)):
 
 @app.get("/statistiques/semaine/{id_utilisateur}")
 def statistiques_semaine(id_utilisateur: int, date_reference: str, user = Depends(get_current_user)):
-    """Récupérer les statistiques d'une semaine spécifique d'un utilisateur."""
+    """Récupérer les statistiques d'une semaine spécifique d'un utilisateur.
+    La date doit être au format YYYY-MM-DD"""
     
     utilisateur = UtilisateurService().trouver_par_id(id_utilisateur)
     if not utilisateur:

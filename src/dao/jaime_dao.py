@@ -42,7 +42,8 @@ class JaimeDao:
                     )
                     res = cursor.fetchone()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
+            raise
 
         created = False
         if res:
@@ -76,7 +77,7 @@ class JaimeDao:
                     )
                     res = cursor.fetchall()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
 
         liste_jaimes = []
@@ -94,13 +95,15 @@ class JaimeDao:
 
 
     @log
-    def supprimer(self, jaime: Jaime) -> bool:
+    def supprimer(self, id_activite: int, id_auteur: int) -> bool:
         """Suppression d'un jaime dans la base de données
 
         Parameters
         ----------
-        jaime : Jaime
-            Le jaime à supprimer
+        jaime : int
+            L'id de l'activité du jaime à supprimer
+        id_auteur : int
+            L'id de l'auteur du jaime à supprimer
 
         Returns
         -------
@@ -115,13 +118,13 @@ class JaimeDao:
                         "WHERE id_activite = %(id_activite)s    "
                         "AND id_auteur = %(id_auteur)s          ",
                         {
-                            "id_activite": jaime.id_activite,
-                            "id_auteur": jaime.id_auteur
+                            "id_activite": id_activite,
+                            "id_auteur": id_auteur
                         }
                     )
                     res = cursor.rowcount
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
 
         return res > 0
@@ -156,7 +159,7 @@ class JaimeDao:
                     )
                     res = cursor.fetchone()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
         
         return res is not None

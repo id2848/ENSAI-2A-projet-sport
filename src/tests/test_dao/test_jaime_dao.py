@@ -36,11 +36,9 @@ def test_creer_ko_id_activite():
     # GIVEN
     jaime = Jaime(id_activite=99999, id_auteur=994)
 
-    # WHEN
-    creation_ok = JaimeDao().creer(jaime)
-
-    # THEN
-    assert not creation_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        JaimeDao().creer(jaime)
 
 def test_creer_ko_id_auteur():
     """Création d'un jaime échouée (id_auteur incorrect)"""
@@ -48,11 +46,9 @@ def test_creer_ko_id_auteur():
     # GIVEN
     jaime = Jaime(id_activite=991, id_auteur=99999)
 
-    # WHEN
-    creation_ok = JaimeDao().creer(jaime)
-
-    # THEN
-    assert not creation_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        JaimeDao().creer(jaime)
 
 def test_lister_par_activite():
     """Lister tous les jaimes d'une activité"""
@@ -76,10 +72,12 @@ def test_supprimer_ok():
     """Suppression d'un jaime réussie"""
 
     # GIVEN
-    jaime = Jaime(id_activite=993, id_auteur=991) # issu données test
+    id_activite = 993
+    id_auteur = 991
+    # issus données test
 
     # WHEN
-    suppression_ok = JaimeDao().supprimer(jaime)
+    suppression_ok = JaimeDao().supprimer(id_activite, id_auteur)
 
     # THEN
     assert suppression_ok
@@ -88,10 +86,11 @@ def test_supprimer_ko_1():
     """Suppression d'un jaime échouée (jaime inexistant)"""
 
     # GIVEN
-    jaime = Jaime(id_activite=991, id_auteur=995)
+    id_activite = 991
+    id_auteur = 995
 
     # WHEN
-    suppression_ok = JaimeDao().supprimer(jaime)
+    suppression_ok = JaimeDao().supprimer(id_activite, id_auteur)
 
     # THEN
     assert not suppression_ok
@@ -100,10 +99,11 @@ def test_supprimer_ko_id_activite():
     """Suppression d'un jaime échouée (id_activite inexistant)"""
 
     # GIVEN
-    jaime = Jaime(id_activite=9999, id_auteur=991)
+    id_activite = 9999
+    id_auteur = 995
 
     # WHEN
-    suppression_ok = JaimeDao().supprimer(jaime)
+    suppression_ok = JaimeDao().supprimer(id_activite, id_auteur)
 
     # THEN
     assert not suppression_ok
@@ -112,10 +112,11 @@ def test_supprimer_ko_id_auteur():
     """Suppression d'un jaime échouée (id_auteur inexistant)"""
 
     # GIVEN
-    jaime = Jaime(id_activite=991, id_auteur=9999)
+    id_activite = 991
+    id_auteur = 99999
 
     # WHEN
-    suppression_ok = JaimeDao().supprimer(jaime)
+    suppression_ok = JaimeDao().supprimer(id_activite, id_auteur)
 
     # THEN
     assert not suppression_ok

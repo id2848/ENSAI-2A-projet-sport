@@ -15,6 +15,8 @@ from dao.activite_dao import ActiviteDao
 from dao.commentaire_dao import CommentaireDao
 from dao.jaime_dao import JaimeDao
 
+import logging
+
 class ActiviteService:
     """Classe contenant les méthodes de service des activités Utilisateurs"""
 
@@ -32,7 +34,7 @@ class ActiviteService:
             # Simuler l'enregistrement de l'activité dans la base de données
             return ActiviteDao().creer(activite)  # Appel à DAO pour l'enregistrement
         except Exception as e:
-            print(f"Erreur lors de la création de l'activité : {e}")  # Affichage de l'erreur pour le diagnostic
+            logging.error(f"Erreur lors de la création de l'activité : {e}")  # Affichage de l'erreur pour le diagnostic
             return False
             
     def supprimer_activite(self, id_activite: int) -> bool:
@@ -42,13 +44,13 @@ class ActiviteService:
         
             # Si l'activité n'existe pas
             if activite is None:
-                print(f"L'activité avec ID {id_activite} n'existe pas.")
+                logging.warning(f"L'activité avec ID {id_activite} n'existe pas.")
                 return False
         
             return ActiviteDao().supprimer(activite=activite)  # Effectue la suppression dans la base de données
         
         except Exception as e:
-            print(f"Erreur lors de la suppression de l'activité : {e}")
+            logging.error(f"Erreur lors de la suppression de l'activité : {e}")
             return False
 
     def modifier_activite(self, id_activite: int, sport: str) -> bool:
@@ -57,14 +59,14 @@ class ActiviteService:
             activite = ActiviteDao().trouver_par_id(id_activite=id_activite)  # Récupère l'activité par son ID
             # Si l'activité n'existe pas
             if activite is None:
-                print(f"L'activité avec ID {id_activite} n'existe pas.")
+                logging.warning(f"L'activité avec ID {id_activite} n'existe pas.")
                 return False
         
             activite.sport = sport  # Modification du sport de l'activité
             return ActiviteDao().modifier(activite)
         
         except Exception as e:
-            print(f"Erreur lors de la modification de l'activité : {e}")
+            logging.error(f"Erreur lors de la modification de l'activité : {e}")
             return False
     
     def trouver_activite_par_id(self, id_activite: int):
@@ -73,11 +75,11 @@ class ActiviteService:
             activite = ActiviteDao().trouver_par_id(id_activite=id_activite)
             # Si l'activité n'existe pas
             if activite is None:
-                print(f"L'activité avec ID {id_activite} n'existe pas.")
+                logging.warning(f"L'activité avec ID {id_activite} n'existe pas.")
             return activite
         
         except Exception as e:
-            print(f"Erreur lors de la récupération de l'activité : {e}")
+            logging.error(f"Erreur lors de la récupération de l'activité : {e}")
             return None
 
     def lister_activites(self, id_utilisateur: int) -> List[Activite]:
@@ -88,13 +90,13 @@ class ActiviteService:
 
             # Vérification si aucune activité n'est trouvée
             if not activites:
-                print(f"Aucune activité trouvée pour l'utilisateur avec ID {id_utilisateur}.")
+                logging.warning(f"Aucune activité trouvée pour l'utilisateur avec ID {id_utilisateur}.")
 
             return activites  # Retourne la liste des activités (peut être vide)
     
         except Exception as e:
             # Gestion des exceptions : affichage du message d'erreur
-            print(f"Erreur lors de la récupération des activités pour l'utilisateur {id_utilisateur}: {e}")
+            logging.error(f"Erreur lors de la récupération des activités pour l'utilisateur {id_utilisateur}: {e}")
             return None
 
     def lister_activites_filtres(self, id_utilisateur: int, sport: str = None, date_debut: str = None, date_fin: str = None) -> List[Activite]:
@@ -105,13 +107,13 @@ class ActiviteService:
 
             # Vérification si aucune activité filtrée n'est trouvée
             if not activites:
-                print(f"Aucune activité trouvée pour l'utilisateur avec ID {id_utilisateur} avec les filtres spécifiés.")
+                logging.warning(f"Aucune activité trouvée pour l'utilisateur avec ID {id_utilisateur} avec les filtres spécifiés.")
 
             return activites  # Retourne la liste des activités filtrées (peut être vide)
 
         except Exception as e:
             # Gestion des exceptions : affichage du message d'erreur
-            print(f"Erreur lors de la récupération des activités filtrées pour l'utilisateur {id_utilisateur}: {e}")
+            logging.error(f"Erreur lors de la récupération des activités filtrées pour l'utilisateur {id_utilisateur}: {e}")
             return None
 
 
@@ -121,17 +123,15 @@ class ActiviteService:
             jaime = Jaime(id_activite=id_activite, id_auteur=id_utilisateur)
             return JaimeDao().creer(jaime)  # Ajoute le "j'aime" de l'utilisateur
         except Exception as e:
-            print(f"Erreur lors de l'ajout du 'j'aime' : {e}")
+            logging.error(f"Erreur lors de l'ajout du 'j'aime' : {e}")
             return False
 
-    def supprimer_jaime(self, id_utilisateur: int, id_activite: int) -> bool:
+    def supprimer_jaime(self, id_activite: int, id_utilisateur: int) -> bool:
         """Supprime un "j'aime" d'une activité"""
         try:
-            activite = ActiviteDao().trouver_par_id(id_activite=id_activite)
-            utilisateur = UtilisateurDao().trouver_par_id(id_utilisateur=id_utilisateur)
-            return JaimeDao().supprimer(activite, utilisateur)  # Retire le "j'aime" de l'utilisateur
+            return JaimeDao().supprimer(id_activite, id_utilisateur)  # Retire le "j'aime" de l'utilisateur
         except Exception as e:
-            print(f"Erreur lors de la suppression du 'j'aime' : {e}")
+            logging.error(f"Erreur lors de la suppression du 'j'aime' : {e}")
             return False
 
     def ajouter_commentaire(self, id_utilisateur: int, id_activite: int, contenu: str) -> bool:
@@ -147,7 +147,7 @@ class ActiviteService:
             )
             return CommentaireDao().creer(nouveau_commentaire)
         except Exception as e:
-            print(f"Erreur lors de l'ajout du commentaire : {e}")
+            logging.error(f"Erreur lors de l'ajout du commentaire : {e}")
             return False
 
     def supprimer_commentaire(self, id_commentaire: int) -> bool:
@@ -158,14 +158,14 @@ class ActiviteService:
 
             # Si le commentaire n'existe pas
             if commentaire is None:
-                print(f"Le commentaire avec ID {id_commentaire} n'existe pas.")
+                logging.warning(f"Le commentaire avec ID {id_commentaire} n'existe pas.")
                 return False
 
             # Supprimer le commentaire de la base de données
             return CommentaireDao().supprimer(commentaire)
 
         except Exception as e:
-            print(f"Erreur lors de la suppression du commentaire : {e}")
+            logging.error(f"Erreur lors de la suppression du commentaire : {e}")
             return False
 
     def lister_commentaires(self, id_activite: int) -> List[Commentaire]:
@@ -174,7 +174,7 @@ class ActiviteService:
              commentaires = CommentaireDao().lister_par_activite(id_activite=id_activite)  # Méthode dans le DAO
              return commentaires
         except Exception as e:
-            print(f"Erreur lors de la récupération des commentaires : {e}")
+            logging.error(f"Erreur lors de la récupération des commentaires : {e}")
             return None
     
     def trouver_commentaire_par_id(self, id_commentaire: int) -> Commentaire:
@@ -183,11 +183,11 @@ class ActiviteService:
             commentaire = CommentaireDao().trouver_par_id(id_commentaire=id_commentaire)
             # Si le commentaire n'existe pas
             if commentaire is None:
-                print(f"Le commentaire avec ID {id_commentaire} n'existe pas.")
+                logging.warning(f"Le commentaire avec ID {id_commentaire} n'existe pas.")
             return commentaire
         
         except Exception as e:
-            print(f"Erreur lors de la récupération du commentaire : {e}")
+            logging.error(f"Erreur lors de la récupération du commentaire : {e}")
             return None
 
     def jaime_existe(self, id_activite: int, id_auteur: int) -> bool:
@@ -195,7 +195,7 @@ class ActiviteService:
         try:
              return JaimeDao().existe(id_activite, id_auteur)
         except Exception as e:
-            print(f"Erreur lors de la vérification du jaime : {e}")
+            logging.error(f"Erreur lors de la vérification du jaime : {e}")
             return None
 
     def abonnement_existe(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int) -> bool:
@@ -204,5 +204,5 @@ class ActiviteService:
             abonnement = AbonnementDao().trouver_par_ids(id_utilisateur_suiveur, id_utilisateur_suivi)
             return abonnement is not None
         except Exception as e:
-            print(f"Erreur lors de la vérification de l'abonnement : {e}")
+            logging.error(f"Erreur lors de la vérification de l'abonnement : {e}")
             return None
