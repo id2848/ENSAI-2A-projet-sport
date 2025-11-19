@@ -182,7 +182,7 @@ def test_lister_commentaires():
 
     # THEN
     assert len(commentaires) == 1
-    assert commentaires[0].commentaire == "J'adore le vélo !"  # Le commentaire de Sam
+    assert commentaires[0].contenu == "J'adore le vélo !"  # Le commentaire de Sam
 
 def test_ajouter_commentaire_ok():
     """Test pour ajouter un commentaire à une activité"""
@@ -190,10 +190,10 @@ def test_ajouter_commentaire_ok():
     # GIVEN
     id_utilisateur = 991  # John Doe
     id_activite = 994  # Activité de Emily Jones
-    commentaire = "Très belle randonnée !"
+    contenu = "Très belle randonnée !"
 
     # WHEN
-    result = ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, commentaire)
+    result = ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, contenu)
 
     # THEN
     assert result is True
@@ -204,10 +204,10 @@ def test_ajouter_commentaire_echec():
     # GIVEN
     id_utilisateur = 999  # Un utilisateur qui n'existe pas
     id_activite = 999  # Une activité qui n'existe pas
-    commentaire = "Super activité !"
+    contenu = "Super activité !"
 
     # WHEN
-    result = ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, commentaire)
+    result = ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, contenu)
 
     # THEN
     assert result is False
@@ -258,6 +258,60 @@ def test_trouver_commentaire_par_id_ok():
     # THEN
     assert commentaire is not None
     assert commentaire.id_commentaire == id_commentaire
+
+def test_jaime_existe_ok():
+    """Vérifier qu'un jaime existe pour une activité et un auteur donnés"""
+
+    # GIVEN
+    id_activite=991
+    id_auteur=993
+
+    # WHEN
+    existe = ActiviteService().jaime_existe(id_activite=id_activite, id_auteur=id_auteur)
+
+    # THEN
+    assert existe
+
+
+def test_jaime_existe_ko():
+    """Vérifier qu'un jaime n'existe pas"""
+
+    # GIVEN
+    id_activite = 991
+    id_auteur = 995
+
+    # WHEN
+    existe = ActiviteService().jaime_existe(id_activite=id_activite, id_auteur=id_auteur)
+
+    # THEN
+    assert (not existe)
+
+def test_abonnement_existe_ok():
+    """Vérifier qu'un abonnement existe pour une activité et un auteur donnés"""
+
+    # GIVEN
+    id_utilisateur_suiveur=991
+    id_utilisateur_suivi=992
+
+    # WHEN
+    existe = ActiviteService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
+
+    # THEN
+    assert existe
+
+
+def test_abonnement_existe_ko():
+    """Vérifier qu'un abonnement n'existe pas"""
+
+    # GIVEN
+    id_utilisateur_suiveur = 991
+    id_utilisateur_suivi = 995
+
+    # WHEN
+    existe = ActiviteService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
+
+    # THEN
+    assert (not existe)
 
 if __name__ == "__main__":
     import pytest

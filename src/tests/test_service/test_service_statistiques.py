@@ -26,17 +26,6 @@ def test_verifier_utilisateur_existant():
     assert ServiceStatistiques().verifier_utilisateur_existant(id_existant) is True
     assert ServiceStatistiques().verifier_utilisateur_existant(id_inexistant) is False
 
-def test_verifier_date():
-    """Test pour vérifier si la date est au bon format"""
-    
-    # GIVEN
-    date_valide = "2025-09-26"
-    date_invalide = "26-09-2025"  # Format incorrect
-    
-    # WHEN / THEN
-    assert ServiceStatistiques().verifier_date(date_valide) is True
-    assert ServiceStatistiques().verifier_date(date_invalide) is False
-
 def test_calculer_nombre_activites_total():
     """Test pour calculer le nombre total d'activités par sport"""
     

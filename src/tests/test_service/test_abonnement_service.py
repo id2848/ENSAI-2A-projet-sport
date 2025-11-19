@@ -1,16 +1,13 @@
-
-from service.abonnement_service import AbonnementService
-
-from dao.abonnement_dao import AbonnementDao
-from dao.utilisateur_dao import UtilisateurDao
-
-from business_object.abonnement import Abonnement
-from business_object.utilisateur import Utilisateur
-
 import os
 import pytest
 from unittest.mock import patch
 from utils.reset_database import ResetDatabase
+
+from service.abonnement_service import AbonnementService
+
+from business_object.abonnement import Abonnement
+from business_object.utilisateur import Utilisateur
+
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
@@ -34,8 +31,7 @@ def test_creer_ok():
 
 
 def test_creer_echec():
-    """Création de Abonnement échouée
-    (car la méthode AbonnementDao().creer retourne False)"""
+    """Création de Abonnement échouée"""
 
     # GIVEN
     id_u_suiveur, id_u_suivi = 123, 100
@@ -71,6 +67,32 @@ def test_lister_utilisateurs_suiveurs_succes():
 
     # THEN
     assert res == set([992, 993])
+
+def test_supprimer_abonnement_ok():
+    """Test de suppression d'un abonnement réussi"""
+
+    # GIVEN
+    id_utilisateur_suiveur=991
+    id_utilisateur_suivi=992
+
+    # WHEN
+    suppression_ok = AbonnementService().supprimer_abonnement(id_utilisateur_suiveur, id_utilisateur_suivi)
+
+    # THEN
+    assert suppression_ok
+
+def test_supprimer_abonnement_ko():
+    """Test de suppression d'un abonnement échouée"""
+
+    # GIVEN
+    id_utilisateur_suiveur=991
+    id_utilisateur_suivi=995
+
+    # WHEN
+    suppression_ok = AbonnementService().supprimer_abonnement(id_utilisateur_suiveur, id_utilisateur_suivi)
+
+    # THEN
+    assert not suppression_ok
 
 
 if __name__ == "__main__":

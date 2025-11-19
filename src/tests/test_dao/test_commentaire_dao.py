@@ -20,7 +20,7 @@ def test_creer_ok():
     """Création de Commentaire réussie"""
 
     # GIVEN
-    commentaire = Commentaire(id_activite=991, id_auteur=992, commentaire='Super activité !', date_commentaire='2025-09-26')
+    commentaire = Commentaire(id_activite=991, id_auteur=992, contenu='Super activité !', date_commentaire='2025-09-26')
 
     # WHEN
     creation_ok = CommentaireDao().creer(commentaire)
@@ -31,10 +31,10 @@ def test_creer_ok():
 
 
 def test_creer_ko():
-    """Création de Joueur échouée (id_activite, id_auteur, commentaire et date_commentaire incorrects)"""
+    """Création de Joueur échouée (id_activite, id_auteur, contenu et date_commentaire incorrects)"""
 
     # GIVEN
-    commentaire = Commentaire(id_activite='z', id_auteur='a', commentaire=5871, date_commentaire='t')
+    commentaire = Commentaire(id_activite='z', id_auteur='a', contenu=5871, date_commentaire='t')
 
     # WHEN
     creation_ok = CommentaireDao().creer(commentaire)
@@ -62,7 +62,7 @@ def test_supprimer_ok():
     """Suppression de commentaire réussie"""
 
     # GIVEN
-    commentaire = Commentaire(id_commentaire=991, id_activite=991, id_auteur=992, commentaire='Super activité !', date_commentaire='2025-09-26')
+    commentaire = Commentaire(id_commentaire=991, id_activite=991, id_auteur=992, contenu='Super activité !', date_commentaire='2025-09-26')
 
     # WHEN
     suppression_ok = CommentaireDao().supprimer(commentaire)
@@ -74,7 +74,7 @@ def test_supprimer_ko():
     """Suppression de commentaire échouée (id inconnu)"""
 
     # GIVEN
-    commentaire = Commentaire(id_activite=123, id_auteur=456, commentaire="ok !", date_commentaire=2025-10-21)
+    commentaire = Commentaire(id_activite=123, id_auteur=456, contenu="ok !", date_commentaire=2025-10-21)
 
     # WHEN
     suppression_ok = CommentaireDao().supprimer(commentaire)

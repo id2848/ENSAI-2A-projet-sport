@@ -49,7 +49,7 @@ CREATE TABLE commentaire (
     id_commentaire          SERIAL PRIMARY KEY,
     id_activite             INTEGER, 
     id_auteur               INTEGER, 
-    commentaire             VARCHAR(300),
+    contenu             VARCHAR(300),
     date_commentaire        DATE,
     FOREIGN KEY (id_activite) REFERENCES activite(id_activite) ON DELETE CASCADE,  
     FOREIGN KEY (id_auteur) REFERENCES utilisateur(id_utilisateur) ON DELETE CASCADE

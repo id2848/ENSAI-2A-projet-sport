@@ -134,7 +134,7 @@ class ActiviteService:
             print(f"Erreur lors de la suppression du 'j'aime' : {e}")
             return False
 
-    def ajouter_commentaire(self, id_utilisateur: int, id_activite: int, commentaire: str) -> bool:
+    def ajouter_commentaire(self, id_utilisateur: int, id_activite: int, contenu: str) -> bool:
         """Ajoute un commentaire à une activité"""
         try:
             activite = ActiviteDao().trouver_par_id(id_activite=id_activite)
@@ -142,7 +142,7 @@ class ActiviteService:
             nouveau_commentaire = Commentaire(
                 id_activite=id_activite,
                 id_auteur=id_utilisateur,
-                commentaire=commentaire,
+                contenu=contenu,
                 date_commentaire=datetime.now()
             )
             return CommentaireDao().creer(nouveau_commentaire)
@@ -190,3 +190,19 @@ class ActiviteService:
             print(f"Erreur lors de la récupération du commentaire : {e}")
             return None
 
+    def jaime_existe(self, id_activite: int, id_auteur: int):
+        """Vérifie si un jaime existe dans la base de données"""
+        try:
+             return JaimeDao().existe(id_activite, id_auteur)
+        except Exception as e:
+            print(f"Erreur lors de la vérification du jaime : {e}")
+            return None
+
+    def abonnement_existe(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int):
+        """Vérifie si un abonnement existe dans la base de données"""
+        try:
+            abonnement = AbonnementDao().trouver_par_ids(id_utilisateur_suiveur, id_utilisateur_suivi)
+            return abonnement is not None
+        except Exception as e:
+            print(f"Erreur lors de la vérification de l'abonnement : {e}")
+            return None
