@@ -47,7 +47,7 @@ def test_lister_par_activite():
     de taille supérieure ou égale à 2
     """
     # GIVEN
-    id_ad =991
+    id_ad = 991
 
     # WHEN
     commentaires = CommentaireDao().lister_par_activite(id_activite=id_ad)

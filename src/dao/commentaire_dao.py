@@ -85,6 +85,7 @@ class CommentaireDao:
         if res:
             for row in res:
                 commentaire = Commentaire(
+                    id_commentaire=row["id_commentaire"],
                     id_activite=row["id_activite"],
                     id_auteur=row["id_auteur"],
                     contenu=row["contenu"],

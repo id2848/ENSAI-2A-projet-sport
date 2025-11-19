@@ -95,20 +95,16 @@ class UtilisateurService:
             return None
 
     def lister_utilisateurs(self) -> List[Utilisateur]:
-        """ Liste toutes les utilisateurs  """
+        """Lister toutes les utilisateurs"""
         try:
             # Recherche des utilisateurs
             liste = UtilisateurDao().lister_tous()
-
-            # Vérification si aucun utilisateur n'est trouvé
-            if not liste:
-                print(f"Aucun utilisateur trouvé")
 
             return liste  # Retourne la liste des utilisateurs (peut être vide)
     
         except Exception as e:
             logging.error(f"Erreur lors de la récupération des utilisateurs: {e}")
-            return []  # Retourne une liste vide en cas d'erreur
+            return None
 
 
     def trouver_par_id(self, id_utilisateur) -> Utilisateur:

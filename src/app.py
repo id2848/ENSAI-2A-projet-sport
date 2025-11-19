@@ -59,6 +59,34 @@ def me(user = Depends(get_current_user)):
 async def logout(creds: HTTPBasicCredentials = Depends(get_current_user)):
     return HTMLResponse(content="Vous vous êtes déconnecté", status_code=status.HTTP_401_UNAUTHORIZED)
 
+@app.post("/inscription")
+def inscription(
+    pseudo: str,
+    mot_de_passe: str,
+    nom: str,
+    prenom: str,
+    date_de_naissance: str,
+    sexe: str,
+):
+    """Créer un nouveau compte utilisateur.
+    La date de naissance doit être au format YYYY-MM-DD"""
+    succes = UtilisateurService().inscrire(
+        pseudo=pseudo,
+        mot_de_passe=mot_de_passe,
+        nom=nom,
+        prenom=prenom,
+        date_de_naissance=date_de_naissance,
+        sexe=sexe,
+    )
+
+    if not succes:
+        raise HTTPException(
+            status_code=400,
+            detail="Impossible d'inscrire l'utilisateur (pseudo peut-être déjà utilisé)",
+        )
+
+    return {"message": "Utilisateur inscrit avec succès"}
+
 
 # --- Endpoints de base ---
 
@@ -77,10 +105,43 @@ def activites_par_utilisateur(id_utilisateur: int, user = Depends(get_current_us
     if not utilisateur:
         return {"message": "Cet utilisateur n'existe pas"}
     liste_activites = ActiviteService().lister_activites(id_utilisateur)
-    if liste_activites:
-        return liste_activites
-    else:
-        return {"message": "Erreur"}
+    if liste_activites is None:
+        raise HTTPException(status_code=400, detail="Erreur lors de la récupération des activités de l'utilisateur")
+    return liste_activites
+
+@app.get("/activites-filtres/{id_utilisateur}")
+def activites_par_utilisateur_filtres(
+    id_utilisateur: int,
+    sport: str = None,
+    date_debut: str = None,
+    date_fin: str = None,
+    user = Depends(get_current_user),
+):
+    """Lister les activités d'un utilisateur avec filtres facultatifs."""
+    utilisateur = UtilisateurService().trouver_par_id(id_utilisateur)
+    if not utilisateur:
+        return {"message": "Cet utilisateur n'existe pas"}
+
+    try:
+        liste_activites = ActiviteService().lister_activites_filtres(
+            id_utilisateur=id_utilisateur,
+            sport=sport,
+            date_debut=date_debut,
+            date_fin=date_fin,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Erreur lors de la récupération des activités filtrées : {e}",
+        )
+
+    if liste_activites is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Erreur lors de la récupération des activités de l'utilisateur",
+        )
+
+    return liste_activites
 
 @app.post("/activites")
 async def creer_activite(file: UploadFile = File(...), sport: str = "randonnée", user = Depends(get_current_user)):
@@ -89,7 +150,6 @@ async def creer_activite(file: UploadFile = File(...), sport: str = "randonnée"
     try:
         parsed_activite = parse_gpx(content)
     except Exception as e:
-        logging.error(f"Erreur lors du parsing du fichier GPX : {e}")
         return {"message": "Erreur lors du parsing du fichier GPX"}
     date_activite = parsed_activite["date"]
     distance = parsed_activite["distance totale"]
@@ -126,7 +186,34 @@ def supprimer_activite(id_activite: int, user = Depends(get_current_user)):
     return {"message": "Activité supprimée"}
 
 
-# --- Endpoints Interactions avec les activités ---
+# --- Endpoints Utilisateurs ---
+
+@app.get("/utilisateurs/{id_utilisateur}")
+def consulter_utilisateur_par_id(id_utilisateur: int, user = Depends(get_current_user)):
+    """Récupérer un utilisateur grâce à son ID."""
+    utilisateur = UtilisateurService().trouver_par_id(id_utilisateur)
+    if not utilisateur:
+        raise HTTPException(status_code=400, detail="Cet utilisateur n'existe pas")
+    return utilisateur
+
+@app.get("/utilisateurs/pseudo/{pseudo}")
+def consulter_utilisateur_par_pseudo(pseudo: str, user = Depends(get_current_user)):
+    """Récupérer un utilisateur grâce à son pseudo."""
+    utilisateur = UtilisateurService().trouver_par_pseudo(pseudo)
+    if not utilisateur:
+        raise HTTPException(status_code=400, detail="Cet utilisateur n'existe pas")
+    return utilisateur
+
+@app.get("/utilisateurs")
+def lister_utilisateurs(user = Depends(get_current_user)):
+    """Lister tous les utilisateurs."""
+    utilisateurs = UtilisateurService().lister_utilisateurs()
+    if utilisateurs is None:
+        raise HTTPException(status_code=400, detail="Erreur lors de la récupération des utilisateurs")
+    return utilisateurs
+        
+
+# --- Endpoints Jaimes ---
 
 @app.post("/jaimes")
 def ajouter_jaime(id_activite: int, user = Depends(get_current_user)):
@@ -153,6 +240,22 @@ def supprimer_jaime(id_activite: int, user = Depends(get_current_user)):
         raise HTTPException(status_code=400, detail="Erreur lors de la suppression du jaime")
     return {"message": "Jaime supprimé"}
 
+@app.get("/jaimes/existe")
+def jaime_existe(id_activite: int, id_auteur: int, user = Depends(get_current_user)):
+    """Vérifier si un jaime existe pour une activité et un auteur donné."""
+    utilisateur = UtilisateurService().trouver_par_id(id_auteur)
+    if not utilisateur:
+        raise HTTPException(status_code=400, detail="Cet utilisateur n'existe pas")
+    activite = ActiviteService().trouver_activite_par_id(id_activite)
+    if not activite:
+        raise HTTPException(status_code=400, detail="Cette activité n'existe pas")
+
+    existe = ActiviteService().jaime_existe(id_activite, id_auteur)
+    return existe
+
+
+# --- Endpoints Commentaires ---
+
 @app.post("/commentaires")
 def ajouter_commentaire(id_activite: int, commentaire: str, user = Depends(get_current_user)):
     """Ajouter un commentaire à une activité pour l'utilisateur connecté."""
@@ -177,6 +280,18 @@ def supprimer_commentaire(id_commentaire: int, user = Depends(get_current_user))
         raise HTTPException(status_code=400, detail="Erreur lors de la suppression du commentaire")
     return {"message": "Commentaire supprimé"}
 
+@app.get("/commentaires/{id_activite}")
+def lister_commentaires(id_activite: int, user = Depends(get_current_user)):
+    """Lister les commentaires d'une activité donnée."""
+    activite = ActiviteService().trouver_activite_par_id(id_activite)
+    if not activite:
+        raise HTTPException(status_code=400, detail="Cette activité n'existe pas")
+
+    commentaires = ActiviteService().lister_commentaires(id_activite)
+    if commentaires is None:
+        raise HTTPException(status_code=400, detail="Erreur lors de la récupération des commentaires")
+
+    return commentaires
 
 # --- Endpoints Abonnements ---
 
@@ -206,6 +321,18 @@ def supprimer_abonnement(id_utilisateur_suivi: int, user = Depends(get_current_u
     if not supprime:
         raise HTTPException(status_code=400, detail="Erreur lors de la suppression de l'abonnement")
     return {"message": "Abonnement supprimé"}
+
+@app.get("/abonnements/existe")
+def abonnement_existe(id_utilisateur_suiveur: int, id_utilisateur_suivi: int, user = Depends(get_current_user)):
+    """Vérifier si un abonnement existe entre deux utilisateurs."""
+    utilisateur_suiveur = UtilisateurService().trouver_par_id(id_utilisateur_suiveur)
+    utilisateur_suivi = UtilisateurService().trouver_par_id(id_utilisateur_suivi)
+
+    if not utilisateur_suiveur or not utilisateur_suivi:
+        raise HTTPException(status_code=400, detail="L'un des utilisateurs n'existe pas")
+
+    existe = ActiviteService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
+    return existe
 
 @app.get("/abonnements/suivis/{id_utilisateur}")
 def lister_abonnements_suivis(id_utilisateur: int, user = Depends(get_current_user)):
@@ -302,7 +429,6 @@ async def upload_gpx(file: UploadFile = File(...)):
     try:
         parsed_activite = parse_gpx(content)
     except Exception as e:
-        logging.error(f"Erreur lors du parsing du fichier GPX : {e}")
         return {"message": "Erreur lors du parsing du fichier GPX"}
     return {"message": "Fichier GPX analysé", "activite": parsed_activite}
 
