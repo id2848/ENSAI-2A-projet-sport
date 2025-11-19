@@ -133,6 +133,15 @@ class ActiviteService:
         except Exception as e:
             logging.error(f"Erreur lors de la suppression du 'j'aime' : {e}")
             return False
+    
+    def compter_jaimes_par_activite(self, id_activite: int) -> int:
+        """Compte le nombre de jaimes pour une activité donnée."""
+        try:
+            nombre = JaimeDao().compter_par_activite(id_activite)
+            return nombre
+        except Exception as e:
+            logging.error(f"Erreur lors du comptage des jaimes d'une activité : {e}")
+            return None
 
     def ajouter_commentaire(self, id_utilisateur: int, id_activite: int, contenu: str) -> bool:
         """Ajoute un commentaire à une activité"""

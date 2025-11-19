@@ -42,7 +42,7 @@ class JaimeDao:
                     )
                     res = cursor.fetchone()
         except Exception as e:
-            logging.error(e)
+            logging.error(f"Erreur lors de la création d'un jaime : {e}")
             raise
 
         created = False
@@ -77,7 +77,7 @@ class JaimeDao:
                     )
                     res = cursor.fetchall()
         except Exception as e:
-            logging.error(e)
+            logging.error(f"Erreur lors de la récupération des jaimes d'une activité : {e}")
             raise
 
         liste_jaimes = []
@@ -124,7 +124,7 @@ class JaimeDao:
                     )
                     res = cursor.rowcount
         except Exception as e:
-            logging.error(e)
+            logging.error(f"Erreur lors de la suppression d'un jaime : {e}")
             raise
 
         return res > 0
@@ -159,7 +159,34 @@ class JaimeDao:
                     )
                     res = cursor.fetchone()
         except Exception as e:
-            logging.error(e)
+            logging.error(f"Erreur lors de la vérification d'un jaime : {e}")
             raise
         
         return res is not None
+
+    @log
+    def compter_par_activite(self, id_activite: int) -> int:
+        """Compte le nombre de jaimes pour une activité donnée.
+
+        Parameters
+        ----------
+        id_activite : int
+            L'identifiant de l'activité
+
+        Returns
+        -------
+        int
+            Nombre de jaimes pour l'activité
+        """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT COUNT(*) FROM jaime WHERE id_activite = %(id_activite)s;",
+                        {"id_activite": id_activite}
+                    )
+                    res = cursor.fetchone()
+                    return res['count']
+        except Exception as e:
+            logging.error(f"Erreur lors du comptage des jaimes : {e}")
+            raise

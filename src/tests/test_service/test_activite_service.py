@@ -312,6 +312,30 @@ def test_jaime_existe_ko():
     # THEN
     assert (not existe)
 
+def test_compter_jaimes_par_activite_existante():
+    """Compter le nombre de jaimes pour une activité existante"""
+    # GIVEN
+    id_activite = 991  # présent dans les données de test
+
+    # WHEN
+    count = ActiviteService().compter_jaimes_par_activite(id_activite)
+
+    # THEN
+    assert isinstance(count, int)
+    assert count == 1 # d'après les données test
+
+def test_compter_jaimes_par_activite_inexistante():
+    """Compter le nombre de jaimes pour une activité inexistante"""
+    # GIVEN
+    id_activite = 99999  # inexistant
+
+    # WHEN
+    count = ActiviteService().compter_jaimes_par_activite(id_activite)
+
+    # THEN
+    assert isinstance(count, int)
+    assert count == 0
+
 def test_abonnement_existe_ok():
     """Vérifier qu'un abonnement existe pour une activité et un auteur donnés"""
 

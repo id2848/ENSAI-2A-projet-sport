@@ -9,7 +9,7 @@ from dao.jaime_dao import JaimeDao
 
 from business_object.jaime import Jaime
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(autouse=True)
 def setup_test_environment():
     """Initialisation des données de test"""
     with patch.dict(os.environ, {"SCHEMA": "projet_test_dao"}):
@@ -147,3 +147,53 @@ def test_existe_ko():
 
     # THEN
     assert (not existe)
+
+def test_lister_par_activite_existante():
+    """Lister les jaimes pour une activité existante"""
+    # GIVEN
+    id_activite = 991  # présent dans les données de test
+
+    # WHEN
+    liste_jaimes = JaimeDao().lister_par_activite(id_activite)
+
+    # THEN
+    assert isinstance(liste_jaimes, list)
+    assert len(liste_jaimes) > 0
+    assert all(isinstance(j, Jaime) for j in liste_jaimes)
+
+
+def test_lister_par_activite_inexistante():
+    """Lister les jaimes pour une activité qui n'existe pas"""
+    # GIVEN
+    id_activite = 99999  # inexistant
+
+    # WHEN
+    liste_jaimes = JaimeDao().lister_par_activite(id_activite)
+
+    # THEN
+    assert isinstance(liste_jaimes, list)
+    assert len(liste_jaimes) == 0
+
+def test_compter_par_activite_existante():
+    """Compter le nombre de jaimes pour une activité existante"""
+    # GIVEN
+    id_activite = 991  # présent dans les données de test
+
+    # WHEN
+    count = JaimeDao().compter_par_activite(id_activite)
+
+    # THEN
+    assert isinstance(count, int)
+    assert count == 1 # d'après les données test
+
+def test_compter_par_activite_inexistante():
+    """Compter le nombre de jaimes pour une activité inexistante"""
+    # GIVEN
+    id_activite = 99999  # inexistant
+
+    # WHEN
+    count = JaimeDao().compter_par_activite(id_activite)
+
+    # THEN
+    assert isinstance(count, int)
+    assert count == 0

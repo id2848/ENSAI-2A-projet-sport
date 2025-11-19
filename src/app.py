@@ -259,6 +259,22 @@ def jaime_existe(id_activite: int, id_auteur: int, user = Depends(get_current_us
     existe = ActiviteService().jaime_existe(id_activite, id_auteur)
     return existe
 
+@app.get("/jaimes/compter")
+def compter_jaimes(id_activite: int, user = Depends(get_current_user)):
+    """Compter le nombre de jaimes pour une activité donnée."""
+    
+    # Vérifier que l'activité existe
+    activite = ActiviteService().trouver_activite_par_id(id_activite)
+    if not activite:
+        raise HTTPException(status_code=400, detail="Cette activité n'existe pas")
+    
+    # Compter les jaimes via le service
+    nombre_jaimes = ActiviteService().compter_jaimes_par_activite(id_activite)
+    if nombre_jaimes is None:
+        raise HTTPException(status_code=500, detail="Erreur lors du comptage des jaimes")
+    
+    return {"id_activite": id_activite, "nombre_jaimes": nombre_jaimes}
+
 
 # --- Endpoints Commentaires ---
 
