@@ -1,5 +1,4 @@
-````markdown
-# ENSAI-2A-Projet-Sport
+## ENSAI-2A-Projet-Sport
 
 Projet informatique de 2ème année ENSAI.
 
