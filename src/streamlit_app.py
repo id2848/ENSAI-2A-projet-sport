@@ -1,15 +1,12 @@
-# streamlit_app.py
 import streamlit as st
 import requests
-from datetime import datetime
 from typing import Any
+from datetime import datetime
 
 # --- URLs API ---
 API_BASE = "http://localhost:9876"
 API_ME = f"{API_BASE}/me"
-API_GPX = f"{API_BASE}/upload-gpx"
 API_ACTIVITES = f"{API_BASE}/activites"
-API_ACTIVITE_BY_ID = f"{API_BASE}/activites"  # used as f"{API_ACTIVITE_BY_ID}/{id}"
 API_DELETE_ACTIVITE = f"{API_BASE}/activites" 
 API_COMMENTAIRES = f"{API_BASE}/commentaires"
 API_UPLOAD_GPX = f"{API_BASE}/upload-gpx"
@@ -18,9 +15,11 @@ API_ABONNEMENTS = f"{API_BASE}/abonnements"
 API_ABONNEMENTS_SUIVIS = f"{API_BASE}/abonnements/suivis"
 API_JAIMES = f"{API_BASE}/jaimes"
 API_JAIMES_EXISTE = f"{API_BASE}/jaimes/existe"
+API_JAIMES_COMPTER = f"{API_BASE}/jaimes/compter"
 API_STATS_TOTAL = f"{API_BASE}/statistiques/total"
 API_STATS_SEMAINE = f"{API_BASE}/statistiques/semaine"
-API_LOGOUT = f"{API_BASE}/logout"
+API_INSCRIPTION = f"{API_BASE}/inscription"
+API_FIL = f"{API_BASE}/fil-dactualite"
 
 # --- Session initialization ---
 if "connected" not in st.session_state:
@@ -54,14 +53,10 @@ def extract_activity_field(a: dict, *keys, default=None):
     return default
 
 def normalize_activity(activite_raw: dict) -> dict:
-    """
-    Normalize different possible keys to a standard structure used by the UI:
-    - id_activite, sport, distance (km), duree (minutes), date, nom
-    """
     a = {}
     a['id_activite'] = extract_activity_field(activite_raw, 'id_activite', 'id', 'id_activity', default=None)
     a['sport'] = extract_activity_field(activite_raw, 'sport', 'type', default='inconnu')
-    # distance: try common keys; if distance given as meters convert to km if > 1000
+    
     dist = extract_activity_field(activite_raw, 'distance', 'distance totale', 'distance_km', 'distance_m', default=None)
     if isinstance(dist, str):
         try:
@@ -69,11 +64,10 @@ def normalize_activity(activite_raw: dict) -> dict:
         except Exception:
             dist = None
     if isinstance(dist, (int, float)):
-        # Heuristic: if distance > 1000 it's probably in meters
-        if dist > 1000:
+        if dist > 1000: # Heuristic: si > 1000, c'est surement en mètres
             dist = dist / 1000.0
     a['distance'] = dist if dist is not None else 0.0
-    # duree: minutes or seconds?
+    
     duree = extract_activity_field(activite_raw, 'duree', 'durée totale', 'duree_minutes', 'duree_secondes', default=None)
     if isinstance(duree, str):
         try:
@@ -81,32 +75,29 @@ def normalize_activity(activite_raw: dict) -> dict:
         except Exception:
             duree = None
     if isinstance(duree, (int, float)):
-        # If very large, assume seconds -> convert to minutes
+        # Si très grand, supposé en secondes
         if duree > 10000:
             duree = duree / 60.0
-        elif duree > 300 and duree < 10000 and 'secondes' in str(list(activite_raw.keys())).lower():
-            # ambiguous - but keep as minutes if reasonable
-            pass
     a['duree'] = duree if duree is not None else 0.0
+    
     a['date'] = extract_activity_field(activite_raw, 'date', 'date_activite', 'start_time', default=None)
     a['nom'] = extract_activity_field(activite_raw, 'nom', 'name', default='')
     return a
 
-# --- 1. Auth form ---
-def auth_form():
-    st.subheader("Connexion")
-    username = st.text_input("Nom d'utilisateur", value=st.session_state.get("username",""))
-    password = st.text_input("Mot de passe", type="password", value=st.session_state.get("password",""))
-
-    col1, col2 = st.columns([1,1])
-    with col1:
+# --- 1. Auth & Inscription ---
+def auth_screen():
+    tab_conn, tab_insc = st.tabs(["Connexion", "Inscription"])
+    
+    with tab_conn:
+        st.subheader("Connexion")
+        username = st.text_input("Nom d'utilisateur", key="login_user")
+        password = st.text_input("Mot de passe", type="password", key="login_pass")
         if st.button("Se connecter"):
             try:
                 resp = requests.get(API_ME, auth=(username, password))
                 if resp.status_code == 200:
                     user = resp.json()
-                    # user must contain id_utilisateur
-                    uid = user.get("id_utilisateur") or user.get("id") or user.get("id_user")
+                    uid = user.get("id_utilisateur") or user.get("id")
                     if uid is None:
                         st.error("L'API /me n'a pas retourné d'ID utilisateur.")
                         return
@@ -115,27 +106,55 @@ def auth_form():
                     st.session_state["user_id"] = uid
                     st.session_state["connected"] = True
                     st.success("Connecté avec succès !")
-                    st.experimental_rerun()
+                    st.rerun()
                 else:
-                    st.error(f"Échec d'authentification : {resp.status_code} - {safe_json(resp)}")
+                    st.error("Identifiants invalides.")
             except Exception as e:
                 st.error(f"Erreur de connexion : {e}")
 
-    with col2:
-        if st.button("Se déconnecter"):
-            # clear session
-            st.session_state["connected"] = False
-            st.session_state["username"] = None
-            st.session_state["password"] = None
-            st.session_state["user_id"] = None
-            st.success("Déconnecté")
-            st.experimental_rerun()
+    with tab_insc:
+        st.subheader("Créer un compte")
+        new_pseudo = st.text_input("Pseudo *", key="insc_pseudo")
+        new_mdp = st.text_input("Mot de passe *", type="password", key="insc_mdp")
+        new_nom = st.text_input("Nom", key="insc_nom")
+        new_prenom = st.text_input("Prénom", key="insc_prenom")
+        new_date = st.date_input("Date de naissance", key="insc_date", min_value=datetime(1900, 1, 1), max_value=datetime.today())
+        new_sexe = st.selectbox("Sexe", ["homme", "femme", "autre"], key="insc_sexe")
+        
+        if st.button("S'inscrire"):
+            if not new_pseudo or not new_mdp:
+                st.warning("Le pseudo et le mot de passe sont obligatoires.")
+            else:
+                payload = {
+                    "pseudo": new_pseudo,
+                    "mot_de_passe": new_mdp,
+                    "nom": new_nom,
+                    "prenom": new_prenom,
+                    "date_de_naissance": new_date.strftime("%Y-%m-%d"),
+                    "sexe": new_sexe
+                }
+                try:
+                    # Note: FastAPI attend des query params selon votre définition dans app.py
+                    # Utilisation de params=payload pour envoyer en query string
+                    resp = requests.post(API_INSCRIPTION, params=payload)
+                    if resp.status_code == 200:
+                        st.success("Compte créé ! Vous pouvez maintenant vous connecter.")
+                    else:
+                        st.error(f"Erreur inscription : {resp.status_code} - {safe_json(resp)}")
+                except Exception as e:
+                    st.error(f"Erreur technique : {e}")
 
-# --- 2. GPX upload and create activity ---
+def logout_button():
+    if st.sidebar.button("Se déconnecter"):
+        st.session_state["connected"] = False
+        st.session_state["username"] = None
+        st.session_state["password"] = None
+        st.session_state["user_id"] = None
+        st.rerun()
+
+# --- 2. GPX upload ---
 def gpx_analyse_et_creation():
-    st.subheader("Importer une nouvelle activité (GPX)")
-    st.success(f"Connecté en tant que **{st.session_state['username']}** (ID: {st.session_state['user_id']})")
-
+    st.subheader("Importer une activité (GPX)")
     uploaded_file = st.file_uploader("Choisir un fichier GPX", type=["gpx"])
     if uploaded_file is not None:
         if st.button("Analyser le fichier"):
@@ -151,20 +170,17 @@ def gpx_analyse_et_creation():
                     st.session_state['uploaded_file_name'] = uploaded_file.name
                     st.success("Analyse réussie.")
                 else:
-                    st.error(f"Erreur d'analyse : {resp.status_code} - {safe_json(resp)}")
+                    st.error(f"Erreur d'analyse : {resp.status_code}")
             except Exception as e:
-                st.error(f"Erreur lors de l'analyse : {e}")
+                st.error(f"Erreur : {e}")
 
     if 'analyse_data' in st.session_state:
-        st.markdown("#### Résumé de l'analyse")
+        st.markdown("#### Résumé")
         activite = st.session_state['analyse_data']
-        st.write(f"**Nom :** {activite.get('nom', activite.get('name','[inconnu]'))}")
-        st.write(f"**Type (issu du GPX) :** {activite.get('type', '[inconnu]')}")
-        st.write(f"**Distance (km) :** {activite.get('distance totale', activite.get('distance', '[inconnu]'))}")
-        st.write(f"**Durée (min) :** {activite.get('durée totale', activite.get('duree', '[inconnu]'))}")
-        st.write(f"**Vitesse moyenne (km/h) :** {activite.get('vitesse moyenne', '[inconnu]')}")
-        st.write("---")
-        sport = st.selectbox("Type de sport", ["course", "vélo", "randonnée", "marche"])
+        st.write(f"**Type :** {activite.get('type', '?')}")
+        st.write(f"**Distance :** {activite.get('distance totale', '?')} km")
+        st.write(f"**Durée :** {activite.get('durée totale', '?')} min")
+        sport = st.selectbox("Confirmer le sport", ["course", "vélo", "randonnée", "natation"])
         if st.button("Poster cette activité"):
             files_create = {
                 "file": (
@@ -178,397 +194,242 @@ def gpx_analyse_et_creation():
                     API_ACTIVITES,
                     files=files_create,
                     params={"sport": sport},
-                    auth=(st.session_state["username"], st.session_state["password"])
+                    auth=auth_tuple()
                 )
                 if resp.status_code == 200:
-                    st.success("Activité postée avec succès !")
-                    # clear analysis state
-                    for k in ['analyse_data','uploaded_file_bytes','uploaded_file_name']:
-                        if k in st.session_state:
-                            del st.session_state[k]
-                    st.experimental_rerun()
+                    st.success("Activité postée !")
+                    del st.session_state['analyse_data']
+                    st.rerun()
                 else:
-                    st.error(f"Erreur lors de la création : {resp.status_code} - {safe_json(resp)}")
+                    st.error(f"Erreur lors de la création : {resp.text}")
             except Exception as e:
-                st.error(f"Erreur lors de la création : {e}")
+                st.error(f"Erreur : {e}")
 
-# --- 3. Generic activity display (with likes/comments/delete) ---
-def display_activity_list(activites_list: list[dict], show_delete_button: bool = False):
+# --- 3. Display Activities ---
+# Modifiez la ligne de définition :
+def display_activity_list(activites_list: list[dict], show_delete_button: bool = False, key_prefix: str = ""):
     if not activites_list:
         st.info("Aucune activité à afficher.")
         return
 
-    auth = (st.session_state["username"], st.session_state["password"])
+    auth = auth_tuple()
     logged_in_user_id = st.session_state["user_id"]
 
     for raw in activites_list:
         a = normalize_activity(raw)
-        activity_id = a.get('id_activite') or a.get('id') or "[N/A]"
-        activity_sport = a.get('sport', 'N/A')
-        activity_distance = a.get('distance', 0.0)
-        activity_duree = a.get('duree', 0.0)
+        activity_id = a.get('id_activite')
+        
+        if not activity_id:
+            continue
 
-        try:
-            if activity_duree and float(activity_duree) > 0:
-                activity_vitesse = float(activity_distance) / (float(activity_duree) / 60.0)
-                activity_vitesse_str = f"{activity_vitesse:.2f} km/h"
-            else:
-                activity_vitesse_str = "N/A"
-        except Exception:
-            activity_vitesse_str = "N/A"
-
-        expander_label = f"Activité #{activity_id} — {activity_sport} ({activity_distance} km)"
+        expander_label = f"{a.get('sport', 'Activité')} - {a.get('date','')} ({a.get('distance',0)} km)"
         with st.expander(expander_label):
-            st.write(f"**Sport :** {activity_sport}")
-            st.write(f"**Distance :** {activity_distance} km")
-            st.write(f"**Durée :** {activity_duree} min")
-            st.write(f"**Vitesse moyenne :** {activity_vitesse_str}")
-            st.write(f"**Date :** {a.get('date','N/A')}")
-            st.write("---")
+            col_a, col_b = st.columns(2)
+            with col_a:
+                st.write(f"**Sport :** {a.get('sport')}")
+                st.write(f"**Distance :** {a.get('distance')} km")
+            with col_b:
+                st.write(f"**Durée :** {a.get('duree')} min")
+                if a.get('duree', 0) > 0:
+                    vitesse = float(a['distance']) / (float(a['duree'])/60)
+                    st.write(f"**Vitesse :** {vitesse:.2f} km/h")
+            
+            st.divider()
 
-            # --- LIKE / UNLIKE (using /jaimes/existe for current user) ---
+            # --- LIKES ---
+            col_l1, col_l2 = st.columns([1, 5])
+
+            nb_likes = 0
             try:
-                # Check if current user liked this activity
-                params_exist = {"id_activite": activity_id, "id_auteur": logged_in_user_id}
-                resp_exist = requests.get(API_JAIMES_EXISTE, params=params_exist, auth=auth)
-                user_has_liked = False
+                resp_count = requests.get(API_JAIMES_COMPTER, params={"id_activite": activity_id}, auth=auth)
+                if resp_count.status_code == 200:
+                    nb_likes = resp_count.json().get("nombre_jaimes", 0)
+            except:
+                pass
+
+            user_has_liked = False
+            try:
+                resp_exist = requests.get(API_JAIMES_EXISTE, params={"id_activite": activity_id, "id_auteur": logged_in_user_id}, auth=auth)
                 if resp_exist.status_code == 200:
-                    # API returns a raw boolean true/false
-                    try:
-                        user_has_liked = bool(resp_exist.json())
-                    except Exception:
-                        # fallback: parse text
-                        user_has_liked = str(resp_exist.text).lower() in ("true", "1")
-                else:
-                    # treat as not liked if error
-                    user_has_liked = False
+                    user_has_liked = bool(resp_exist.json())
+            except:
+                pass
 
-                like_key = f"like_btn_{activity_id}"
+            with col_l1:
+                like_btn_key = f"{key_prefix}btn_like_{activity_id}"
+                
                 if user_has_liked:
-                    if st.button(f"💔 Retirer le J'aime", key=like_key):
+                    if st.button("❤️", key=like_btn_key, help="Je n'aime plus"):
                         try:
-                            resp_del = requests.delete(f"{API_JAIMES}/{activity_id}/{logged_in_user_id}", auth=auth)
-                            if resp_del.status_code in (200, 204):
-                                st.success("J'aime supprimé")
-                                st.experimental_rerun()
-                            else:
-                                st.error(f"Erreur suppression jaime : {resp_del.status_code} - {safe_json(resp_del)}")
+                            requests.delete(f"{API_JAIMES}/{activity_id}", auth=auth)
+                            st.rerun()
                         except Exception as e:
-                            st.error(f"Erreur lors de la suppression du jaime : {e}")
+                            st.error(str(e))
                 else:
-                    if st.button(f"🤍 J'aime", key=like_key):
+                    if st.button("🤍", key=like_btn_key, help="J'aime"):
                         try:
-                            # API: POST /jaimes?id_activite=X
-                            resp_post = requests.post(API_JAIMES, params={"id_activite": activity_id}, auth=auth)
-                            if resp_post.status_code in (200,201):
-                                st.success("J'aime ajouté")
-                                st.experimental_rerun()
-                            else:
-                                st.error(f"Erreur ajout jaime : {resp_post.status_code} - {safe_json(resp_post)}")
+                            requests.post(API_JAIMES, params={"id_activite": activity_id}, auth=auth)
+                            st.rerun()
                         except Exception as e:
-                            st.error(f"Erreur lors de l'ajout du jaime : {e}")
-            except Exception as e_like:
-                st.error(f"Erreur 'Jaime' : {e_like}")
+                            st.error(str(e))
+            with col_l2:
+                st.markdown(f"**{nb_likes}** J'aime")
 
-            st.write("---")
-
-            # --- COMMENTS ---
+            # --- COMMENTAIRES ---
+            st.markdown("#### Commentaires")
             try:
-                st.markdown("**Commentaires :**")
-                resp_comments = requests.get(f"{API_COMMENTAIRES}/{activity_id}", auth=auth)
-                if resp_comments.status_code == 200:
-                    comments_list = resp_comments.json()
-                    if not comments_list:
-                        st.caption("Aucun commentaire pour l'instant.")
-                    else:
-                        for c in comments_list:
-                            texte = c.get('commentaire') or c.get('texte') or ''
-                            auteur = c.get('id_auteur') or c.get('auteur') or 'Inconnu'
-                            date_c = c.get('date_commentaire') or c.get('date') or ''
-                            st.caption(f"{auteur} — {date_c}")
-                            st.markdown(f"> {texte}")
+                resp_com = requests.get(f"{API_COMMENTAIRES}/{activity_id}", auth=auth)
+                if resp_com.status_code == 200:
+                    for c in resp_com.json():
+                        contenu = c.get("contenu") or c.get("commentaire") or ""
+                        auteur_id = c.get("id_auteur")
+                        date_com = c.get("date_commentaire")
+                        st.markdown(f"👤 **Auteur {auteur_id}** ({date_com}) : {contenu}")
                 else:
-                    st.info("Impossible de récupérer les commentaires pour cette activité.")
-            except Exception as e:
-                st.error(f"Erreur récupération commentaires : {e}")
+                    st.caption("Pas de commentaires.")
+            except:
+                st.caption("Erreur chargement commentaires.")
 
-            st.markdown("**Ajouter un commentaire :**")
-            comment_key = f"comment_text_{activity_id}"
-            button_key = f"comment_btn_{activity_id}"
-            commentaire_texte = st.text_area("Votre commentaire", key=comment_key, label_visibility="collapsed")
-            if st.button("Envoyer", key=button_key):
-                if not commentaire_texte or not commentaire_texte.strip():
-                    st.warning("Le commentaire ne peut pas être vide.")
-                else:
-                    try:
-                        resp_comment = requests.post(
-                            API_COMMENTAIRES,
-                            params={"id_activite": activity_id, "commentaire": commentaire_texte},
-                            auth=auth
-                        )
-                        if resp_comment.status_code in (200,201):
-                            st.success("Commentaire ajouté !")
-                            st.experimental_rerun()
-                        else:
-                            st.error(f"Erreur lors de l'ajout du commentaire : {resp_comment.status_code} - {safe_json(resp_comment)}")
-                    except Exception as e:
-                        st.error(f"Erreur envoi commentaire : {e}")
+            txt_com = st.text_input("Écrire un commentaire...", key=f"{key_prefix}input_com_{activity_id}")
+            if st.button("Envoyer", key=f"{key_prefix}send_com_{activity_id}"):
+                if txt_com:
+                    requests.post(API_COMMENTAIRES, params={"id_activite": activity_id, "commentaire": txt_com}, auth=auth)
+                    st.success("Envoyé !")
+                    st.rerun()
 
-            # --- DELETE (if allowed) ---
+            # --- DELETE ---
             if show_delete_button:
                 st.divider()
-                st.markdown("**Supprimer l'activité**")
-                delete_key = f"delete_btn_{activity_id}"
-                if st.button("Supprimer cette activité", key=delete_key):
-                    try:
-                        resp = requests.delete(f"{API_DELETE_ACTIVITE}/{activity_id}", auth=auth)
-                        if resp.status_code in (200, 204):
-                            st.success("Activité supprimée avec succès !")
-                            # invalidate cache if any
-                            if 'activites_list' in st.session_state:
-                                del st.session_state['activites_list']
-                            st.experimental_rerun()
-                        else:
-                            st.error(f"Erreur suppression activité : {resp.status_code} - {safe_json(resp)}")
-                    except Exception as e:
-                        st.error(f"Erreur suppression activité : {e}")
+                # --- CORRECTION ICI : Ajout du key_prefix ---
+                if st.button("Supprimer l'activité", key=f"{key_prefix}del_act_{activity_id}"):
+                    requests.delete(f"{API_DELETE_ACTIVITE}/{activity_id}", auth=auth)
+                    st.success("Supprimé")
+                    st.rerun()
 
-# --- 4. My activities ---
+# --- 4. Fil d'actualité ---
+def afficher_fil_dactualite():
+    st.subheader("Fil d'actualité")
+    user_id = st.session_state["user_id"]
+    auth = auth_tuple()
+    
+    if st.button("Actualiser le fil"):
+        try:
+            # Appel à l'endpoint GET /fil-dactualite/{id}
+            resp = requests.get(f"{API_FIL}/{user_id}", auth=auth)
+            if resp.status_code == 200:
+                st.session_state['fil_actu'] = resp.json()
+            else:
+                st.warning("Impossible de récupérer le fil ou fil vide.")
+                st.session_state['fil_actu'] = []
+        except Exception as e:
+            st.error(f"Erreur : {e}")
+
+    if 'fil_actu' in st.session_state:
+        display_activity_list(st.session_state['fil_actu'], show_delete_button=False, key_prefix="fil_")
+
+# --- 5. Mes Activités ---
 def afficher_activites_personnelles():
     st.subheader("Mes activités")
-    if st.button("Afficher / Actualiser mes activités"):
-        user_id = st.session_state["user_id"]
-        auth = auth_tuple()
-        try:
-            resp = requests.get(f"{API_ACTIVITES}/{user_id}", auth=auth)
-            if resp.status_code == 200:
-                st.session_state['activites_list'] = resp.json()
-            else:
-                st.error(f"Erreur récupération activités : {resp.status_code} - {safe_json(resp)}")
-                if 'activites_list' in st.session_state:
-                    del st.session_state['activites_list']
-        except Exception as e:
-            st.error(f"Erreur requête activités : {e}")
-            if 'activites_list' in st.session_state:
-                del st.session_state['activites_list']
-
-    if 'activites_list' in st.session_state:
-        display_activity_list(st.session_state['activites_list'], show_delete_button=True)
-
-# --- 5. Search profile ---
-def afficher_recherche_profil():
-    st.subheader("Rechercher un Utilisateur")
-    pseudo_recherche = st.text_input("Entrer le pseudo de l'utilisateur", key="pseudo_search")
-
-    if st.button("Rechercher"):
-        if not pseudo_recherche:
-            st.warning("Entrez un pseudo.")
-            return
-        # clear previous
-        for k in ['profil_data', 'profil_activites', 'profil_suivi']:
-            if k in st.session_state:
-                del st.session_state[k]
-        st.session_state['profil_recherche'] = pseudo_recherche
-
-    if 'profil_recherche' in st.session_state:
-        pseudo = st.session_state['profil_recherche']
-        auth = auth_tuple()
-        logged_in_user_id = st.session_state['user_id']
-        try:
-            if 'profil_data' not in st.session_state:
-                resp = requests.get(f"{API_UTILISATEUR_PSEUDO}/{pseudo}", auth=auth)
-                if resp.status_code == 200:
-                    st.session_state['profil_data'] = resp.json()
-                else:
-                    st.error(f"Utilisateur '{pseudo}' non trouvé ({resp.status_code}).")
-                    return
-            profil_data = st.session_state['profil_data']
-            profil_user_id = profil_data.get('id_utilisateur') or profil_data.get('id')
-
-            col1, col2 = st.columns([3,1])
-            with col1:
-                st.markdown(f"#### Profil de **{profil_data.get('pseudo', '[inconnu]')}**")
-                st.caption(f"Nom : {profil_data.get('nom','N/A')} {profil_data.get('prenom','')}")
-            with col2:
-                # Determine follow status by fetching followed list of logged in user
-                if 'profil_suivi' not in st.session_state:
-                    try:
-                        resp_suivis = requests.get(f"{API_ABONNEMENTS_SUIVIS}/{logged_in_user_id}", auth=auth)
-                        if resp_suivis.status_code == 200:
-                            payload = resp_suivis.json()
-                            # API returns a list of ids (set converted to list), e.g. [2,5,8]
-                            if isinstance(payload, dict) and 'suivis' in payload:
-                                suivis_list = payload.get('suivis', [])
-                            elif isinstance(payload, (list, set, tuple)):
-                                suivis_list = list(payload)
-                            else:
-                                # unknown format -> assume empty
-                                suivis_list = []
-                        else:
-                            suivis_list = []
-                        st.session_state['profil_suivi'] = profil_user_id in suivis_list
-                    except Exception as e:
-                        st.error(f"Erreur récupération suivis : {e}")
-                        st.session_state['profil_suivi'] = False
-
-                is_following = st.session_state['profil_suivi']
-
-                if profil_user_id != logged_in_user_id:
-                    if is_following:
-                        if st.button("Se désabonner", key=f"follow_btn_{profil_user_id}"):
-                            try:
-                                # API: DELETE /abonnements?id_utilisateur_suivi=X (uses current user from auth to delete)
-                                resp_del = requests.delete(API_ABONNEMENTS, params={"id_utilisateur_suivi": profil_user_id}, auth=auth)
-                                if resp_del.status_code in (200,204):
-                                    st.success("Désabonné")
-                                    del st.session_state['profil_suivi']
-                                    st.experimental_rerun()
-                                else:
-                                    st.error(f"Erreur désabonnement : {resp_del.status_code} - {safe_json(resp_del)}")
-                            except Exception as e:
-                                st.error(f"Erreur lors de la suppression de l'abonnement : {e}")
-                    else:
-                        if st.button("Suivre", key=f"follow_btn_{profil_user_id}"):
-                            try:
-                                # API: POST /abonnements?id_utilisateur_suivi=X
-                                resp_post = requests.post(API_ABONNEMENTS, params={"id_utilisateur_suivi": profil_user_id}, auth=auth)
-                                if resp_post.status_code in (200,201):
-                                    st.success("Abonnement créé")
-                                    if 'profil_suivi' in st.session_state:
-                                        del st.session_state['profil_suivi']
-                                    st.experimental_rerun()
-                                else:
-                                    st.error(f"Erreur abonnement : {resp_post.status_code} - {safe_json(resp_post)}")
-                            except Exception as e:
-                                st.error(f"Erreur lors de la création de l'abonnement : {e}")
-
-            st.divider()
-            # Activities of profile
-            st.markdown(f"**Activités de {profil_data.get('pseudo','[inconnu]')}**")
-            if 'profil_activites' not in st.session_state:
-                try:
-                    resp_acts = requests.get(f"{API_ACTIVITES}/{profil_user_id}", auth=auth)
-                    if resp_acts.status_code == 200:
-                        st.session_state['profil_activites'] = resp_acts.json()
-                    else:
-                        st.session_state['profil_activites'] = []
-                except Exception as e:
-                    st.error(f"Erreur récupération activités du profil : {e}")
-                    st.session_state['profil_activites'] = []
-            display_activity_list(st.session_state.get('profil_activites', []), show_delete_button=False)
-
-        except Exception as e:
-            st.error(f"Erreur lors de la récupération du profil : {e}")
-            if 'profil_data' in st.session_state:
-                del st.session_state['profil_data']
-
-# --- 6. Stats ---
-def afficher_statistiques_personnelles():
-    st.subheader("Mes Statistiques Personnelles")
-    auth = auth_tuple()
     user_id = st.session_state["user_id"]
+    
+    if st.button("Actualiser mes activités"):
+        resp = requests.get(f"{API_ACTIVITES}/{user_id}", auth=auth_tuple())
+        if resp.status_code == 200:
+            st.session_state['mes_activites'] = resp.json()
+    
+    if 'mes_activites' in st.session_state:
+        display_activity_list(st.session_state['mes_activites'], show_delete_button=True, key_prefix="mes_")
 
-    st.markdown("##### 📈 Statistiques Globales")
-    if st.button("Afficher mes statistiques totales"):
-        try:
-            resp = requests.get(f"{API_STATS_TOTAL}/{user_id}", auth=auth)
-            if resp.status_code == 200:
-                st.session_state['total_stats'] = resp.json()
-            else:
-                st.error(f"Erreur récupération stats totales : {resp.status_code} - {safe_json(resp)}")
-                if 'total_stats' in st.session_state:
-                    del st.session_state['total_stats']
-        except Exception as e:
-            st.error(f"Erreur requête stats totales : {e}")
-            if 'total_stats' in st.session_state:
-                del st.session_state['total_stats']
+# --- 6. Recherche Profil ---
+def afficher_recherche_profil():
+    st.subheader("Rechercher un profil")
+    pseudo = st.text_input("Pseudo")
+    if st.button("Rechercher"):
+        resp = requests.get(f"{API_UTILISATEUR_PSEUDO}/{pseudo}", auth=auth_tuple())
+        if resp.status_code == 200:
+            st.session_state['profil_trouve'] = resp.json()
+            # Charger ses activités
+            uid = resp.json()['id_utilisateur']
+            r2 = requests.get(f"{API_ACTIVITES}/{uid}", auth=auth_tuple())
+            if r2.status_code == 200:
+                st.session_state['profil_activites'] = r2.json()
+        else:
+            st.error("Utilisateur introuvable.")
 
-    if 'total_stats' in st.session_state:
-        stats_total = st.session_state['total_stats']
-        # API returns: nombre_activites_total, distance_totale, duree_totale
-        nb = stats_total.get('nombre_activites_total', {})
-        dist = stats_total.get('distance_totale', {})
-        duree = stats_total.get('duree_totale', {})
-        # If the API gives aggregated dicts by sport, use as-is; else present totals
-        if isinstance(nb, dict) and nb:
-            st.markdown("**Nombre d'activités (par sport)**")
-            st.bar_chart(nb)
-        else:
-            st.metric("Nombre total d'activités", f"{nb}")
-        if isinstance(dist, dict) and dist:
-            st.markdown("**Distance totale (km) par sport**")
-            st.bar_chart(dist)
-        else:
-            st.metric("Distance totale (km)", f"{dist}")
-        if isinstance(duree, dict) and duree:
-            # assume duree may be seconds or minutes; try to normalize if keys indicate seconds
-            # if numbers look large treat as seconds convert to minutes for display
+    if 'profil_trouve' in st.session_state:
+        profil = st.session_state['profil_trouve']
+        st.markdown(f"### Profil de {profil['pseudo']}")
+        st.write(f"Nom : {profil.get('nom')} {profil.get('prenom')}")
+        
+        # Bouton Suivre / Ne plus suivre
+        current_uid = st.session_state["user_id"]
+        target_uid = profil['id_utilisateur']
+        
+        if current_uid != target_uid:
+            # Vérifier abonnement
+            is_following = False
             try:
-                # attempt to convert dict values to minutes if they seem large
-                sample = next(iter(duree.values()))
-                if isinstance(sample, (int,float)) and sample > 1000:
-                    duree_min = {k: v/60.0 for k,v in duree.items()}
-                    st.markdown("**Durée totale (minutes) par sport**")
-                    st.bar_chart(duree_min)
-                else:
-                    st.markdown("**Durée totale (minutes) par sport**")
-                    st.bar_chart(duree)
-            except Exception:
-                st.write(duree)
-        else:
-            st.metric("Durée totale", f"{duree}")
+                # On récupère la liste des suivis pour vérifier
+                r_suivis = requests.get(f"{API_ABONNEMENTS_SUIVIS}/{current_uid}", auth=auth_tuple())
+                if r_suivis.status_code == 200:
+                    suivis = r_suivis.json() # liste d'IDs
+                    if target_uid in suivis:
+                        is_following = True
+            except:
+                pass
 
-    st.divider()
-    st.markdown("##### 📅 Statistiques Hebdomadaires")
-    date_ref = st.date_input("Choisir une date de référence pour la semaine")
-    if st.button("Afficher les statistiques de la semaine"):
-        date_str = date_ref.strftime("%Y-%m-%d")
-        try:
-            resp = requests.get(f"{API_STATS_SEMAINE}/{user_id}", params={"date_reference": date_str}, auth=auth)
-            if resp.status_code == 200:
-                st.session_state['weekly_stats'] = resp.json()
-                st.session_state['weekly_stats_date'] = date_str
+            if is_following:
+                if st.button("Se désabonner"):
+                    requests.delete(API_ABONNEMENTS, params={"id_utilisateur_suivi": target_uid}, auth=auth_tuple())
+                    st.success("Désabonné")
+                    st.rerun()
             else:
-                st.error(f"Erreur récupération stats semaine : {resp.status_code} - {safe_json(resp)}")
-                if 'weekly_stats' in st.session_state:
-                    del st.session_state['weekly_stats']
-        except Exception as e:
-            st.error(f"Erreur requête stats semaine : {e}")
-            if 'weekly_stats' in st.session_state:
-                del st.session_state['weekly_stats']
+                if st.button("Suivre"):
+                    requests.post(API_ABONNEMENTS, params={"id_utilisateur_suivi": target_uid}, auth=auth_tuple())
+                    st.success("Abonné !")
+                    st.rerun()
 
-    if 'weekly_stats' in st.session_state:
-        s = st.session_state['weekly_stats']
-        st.info(f"Affichage des statistiques pour la semaine du {st.session_state.get('weekly_stats_date','?')}")
-        # API returns: nombre_activites_semaine, distance_semaine, duree_semaine
-        nbw = s.get('nombre_activites_semaine', {})
-        distw = s.get('distance_semaine', 0)
-        dureew = s.get('duree_semaine', 0)
-        try:
-            duree_min = float(dureew) / 60.0 if dureew else 0.0
-        except Exception:
-            duree_min = dureew
-        col3, col4 = st.columns(2)
-        col3.metric("Distance (Semaine)", f"{distw:.2f} km" if isinstance(distw,(int,float)) else str(distw))
-        col4.metric("Durée (Semaine)", f"{duree_min:.1f} minutes" if isinstance(duree_min,(int,float)) else str(duree_min))
-        if isinstance(nbw, dict) and nbw:
-            st.markdown("**Nombre d'activités (semaine) par sport**")
-            st.bar_chart(nbw)
+        st.divider()
+        st.markdown("**Activités récentes**")
+        if 'profil_activites' in st.session_state:
+            display_activity_list(st.session_state['profil_activites'], show_delete_button=False, key_prefix="recherche_")
 
-# --- Main layout ---
+# --- 7. Statistiques ---
+def afficher_statistiques():
+    st.subheader("Statistiques")
+    user_id = st.session_state["user_id"]
+    auth = auth_tuple()
+
+    if st.button("Charger stats globales"):
+        r = requests.get(f"{API_STATS_TOTAL}/{user_id}", auth=auth)
+        if r.status_code == 200:
+            st.json(r.json())
+    
+    date_ref = st.date_input("Semaine du :")
+    if st.button("Charger stats semaine"):
+        r = requests.get(f"{API_STATS_SEMAINE}/{user_id}", params={"date_reference": date_ref}, auth=auth)
+        if r.status_code == 200:
+            st.json(r.json())
+
+
+# --- Main ---
 if not st.session_state["connected"]:
-    auth_form()
+    auth_screen()
 else:
-    tab1, tab2, tab3, tab4 = st.tabs(["Poster Activité", "Mes Activités", "Mes Statistiques", "Rechercher Profil"])
+    logout_button()
+    st.sidebar.markdown(f"Connecté : **{st.session_state['username']}**")
+    
+    tab_fil, tab_mes_acts, tab_poster, tab_profil, tab_stats = st.tabs(
+        ["Fil d'actualité", "Mes Activités", "Poster (GPX)", "Rechercher Profil", "Statistiques"]
+    )
 
-    with tab1:
-        gpx_analyse_et_creation()
-
-    with tab2:
+    with tab_fil:
+        afficher_fil_dactualite()
+    with tab_mes_acts:
         afficher_activites_personnelles()
-
-    with tab3:
-        afficher_statistiques_personnelles()
-
-    with tab4:
+    with tab_poster:
+        gpx_analyse_et_creation()
+    with tab_profil:
         afficher_recherche_profil()
+    with tab_stats:
+        afficher_statistiques()
