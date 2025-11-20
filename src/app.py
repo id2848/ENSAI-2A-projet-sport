@@ -11,7 +11,7 @@ from utils.log_init import initialiser_logs
 from service.activite_service import ActiviteService
 from service.utilisateur_service import UtilisateurService
 from service.abonnement_service import AbonnementService
-from service.service_statistiques import ServiceStatistiques
+from service.statistiques_service import StatistiquesService
 from service.fil_dactualite_service import Fildactualite
 
 from utils.gpx_parser import parse_gpx
@@ -403,10 +403,10 @@ def statistiques_totales(id_utilisateur: int, user = Depends(get_current_user)):
     if not utilisateur:
         return {"message": "Cet utilisateur n'existe pas"}
     
-    # Récupérer les données nécessaires via les méthodes de ServiceStatistiques
-    nombre_activites = ServiceStatistiques().calculer_nombre_activites_total(id_utilisateur)
-    distance_totale = ServiceStatistiques().calculer_distance_totale(id_utilisateur)
-    duree_totale = ServiceStatistiques().calculer_duree_totale(id_utilisateur)
+    # Récupérer les données nécessaires via les méthodes de StatistiquesService
+    nombre_activites = StatistiquesService().calculer_nombre_activites_total(id_utilisateur)
+    distance_totale = StatistiquesService().calculer_distance_totale(id_utilisateur)
+    duree_totale = StatistiquesService().calculer_duree_totale(id_utilisateur)
 
     if all(x is not None for x in [nombre_activites, distance_totale, duree_totale]):
         return {
@@ -429,10 +429,10 @@ def statistiques_semaine(id_utilisateur: int, date_reference: str, user = Depend
     if not verifier_date(date_reference):
         return {"message": f"Le format de la date est incorrect. Utilisez le format YYYY-MM-DD."}
     
-    # Récupérer les données de la semaine demandée via les méthodes de ServiceStatistiques
-    nombre_activites_semaine = ServiceStatistiques().calculer_nombre_activites_semaine(id_utilisateur, date_reference)
-    distance_semaine = ServiceStatistiques().calculer_distance_semaine(id_utilisateur, date_reference)
-    duree_semaine = ServiceStatistiques().calculer_duree_semaine(id_utilisateur, date_reference)
+    # Récupérer les données de la semaine demandée via les méthodes de StatistiquesService
+    nombre_activites_semaine = StatistiquesService().calculer_nombre_activites_semaine(id_utilisateur, date_reference)
+    distance_semaine = StatistiquesService().calculer_distance_semaine(id_utilisateur, date_reference)
+    duree_semaine = StatistiquesService().calculer_duree_semaine(id_utilisateur, date_reference)
     
     if all(x is not None for x in [nombre_activites_semaine, distance_semaine, duree_semaine]):
         return {

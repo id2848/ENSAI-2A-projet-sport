@@ -11,7 +11,7 @@ from datetime import datetime
 from utils.verifier_date import verifier_date
 
 
-class ServiceStatistiques:
+class StatistiquesService:
     """Classe contenant les méthodes de service pour les statistiques des activités"""
 
     def __init__(self):
