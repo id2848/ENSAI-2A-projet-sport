@@ -1,110 +1,88 @@
-# ENSAI-2A-projet-info-template
+````markdown
+# ENSAI-2A-Projet-Sport
 
-Template for the ENSAI 2nd year IT project.
+Projet informatique de 2ème année ENSAI.
 
-This very simple application includes a few elements that may help with the info 2A project:
+Cette application est un **réseau social sportif** permettant aux utilisateurs de gérer leurs activités physiques et d'interagir avec une communauté. Elle repose sur une architecture en couches (DAO, Service, Business Object) et expose une API REST consommée par une interface Web.
 
-- Layer programming (DAO, service, view, business_object)
-- Connection to a database
-- Terminal interface (view layer) with [inquirerPy](https://inquirerpy.readthedocs.io/en/latest/)
-- Calling a Webservice
-- Creating a webservice
+Principales fonctionnalités :
+- **Import et analyse de fichiers GPX** (calcul de distance, durée, dénivelé, vitesse).
+- **Réseau social** : Suivre des amis, fil d'actualité, recherche de profils.
+- **Interactions** : Liker et commenter les activités.
+- **Statistiques** : Suivi des performances globales et hebdomadaires.
+- **Interfaces** : Une interface Web moderne (Streamlit) et une API Backend (FastAPI).
 
-
-## :arrow_forward: Software and tools
+## :arrow_forward: Logiciels et outils
 
 - [Visual Studio Code](https://code.visualstudio.com/)
 - [Python 3.13](https://www.python.org/)
 - [Git](https://git-scm.com/)
-- A [PostgreSQL](https://www.postgresql.org/) database
+- [PostgreSQL](https://www.postgresql.org/) (Base de données)
+- [Streamlit](https://streamlit.io/) (Interface Frontend)
+- [FastAPI](https://fastapi.tiangolo.com/) (Backend)
 
+## :arrow_forward: Cloner le dépôt
 
-## :arrow_forward: Clone the repository
+- [ ] Ouvrir VSCode
+- [ ] Ouvrir **Git Bash**
+- [ ] Cloner le dépôt :
+  - `git clone <VOTRE_URL_GITHUB>`
 
-- [ ] Open VSCode
-- [ ] Open **Git Bash**
-- [ ] Clone the repo
-  - `git clone https://github.com/ludo2ne/ENSAI-2A-projet-info-template.git`
+### Ouvrir le dossier
 
-
-### Open Folder
-
-- [ ] Open **Visual Studio Code**
+- [ ] Ouvrir **Visual Studio Code**
 - [ ] File > Open Folder
-- [ ] Select folder *ENSAI-2A-projet-info-template*
-  - *ENSAI-2A-projet-info-template* should be the root of your Explorer
-  - :warning: if not the application will not launch. Retry open folder
+- [ ] Sélectionner le dossier du projet
+  - :warning: Assurez-vous d'être à la racine du projet pour que les imports fonctionnent correctement.
 
+## Aperçu des fichiers
 
-## Repository Files Overview
+| Fichier / Dossier          | Description                                                                 |
+| -------------------------- | --------------------------------------------------------------------------- |
+| `src/streamlit_app.py`     | **Point d'entrée de l'interface Web** (Frontend).                           |
+| `src/app.py`               | **Point d'entrée de l'API** (Backend FastAPI).                              |
+| `src/main.py`              | Script de démonstration pour l'analyse locale de fichiers GPX.              |
+| `data`                     | Scripts SQL d'initialisation et de population de la base de données.        |
+| `doc`                      | Documentation (Endpoints, Diagrammes UML, Planning).                        |
+| `requirements.txt`         | Liste des dépendances Python nécessaires.                                   |
+| `.env`                     | Variables d'environnement (Configuration BDD, API).                         |
 
+### Fichiers de configuration
 
-| Item                       | Description                                                              |
-| -------------------------- | ------------------------------------------------------------------------ |
-| `README.md`                | Provides useful information to present, install, and use the application |
-| `LICENSE`                  | Specifies the usage rights and licensing terms for the repository        |
+Vous n'aurez généralement pas besoin de modifier ces fichiers, sauf le `.env`.
 
-### Configuration files
+| Fichier                    | Description                                                                 |
+| -------------------------- | --------------------------------------------------------------------------- |
+| `.gitignore`               | Liste les fichiers ignorés par Git (ex: `.env`, `__pycache__`).             |
+| `logging_config.yml`       | Configuration des logs de l'application.                                    |
+| `pytest.ini` / `.coveragerc`| Configuration pour les tests unitaires et la couverture de code.           |
 
-This repository contains a large number of configuration files for setting the parameters of the various tools used.
+## :arrow_forward: Installation des dépendances
 
-Normally, for the purposes of your project, you won't need to modify these files, except for `.env` and `requirements.txt`.
-
-
-| Item                       | Description                                                              |
-| -------------------------- | ------------------------------------------------------------------------ |
-| `.github/workflows/ci.yml` | Automated workflow that runs predefined tasks (like testing, linting, or deploying) |
-| `.vscode/settings.json`    | Contains VS Code settings specific to this project                       |
-| `.coveragerc`              | Setup for test coverage                                                  |
-| `.gitignore`               | Lists the files and folders that should not be tracked by Git            |
-| `logging_config.yml`       | Setup for logging                                                        |
-| `requirements.txt`         | Lists the required Python packages for the project                       |
-
-You will also need a `.env` file. See below.
-
-
-### Folders
-
-| Item                       | Description                                                              |
-| -------------------------- | ------------------------------------------------------------------------ |
-| `data`                     | SQL script containing data sets                                          |
-| `doc`                      | UML diagrams, project status...                                          |
-| `logs`                     | Containing logs files (once you have launched the application)           |
-| `src`                      | Folder containing Python files organized using a layered architecture    |
-
-
-
-### Settings files
-
-This repository contains a large number of configuration files for setting the parameters of the various tools used.
-
-Normally, for the purposes of your project, you won't need to modify these files, except for `.env` and `requirements.txt`.
-
-
-## :arrow_forward: Install required packages
-
-- [ ] In Git Bash, run the following commands to:
-  - install all packages from file `requirements.txt`
-  - list all packages
+- [ ] Dans Git Bash, exécutez les commandes suivantes pour installer les paquets requis :
 
 ```bash
 pip install -r requirements.txt
 pip list
-```
+````
 
+## :arrow\_forward: Variables d'environnement
 
-## :arrow_forward: Environment variables
+Vous devez définir les variables pour connecter l'application à votre base de données PostgreSQL et configurer le Webservice.
 
-You are now going to define environment variables to declare the database and webservice to which you are going to connect your python application.
+À la racine du projet :
 
-At the root of the project :
+  - [ ] Créez un fichier nommé `.env`
+  - [ ] Copiez et adaptez le contenu ci-dessous :
 
-- [ ] Create a file called `.env`
-- [ ] Paste in and complete the elements below
+<!-- end list -->
 
 ```default
-WEBSERVICE_HOST=https://pokeapi.co/api/v2
+# Configuration de l'API (si nécessaire)
+API_HOST=localhost
+API_PORT=9876
 
+# Base de données PostgreSQL
 POSTGRES_HOST=sgbd-eleves.domensai.ecole
 POSTGRES_PORT=5432
 POSTGRES_DATABASE=idxxxx
@@ -113,134 +91,79 @@ POSTGRES_PASSWORD=idxxxx
 POSTGRES_SCHEMA=projet
 ```
 
+## :arrow\_forward: Lancer l'application
 
-## :arrow_forward: Unit tests
+L'application se compose de deux parties qui doivent fonctionner en parallèle : le **Backend** (API) et le **Frontend** (Streamlit).
 
-- [ ] In Git Bash: `pytest -v` 
-  - or `python -m pytest -v` if *pytest* has not been added to *PATH*
+### 1\. Lancer le Backend (API)
 
+Ce service gère la logique métier, la base de données et l'analyse des fichiers GPX.
 
-### TU DAO
+  - [ ] Dans un terminal :
 
-To ensure tests are repeatable, safe, and **do not interfere with the real database**, we use a dedicated schema for unit testing.
+<!-- end list -->
 
-The DAO unit tests use data from the `data/pop_db_test.sql` file.
-
-This data is loaded into a separate schema (projet_test_dao) so as not to pollute the other data.
-
-
-### Test coverage
-
-It is also possible to generate test coverage using [Coverage](https://coverage.readthedocs.io/en/7.4.0/index.html)
-
-:bulb: The `.coveragerc` file can be used to modify the settings
-
-- [ ] `coverage run -m pytest`
-- [ ] `coverage report -m`
-- [ ] `coverage html`
-  - Download and open coverage_report/index.html
-
-
-
-## :arrow_forward: Launch the CLI application
-
-This application provides a very basic graphical interface for navigating between different menus.
-
-- [ ] In Git Bash: `python src/main.py`
-- [ ] On first launch, choose **Reset database**
-  - this calls the `src/utils/reset_database.py` program
-  - which will itself execute the SQL scripts in the `data` folder
-
-
-
-## :arrow_forward: Launch the webservice
-
-This application can also be used to create a webservice.
-
-- [ ] `python src/app.py`
-
-Documentation :
-
-- /docs
-- /redoc
-
-### Endpoints
-
-Examples of endpoints (to be tested, for example, with *Insomnia* or a browser):
-
-
-- `GET http://localhost/joueur`
-- `GET http://localhost/joueur/3`
-- ```
-  POST http://localhost/joueur/
-  JSON body :
-    {
-      "pseudo": "patapouf",
-      "mdp": "9999",
-      "age": "95",
-      "mail": "patapouf@mail.fr",
-      "fan_pokemon": true
-    }
-  ```
-- ```
-  PUT http://localhost/joueur/3
-  JSON body :
-    {
-       "pseudo": "maurice_new",
-       "mdp": null,
-       "age": 20,
-       "mail": "maurice@ensai.fr",
-       "fan_pokemon": true
-    }
-  ```
-- `DELETE http://localhost/joueur/5`
-
-
-
-## :arrow_forward: Logs
-
-It is initialised in the `src/utils/log_init.py` module:
-
-- This is called when the application or webservice is started.
-- It uses the `logging_config.yml` file for configuration.
-  - to change the log level :arrow_right: *level* tag
-
-A decorator has been created in `src/utils/log_decorator.py`.
-
-When applied to a method, it will display in the logs :
-
-- input parameters
-- the output
-
-The logs can be viewed in the `logs` folder.
-
-Example of logs :
-
-```
-07/08/2024 09:07:07 - INFO     - ConnexionVue
-07/08/2024 09:07:08 - INFO     -     JoueurService.se_connecter('a', '*****') - DEBUT
-07/08/2024 09:07:08 - INFO     -         JoueurDao.se_connecter('a', '*****') - DEBUT
-07/08/2024 09:07:08 - INFO     -         JoueurDao.se_connecter('a', '*****') - FIN
-07/08/2024 09:07:08 - INFO     -            └─> Sortie : Joueur(a, 20 ans)
-07/08/2024 09:07:08 - INFO     -     JoueurService.se_connecter('a', '*****') - FIN
-07/08/2024 09:07:08 - INFO     -        └─> Sortie : Joueur(a, 20 ans)
-07/08/2024 09:07:08 - INFO     - MenuJoueurVue
+```bash
+python src/app.py
 ```
 
+*L'API sera accessible sur `http://localhost:9876`.*
 
+Documentation de l'API (une fois lancée) :
 
-## :arrow_forward: Continuous integration (CI)
+  - Swagger UI : `http://localhost:9876/docs`
+  - ReDoc : `http://localhost:9876/redoc`
 
-The repository contains a `.github/workflow/main.yml' file.
+### 2\. Lancer le Frontend (Streamlit)
 
-When you *push* on GitHub, it triggers a pipeline that will perform the following steps:
+C'est l'interface graphique que vous utiliserez dans votre navigateur.
 
-- Creating a container from an Ubuntu (Linux) image
-  - In other words, it creates a virtual machine with just a Linux kernel.
-- Install Python
-- Install the required packages
-- Run the unit tests (only the service tests, as it's more complicated to run the dao tests)
-- Analyse the code with *pylint*
-  - If the score is less than 7.5, the step will fail
+  - [ ] Dans un **nouveau** terminal :
 
-You can check how this pipeline is progressing on your repository's GitHub page, *Actions* tab.
+<!-- end list -->
+
+```bash
+streamlit run src/streamlit_app.py
+```
+
+*Votre navigateur devrait s'ouvrir automatiquement.*
+
+## :arrow\_forward: Fonctionnalités détaillées
+
+Une fois sur l'interface Streamlit, vous pouvez :
+
+1.  **Authentification** : Vous inscrire ou vous connecter.
+2.  **Fil d'actualité** : Voir les dernières activités des personnes que vous suivez.
+3.  **Mes Activités** : Consulter votre historique, voir les détails (vitesse, carte, etc.) et supprimer des activités.
+4.  **Poster (GPX)** : Uploader un fichier `.gpx` (ex: export Strava/Garmin). L'application analyse automatiquement la distance, la durée et le dénivelé avant validation.
+5.  **Rechercher Profil** : Trouver d'autres utilisateurs par pseudo, visiter leur profil et s'abonner ("Suivre").
+6.  **Statistiques** : Visualiser vos totaux (km parcourus, temps total) et vos performances de la semaine.
+
+## :arrow\_forward: Tests Unitaires
+
+Les tests assurent la fiabilité du code (notamment les Services et les DAO).
+
+  - [ ] Lancer les tests : `pytest -v`
+  - [ ] Vérifier la couverture :
+
+<!-- end list -->
+
+```bash
+coverage run -m pytest
+coverage report -m
+```
+
+## :arrow\_forward: Logs
+
+Les logs permettent de suivre l'exécution du backend. Ils sont configurés via `logging_config.yml` et visibles dans le terminal où tourne `src/app.py` ou dans le dossier `logs/` (si configuré).
+
+Exemple de log lors d'une connexion :
+
+```
+INFO     - JoueurService.se_connecter('pseudo', '***') - DEBUT
+INFO     -    JoueurDao.se_connecter - SUCCES
+INFO     - JoueurService.se_connecter - FIN
+```
+
+```
+```
