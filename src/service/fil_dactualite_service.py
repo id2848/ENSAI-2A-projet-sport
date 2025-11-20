@@ -29,10 +29,10 @@ class Fildactualite:
     def creer_fil_dactualite(self, id_utilisateur: int) -> list:
         """Retourne le fil d'actualité d'un utilisateur"""
 
-        liste_id_suivis = AbonnementService().lister_utilisateurs_suivis(id_utilisateur) 
-                
-        for j in liste_id_suivis:
-            ls_activites = self.activite_dao.lister_par_utilisateur(j)
-        ls_activites = sorted(ls_activites, key=lambda a: a.date_activite)
-        print(ls_activites)
+        set_id_suivis = AbonnementService().lister_utilisateurs_suivis(id_utilisateur)
+        ls_activites = []
+        for u in set_id_suivis:
+            ls_activites += self.activite_dao.lister_par_utilisateur(u)
+        ls_activites = sorted(ls_activites, key=lambda a: a.date_activite, reverse=True)
+        
         return ls_activites
