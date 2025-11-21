@@ -15,14 +15,13 @@ from dao.activite_dao import ActiviteDao
 from dao.commentaire_dao import CommentaireDao
 from dao.jaime_dao import JaimeDao
 
-from exceptions import NotFoundError
+from exceptions import NotFoundError, AlreadyExistsError
 
 import logging
 
 class ActiviteService:
     """Classe contenant les méthodes de service des activités Utilisateurs"""
 
-    
     def creer_activite(self, id_utilisateur: int, sport: str, date_activite: date, distance: float, duree: timedelta) -> bool:
         """Crée une nouvelle activité"""
         try:
@@ -33,7 +32,6 @@ class ActiviteService:
                 distance=distance,
                 duree=duree
             )
-            # Simuler l'enregistrement de l'activité dans la base de données
             return ActiviteDao().creer(activite)  # Appel à DAO pour l'enregistrement
         except Exception as e:
             logging.error(f"Erreur lors de la création de l'activité : {e}")  # Affichage de l'erreur pour le diagnostic
@@ -116,47 +114,52 @@ class ActiviteService:
 
     def ajouter_jaime(self, id_activite: int, id_utilisateur: int) -> bool:
         """Ajoute un "j'aime" à une activité"""
-        try:
-            jaime = Jaime(id_activite=id_activite, id_auteur=id_utilisateur)
-            return JaimeDao().creer(jaime)  # Ajoute le "j'aime" de l'utilisateur
-        except Exception as e:
-            logging.error(f"Erreur lors de l'ajout du 'j'aime' : {e}")
-            return False
+        if not ActiviteDao().verifier_id_existant(id_activite):
+            raise NotFoundError("Cette activité n'existe pas")
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError("Cet utilisateur n'existe pas")
+        if JaimeDao().existe(id_activite, id_utilisateur):
+            raise AlreadyExistsError("Ce jaime existe déjà")
+        
+        jaime = Jaime(id_activite=id_activite, id_auteur=id_utilisateur)
+        return JaimeDao().creer(jaime)
 
     def supprimer_jaime(self, id_activite: int, id_utilisateur: int) -> bool:
         """Supprime un "j'aime" d'une activité"""
-        try:
-            return JaimeDao().supprimer(id_activite, id_utilisateur)  # Retire le "j'aime" de l'utilisateur
-        except Exception as e:
-            logging.error(f"Erreur lors de la suppression du 'j'aime' : {e}")
-            return False
+        if not ActiviteDao().verifier_id_existant(id_activite):
+            raise NotFoundError("Cette activité n'existe pas")
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError("Cet utilisateur n'existe pas")
+        if not JaimeDao().existe(id_activite, id_utilisateur):
+            raise NotFoundError("Ce jaime n'existe pas")
+
+        return JaimeDao().supprimer(id_activite, id_utilisateur)
         
-    def jaime_existe(self, id_activite: int, id_auteur: int) -> bool:
+    def jaime_existe(self, id_activite: int, id_utilisateur: int) -> bool:
         """Vérifier si un jaime existe dans la base de données"""
-        try:
-             return JaimeDao().existe(id_activite, id_auteur)
-        except Exception as e:
-            logging.error(f"Erreur lors de la vérification du jaime : {e}")
-            return None
+        if not ActiviteDao().verifier_id_existant(id_activite):
+            raise NotFoundError("Cette activité n'existe pas")
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError("Cet utilisateur n'existe pas")
+        
+        return JaimeDao().existe(id_activite, id_utilisateur)
     
     def compter_jaimes_par_activite(self, id_activite: int) -> int:
         """Compte le nombre de jaimes pour une activité donnée."""
-        try:
-            nombre = JaimeDao().compter_par_activite(id_activite)
-            return nombre
-        except Exception as e:
-            logging.error(f"Erreur lors du comptage des jaimes d'une activité : {e}")
-            return None
+        if not ActiviteDao().verifier_id_existant(id_activite):
+            raise NotFoundError("Cette activité n'existe pas")
+        
+        return JaimeDao().compter_par_activite(id_activite)
 
 
     # --- Commentaires ---
 
-    def ajouter_commentaire(self, id_utilisateur: int, id_activite: int, contenu: str) -> bool:
+    def ajouter_commentaire(self, id_activite: int, id_utilisateur: int, contenu: str) -> bool:
         """Ajoute un commentaire à une activité"""
-        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
-            raise NotFoundError("Cet utilisateur n'existe pas")
         if not ActiviteDao().verifier_id_existant(id_activite):
             raise NotFoundError("Cette activité n'existe pas")
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError("Cet utilisateur n'existe pas")
         
         commentaire = Commentaire(
             id_activite=id_activite,

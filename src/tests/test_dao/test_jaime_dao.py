@@ -23,10 +23,10 @@ def test_creer_ok():
     jaime = Jaime(id_activite=991, id_auteur=994)
 
     # WHEN
-    creation_ok = JaimeDao().creer(jaime)
+    res = JaimeDao().creer(jaime)
 
     # THEN
-    assert creation_ok
+    assert res
     assert jaime.id_activite == 991
     assert jaime.id_auteur == 994
 

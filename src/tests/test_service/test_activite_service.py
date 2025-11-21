@@ -153,10 +153,10 @@ def test_ajouter_jaime_ok():
     id_utilisateur = 992
 
     # WHEN
-    result = ActiviteService().ajouter_jaime(id_activite, id_utilisateur)
+    res = ActiviteService().ajouter_jaime(id_activite, id_utilisateur)
 
     # THEN
-    assert result is True
+    assert res
 
 def test_ajouter_jaime_echec():
     """Test pour l'échec de l'ajout d'un 'j'aime' (par exemple, si l'activité n'existe pas)"""
@@ -165,11 +165,10 @@ def test_ajouter_jaime_echec():
     id_utilisateur = 99999  # Un utilisateur qui n'existe pas
     id_activite = 999  # Une activité qui n'existe pas
 
-    # WHEN
-    result = ActiviteService().ajouter_jaime(id_activite, id_utilisateur)
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        result = ActiviteService().ajouter_jaime(id_activite, id_utilisateur)
 
-    # THEN
-    assert result is False
 
 def test_supprimer_jaime_ok():
     """Suppression d'un jaime réussie"""
@@ -191,11 +190,9 @@ def test_supprimer_jaime_ko():
     id_activite = 991
     id_auteur = 995
 
-    # WHEN
-    suppression_ok = ActiviteService().supprimer_jaime(id_activite, id_auteur)
-
-    # THEN
-    assert not suppression_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        suppression_ok = ActiviteService().supprimer_jaime(id_activite, id_auteur)
 
 def test_lister_commentaires():
     """Test pour lister les commentaires d'une activité"""
@@ -214,12 +211,12 @@ def test_ajouter_commentaire_ok():
     """Test pour ajouter un commentaire à une activité"""
 
     # GIVEN
-    id_utilisateur = 991  # John Doe
     id_activite = 994  # Activité de Emily Jones
+    id_utilisateur = 991  # John Doe
     contenu = "Très belle randonnée !"
 
     # WHEN
-    res = ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, contenu)
+    res = ActiviteService().ajouter_commentaire(id_activite, id_utilisateur, contenu)
 
     # THEN
     assert res
@@ -228,13 +225,13 @@ def test_ajouter_commentaire_echec():
     """Test pour l'échec de l'ajout d'un commentaire (par exemple, si l'activité n'existe pas)"""
 
     # GIVEN
-    id_utilisateur = 991
     id_activite = 9999  # Une activité qui n'existe pas
+    id_utilisateur = 991
     contenu = "Super activité !"
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, contenu)
+        ActiviteService().ajouter_commentaire(id_activite, id_utilisateur, contenu)
 
 def test_supprimer_commentaire_ok():
     """Suppression de commentaire réussie"""
@@ -304,14 +301,14 @@ def test_trouver_commentaire_par_id_ok():
     assert commentaire.id_commentaire == id_commentaire
 
 def test_jaime_existe_ok():
-    """Vérifier qu'un jaime existe pour une activité et un auteur donnés"""
+    """Vérifier qu'un jaime existe pour une activité et un utilisateur donnés"""
 
     # GIVEN
     id_activite=991
-    id_auteur=993
+    id_utilisateur=993
 
     # WHEN
-    existe = ActiviteService().jaime_existe(id_activite=id_activite, id_auteur=id_auteur)
+    existe = ActiviteService().jaime_existe(id_activite=id_activite, id_utilisateur=id_utilisateur)
 
     # THEN
     assert existe
@@ -322,10 +319,10 @@ def test_jaime_existe_ko():
 
     # GIVEN
     id_activite = 991
-    id_auteur = 995
+    id_utilisateur = 995
 
     # WHEN
-    existe = ActiviteService().jaime_existe(id_activite=id_activite, id_auteur=id_auteur)
+    existe = ActiviteService().jaime_existe(id_activite=id_activite, id_utilisateur=id_utilisateur)
 
     # THEN
     assert (not existe)
@@ -347,13 +344,9 @@ def test_compter_jaimes_par_activite_inexistante():
     # GIVEN
     id_activite = 99999  # inexistant
 
-    # WHEN
-    count = ActiviteService().compter_jaimes_par_activite(id_activite)
-
-    # THEN
-    assert isinstance(count, int)
-    assert count == 0
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        count = ActiviteService().compter_jaimes_par_activite(id_activite)
 
 if __name__ == "__main__":
-    import pytest
     pytest.main([__file__])

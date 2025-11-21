@@ -14,7 +14,7 @@ from exceptions import DatabaseCreationError, DatabaseDeletionError
 
 class CommentaireDao:
     """Classe contenant les méthodes pour accéder aux Commentaires de la base de données"""
-    def creer(self, commentaire: Commentaire) -> bool:
+    def creer(self, commentaire: Commentaire) -> Commentaire:
         """Creation d'un commentaire dans la base de données
 
         Parameters

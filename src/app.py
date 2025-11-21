@@ -226,59 +226,40 @@ def lister_utilisateurs(user = Depends(get_current_user)):
 @app.post("/jaimes")
 def ajouter_jaime(id_activite: int, user = Depends(get_current_user)):
     """Ajouter un jaime à une activité pour l'utilisateur connecté."""
-    activite = ActiviteService().trouver_activite_par_id(id_activite)
-    if not activite:
-        raise HTTPException(status_code=400, detail="Cette activité n'existe pas")
-    id_auteur = user["id_utilisateur"]
-    if ActiviteService().jaime_existe(id_activite, id_auteur):
-        raise HTTPException(status_code=400, detail="Vous avez déjà ajouté un jaime à cette activité")
-    jaime_cree = ActiviteService().ajouter_jaime(id_activite, id_auteur)
-    if not jaime_cree:
-        raise HTTPException(status_code=400, detail="Erreur lors de l'ajout du jaime")
-    return {"message": "Jaime ajouté"}
+    try:
+        id_auteur = user["id_utilisateur"]
+        return ActiviteService().ajouter_jaime(id_activite, id_auteur)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except AlreadyExistsError as e:
+        raise HTTPException(status_code=409, detail=str(e))
 
 @app.delete("/jaimes/{id_activite}")
 def supprimer_jaime(id_activite: int, user = Depends(get_current_user)):
-    """Supprimer le jaime appartenant à l'utilisateur connecté d'une activité."""
-    activite = ActiviteService().trouver_activite_par_id(id_activite)
-    if not activite:
-        return {"message": "Cette activité n'existe pas"}
-    jaime = ActiviteService().jaime_existe(id_activite, user["id_utilisateur"])
-    if not jaime:
-        return {"message": "Vous n'avez pas ajouté de jaime à cette activité"}
-    supprime = ActiviteService().supprimer_jaime(id_activite, user["id_utilisateur"])
-    if not supprime:
-        raise HTTPException(status_code=400, detail="Erreur lors de la suppression du jaime")
-    return {"message": "Jaime supprimé"}
+    """Supprimer le jaime appartenant à l'utilisateur connecté d'une activité.""" 
+    try:
+        ActiviteService().supprimer_jaime(id_activite, user["id_utilisateur"])
+        return {"message": "Jaime supprimé avec succès"}
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 @app.get("/jaimes/existe")
 def jaime_existe(id_activite: int, id_auteur: int, user = Depends(get_current_user)):
     """Vérifier si un jaime existe pour une activité et un auteur donné."""
-    utilisateur = UtilisateurService().trouver_par_id(id_auteur)
-    if not utilisateur:
-        raise HTTPException(status_code=400, detail="Cet utilisateur n'existe pas")
-    activite = ActiviteService().trouver_activite_par_id(id_activite)
-    if not activite:
-        raise HTTPException(status_code=400, detail="Cette activité n'existe pas")
-
-    existe = ActiviteService().jaime_existe(id_activite, id_auteur)
-    return existe
+    try:
+        return ActiviteService().jaime_existe(id_activite, id_auteur)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 @app.get("/jaimes/compter")
 def compter_jaimes(id_activite: int, user = Depends(get_current_user)):
     """Compter le nombre de jaimes pour une activité donnée."""
-    
-    # Vérifier que l'activité existe
-    activite = ActiviteService().trouver_activite_par_id(id_activite)
-    if not activite:
-        raise HTTPException(status_code=400, detail="Cette activité n'existe pas")
-    
-    # Compter les jaimes via le service
-    nombre_jaimes = ActiviteService().compter_jaimes_par_activite(id_activite)
-    if nombre_jaimes is None:
-        raise HTTPException(status_code=500, detail="Erreur lors du comptage des jaimes")
-    
-    return {"id_activite": id_activite, "nombre_jaimes": nombre_jaimes}
+
+    try:
+        nombre_jaimes = ActiviteService().compter_jaimes_par_activite(id_activite)
+        return {"id_activite": id_activite, "nombre_jaimes": nombre_jaimes}
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 # --- Endpoints Commentaires ---
@@ -288,7 +269,7 @@ def ajouter_commentaire(id_activite: int, commentaire: str, user = Depends(get_c
     """Ajouter un commentaire à une activité pour l'utilisateur connecté."""
     try:
         id_utilisateur = user["id_utilisateur"]
-        return ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, commentaire)
+        return ActiviteService().ajouter_commentaire(id_activite, id_utilisateur, commentaire)
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -345,8 +326,7 @@ def supprimer_abonnement(id_utilisateur_suivi: int, user = Depends(get_current_u
 def abonnement_existe(id_utilisateur_suiveur: int, id_utilisateur_suivi: int, user = Depends(get_current_user)):
     """Vérifier si un abonnement existe entre deux utilisateurs."""
     try:
-        existe = AbonnementService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
-        return existe
+        return AbonnementService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 

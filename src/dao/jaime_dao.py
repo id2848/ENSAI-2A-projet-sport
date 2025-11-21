@@ -15,7 +15,7 @@ class JaimeDao:
     """Classe contenant les méthodes pour accéder aux Jaimes de la base de données"""
 
     @log
-    def creer(self, jaime: Jaime) -> bool:
+    def creer(self, jaime: Jaime) -> Jaime:
         """Création d'un jaime dans la base de données
 
         Parameters
@@ -52,7 +52,7 @@ class JaimeDao:
             logging.error(msg_err)
             raise DatabaseCreationError(msg_err)
         
-        return True
+        return jaime
     
     @log
     def lister_par_activite(self, id_activite: int) -> List[Jaime]:
