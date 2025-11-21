@@ -37,7 +37,7 @@ class AbonnementDao:
                     )
                     res = cursor.fetchone()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
 
         created = False
         if res:
@@ -75,7 +75,7 @@ class AbonnementDao:
                     )
                     res = cursor.fetchone()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
 
         abonnement = None
@@ -111,7 +111,7 @@ class AbonnementDao:
                     )
                     res = cursor.fetchall()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
 
         liste_abonnements = []
@@ -151,7 +151,7 @@ class AbonnementDao:
                     )
                     res = cursor.fetchall()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
 
         liste_abonnements = []
@@ -184,7 +184,7 @@ class AbonnementDao:
                     )
                     res = cursor.fetchall()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
 
         liste_abonnements = []
@@ -227,7 +227,7 @@ class AbonnementDao:
                     )
                     res = cursor.rowcount
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
 
         return res > 0
