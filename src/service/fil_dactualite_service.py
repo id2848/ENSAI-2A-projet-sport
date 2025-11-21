@@ -1,3 +1,5 @@
+from typing import List
+
 from utils.log_decorator import log
 
 from dao.abonnement_dao import AbonnementDao
@@ -28,7 +30,7 @@ class Fildactualite:
         self.activite_dao = ActiviteDao()
     
     @log
-    def creer_fil_dactualite(self, id_utilisateur: int) -> list:
+    def creer_fil_dactualite(self, id_utilisateur: int) -> List[Activite]:
         """Retourne le fil d'actualité d'un utilisateur"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
             raise NotFoundError(f"Cet utilisateur n'existe pas")

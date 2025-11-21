@@ -317,6 +317,7 @@ def lister_commentaires(id_activite: int, user = Depends(get_current_user)):
 
     return commentaires
 
+
 # --- Endpoints Abonnements ---
 
 @app.post("/abonnements", tags=["Abonnement"])
@@ -378,53 +379,40 @@ def fil_dactualite(id_utilisateur: int, user = Depends(get_current_user)):
 
 # --- Endpoints Statistiques ---
 
-@app.get("/statistiques/total/{id_utilisateur}")
+@app.get("/statistiques/total/{id_utilisateur}", tags=["Statistiques"])
 def statistiques_totales(id_utilisateur: int, user = Depends(get_current_user)):
     """Récupérer les statistiques globales (totales) d'un utilisateur."""
-    
-    utilisateur = UtilisateurService().trouver_par_id(id_utilisateur)
-    if not utilisateur:
-        return {"message": "Cet utilisateur n'existe pas"}
-    
-    # Récupérer les données nécessaires via les méthodes de StatistiquesService
-    nombre_activites = StatistiquesService().calculer_nombre_activites_total(id_utilisateur)
-    distance_totale = StatistiquesService().calculer_distance_totale(id_utilisateur)
-    duree_totale = StatistiquesService().calculer_duree_totale(id_utilisateur)
-
-    if all(x is not None for x in [nombre_activites, distance_totale, duree_totale]):
+    try:
+        # Récupérer les données nécessaires via les méthodes de StatistiquesService
+        nombre_activites = StatistiquesService().calculer_nombre_activites_total(id_utilisateur)
+        distance_totale = StatistiquesService().calculer_distance_totale(id_utilisateur)
+        duree_totale = StatistiquesService().calculer_duree_totale(id_utilisateur)
         return {
             "nombre_activites_total": nombre_activites,
             "distance_totale": distance_totale,
             "duree_totale": duree_totale
-        }  
-    else:
-        return {"message": "Erreur"}
+        }
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/statistiques/semaine/{id_utilisateur}")
+@app.get("/statistiques/semaine/{id_utilisateur}", tags=["Statistiques"])
 def statistiques_semaine(id_utilisateur: int, date_reference: str, user = Depends(get_current_user)):
     """Récupérer les statistiques d'une semaine spécifique d'un utilisateur.
     La date doit être au format YYYY-MM-DD"""
-    
-    utilisateur = UtilisateurService().trouver_par_id(id_utilisateur)
-    if not utilisateur:
-        return {"message": "Cet utilisateur n'existe pas"}
-    
-    if not verifier_date(date_reference):
-        return {"message": f"Le format de la date est incorrect. Utilisez le format YYYY-MM-DD."}
-    
-    # Récupérer les données de la semaine demandée via les méthodes de StatistiquesService
-    nombre_activites_semaine = StatistiquesService().calculer_nombre_activites_semaine(id_utilisateur, date_reference)
-    distance_semaine = StatistiquesService().calculer_distance_semaine(id_utilisateur, date_reference)
-    duree_semaine = StatistiquesService().calculer_duree_semaine(id_utilisateur, date_reference)
-    
-    if all(x is not None for x in [nombre_activites_semaine, distance_semaine, duree_semaine]):
+    try:
+        # Récupérer les données de la semaine demandée via les méthodes de StatistiquesService
+        nombre_activites_semaine = StatistiquesService().calculer_nombre_activites_semaine(id_utilisateur, date_reference)
+        distance_semaine = StatistiquesService().calculer_distance_semaine(id_utilisateur, date_reference)
+        duree_semaine = StatistiquesService().calculer_duree_semaine(id_utilisateur, date_reference)
         return {
             "nombre_activites_semaine": nombre_activites_semaine,
             "distance_semaine": distance_semaine,
             "duree_semaine": duree_semaine
         }
-    else:
-        return {"message": "Erreur"}
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # --- Endpoint Upload GPX ---

@@ -15,17 +15,6 @@ def setup_test_environment():
         ResetDatabase().lancer(test_dao=True)
         yield
 
-def test_verifier_utilisateur_existant():
-    """Test pour vérifier si un utilisateur existe"""
-    
-    # GIVEN
-    id_existant = 992  # Utilisateur avec ID 992 existe dans la base
-    id_inexistant = 9999999  # Utilisateur qui n'existe pas
-    
-    # WHEN / THEN
-    assert StatistiquesService().verifier_utilisateur_existant(id_existant) is True
-    assert StatistiquesService().verifier_utilisateur_existant(id_inexistant) is False
-
 def test_calculer_nombre_activites_total():
     """Test pour calculer le nombre total d'activités par sport"""
     

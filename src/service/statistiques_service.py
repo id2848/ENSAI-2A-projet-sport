@@ -10,27 +10,22 @@ from dao.utilisateur_dao import UtilisateurDao
 from datetime import datetime
 from utils.verifier_date import verifier_date
 
+from exceptions import NotFoundError
+
 
 class StatistiquesService:
     """Classe contenant les méthodes de service pour les statistiques des activités"""
 
+    @log
     def __init__(self):
         self.activite_dao = ActiviteDao()
         self.utilisateur_dao = UtilisateurDao()
 
-    def verifier_utilisateur_existant(self, id_utilisateur: int) -> bool:
-        """Vérifie si l'utilisateur existe dans la base de données"""
-        # Logique pour vérifier si l'utilisateur existe. Exemple :
-        utilisateur = self.utilisateur_dao.trouver_par_id(id_utilisateur)
-        return utilisateur is not None
-
     @log
     def calculer_nombre_activites_total(self, id_utilisateur: int) -> dict:
         """Retourne le nombre total d'activités par sport pour un utilisateur."""
-        # Validation de l'existence de l'utilisateur
-        if not self.verifier_utilisateur_existant(id_utilisateur):
-            logging.error(f"Utilisateur avec ID {id_utilisateur} n'existe pas.")
-            return None
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError(f"Cet utilisateur n'existe pas")
 
         liste_activites = self.activite_dao.lister_par_utilisateur(id_utilisateur)
         stats = {}
@@ -41,10 +36,8 @@ class StatistiquesService:
     @log
     def calculer_distance_totale(self, id_utilisateur: int) -> float:
         """Retourne la distance totale parcourue par l'utilisateur."""
-        # Validation de l'existence de l'utilisateur
-        if not self.verifier_utilisateur_existant(id_utilisateur):
-            logging.error(f"Utilisateur avec ID {id_utilisateur} n'existe pas.")
-            return None
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError(f"Cet utilisateur n'existe pas")
 
         liste_activites = self.activite_dao.lister_par_utilisateur(id_utilisateur)
         return sum(a.distance for a in liste_activites)
@@ -52,10 +45,8 @@ class StatistiquesService:
     @log
     def calculer_duree_totale(self, id_utilisateur: int) -> int:
         """Retourne la durée totale (en secondes) des activités de l'utilisateur."""
-        # Validation de l'existence de l'utilisateur
-        if not self.verifier_utilisateur_existant(id_utilisateur):
-            logging.error(f"Utilisateur avec ID {id_utilisateur} n'existe pas.")
-            return None
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError(f"Cet utilisateur n'existe pas")
 
         liste_activites = self.activite_dao.lister_par_utilisateur(id_utilisateur)
         duree_totale = 0
@@ -68,16 +59,13 @@ class StatistiquesService:
 
     @log
     def calculer_nombre_activites_semaine(self, id_utilisateur: int, date_reference: str) -> dict:
-        """Retourne le nombre d'activités par sport pour la semaine correspondant à la date donnée."""
-        # Validation de l'existence de l'utilisateur
-        if not self.verifier_utilisateur_existant(id_utilisateur):
-            logging.error(f"Utilisateur avec ID {id_utilisateur} n'existe pas.")
-            return None
+        """Retourne le nombre d'activités par sport pour la semaine correspondant à la date donnée (format YYYY-MM-DD)."""
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError(f"Cet utilisateur n'existe pas")
         
         # Validation du format de la date
         if not verifier_date(date_reference):
-            logging.error(f"Le format de la date {date_reference} est incorrect. Utilisez le format YYYY-MM-DD.")
-            return None
+            raise ValueError(f"Le format de la date {date_reference} est incorrect. Utilisez le format YYYY-MM-DD.")
         
         date_reference_obj = datetime.strptime(date_reference, "%Y-%m-%d").date()
         liste_activites = self.activite_dao.lister_par_utilisateur(id_utilisateur)
@@ -97,16 +85,13 @@ class StatistiquesService:
 
     @log
     def calculer_distance_semaine(self, id_utilisateur: int, date_reference: str) -> float:
-        """Retourne la distance totale parcourue par semaine (tous sports confondus)."""
-        # Validation de l'existence de l'utilisateur
-        if not self.verifier_utilisateur_existant(id_utilisateur):
-            logging.error(f"Utilisateur avec ID {id_utilisateur} n'existe pas.")
-            return None
+        """Retourne la distance totale parcourue par semaine (tous sports confondus) correspondant à la date donnée (format YYYY-MM-DD)."""
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError(f"Cet utilisateur n'existe pas")
         
         # Validation du format de la date
         if not verifier_date(date_reference):
-            logging.error(f"Le format de la date {date_reference} est incorrect. Utilisez le format YYYY-MM-DD.")
-            return None
+            raise ValueError(f"Le format de la date {date_reference} est incorrect. Utilisez le format YYYY-MM-DD.")
         
         date_reference_obj = datetime.strptime(date_reference, "%Y-%m-%d").date()
         liste_activites = self.activite_dao.lister_par_utilisateur(id_utilisateur)
@@ -123,16 +108,13 @@ class StatistiquesService:
 
     @log
     def calculer_duree_semaine(self, id_utilisateur: int, date_reference: str) -> int:
-        """Retourne la durée totale (en secondes) des activités de la semaine."""
-        # Validation de l'existence de l'utilisateur
-        if not self.verifier_utilisateur_existant(id_utilisateur):
-            logging.error(f"Utilisateur avec ID {id_utilisateur} n'existe pas.")
-            return None
+        """Retourne la durée totale (en secondes) des activités de la semaine correspondant à la date donnée (format YYYY-MM-DD)."""
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError(f"Cet utilisateur n'existe pas")
         
         # Validation du format de la date
         if not verifier_date(date_reference):
-            logging.error(f"Le format de la date {date_reference} est incorrect. Utilisez le format YYYY-MM-DD.")
-            return None
+            raise ValueError(f"Le format de la date {date_reference} est incorrect. Utilisez le format YYYY-MM-DD.")
         
         date_reference_obj = datetime.strptime(date_reference, "%Y-%m-%d").date()
         liste_activites = self.activite_dao.lister_par_utilisateur(id_utilisateur)
