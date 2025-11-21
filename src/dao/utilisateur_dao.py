@@ -4,9 +4,6 @@ from utils.securite import hash_password, generer_salt, verifier_mot_de_passe
 from dao.db_connection import DBConnection
 
 from business_object.utilisateur import Utilisateur
-import bcrypt
-import hashlib
-import os
 
 class UtilisateurDao:
     """Classe contenant les méthodes pour accéder aux utilisateurs de la base de données"""
@@ -88,7 +85,7 @@ class UtilisateurDao:
 
 
     @log
-    def trouver_par_pseudo(self, pseudo: str) -> Utilisateur:
+    def trouver_par_pseudo(self, pseudo: str) -> Utilisateur | None:
         """Trouver un utilisateur grâce à son pseudo
 
         Parameters
@@ -126,7 +123,7 @@ class UtilisateurDao:
         return None
 
     @log
-    def trouver_par_id(self, id_utilisateur: int) -> Utilisateur:
+    def trouver_par_id(self, id_utilisateur: int) -> Utilisateur | None:
         """Trouver un utilisateur par son ID"""
         try:
             with DBConnection().connection as connection:

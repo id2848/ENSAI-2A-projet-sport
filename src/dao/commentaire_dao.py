@@ -127,7 +127,7 @@ class CommentaireDao:
 
         return res > 0
 
-    def trouver_par_id(self, id_commentaire: int) -> Commentaire:
+    def trouver_par_id(self, id_commentaire: int) -> Commentaire | None:
         """Trouver un commentaire par son id"""
         try:
             with DBConnection().connection as connection:

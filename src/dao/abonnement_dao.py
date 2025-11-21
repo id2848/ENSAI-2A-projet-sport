@@ -1,9 +1,12 @@
+from typing import List
+
 import logging
 from utils.log_decorator import log
 
 from dao.db_connection import DBConnection
 
 from business_object.abonnement import Abonnement
+
 class AbonnementDao:
     """Classe contenant les méthodes pour accéder aux abonnements de la base de données"""
 
@@ -44,8 +47,9 @@ class AbonnementDao:
             created = True
 
         return created
+    
     @log
-    def trouver_par_ids(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int) -> Abonnement:
+    def trouver_par_ids(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int) -> Abonnement | None:
         """Trouver un abonnement grâce aux ids du suiveur et du suivi
 
         Parameters
@@ -87,7 +91,7 @@ class AbonnementDao:
 
         return abonnement
     @log
-    def lister_suivis(self, id_utilisateur: int) -> list[Abonnement]:
+    def lister_suivis(self, id_utilisateur: int) -> List[Abonnement]:
         """Lister tous les abonnements d'un utilisateur (personnes qu'il suit)
 
         Parameters
@@ -127,7 +131,7 @@ class AbonnementDao:
         return liste_abonnements
 
     @log
-    def lister_suiveurs(self, id_utilisateur: int) -> list[Abonnement]:
+    def lister_suiveurs(self, id_utilisateur: int) -> List[Abonnement]:
         """Lister tous les abonnements d'un utilisateur (personnes qui le suivent)
 
         Parameters
@@ -167,13 +171,13 @@ class AbonnementDao:
         return liste_abonnements
 
     @log
-    def lister_tous(self) -> list[Abonnement]:
+    def lister_tous(self) -> List[Abonnement]:
         """Lister tous les abonnements
 
         Returns
         -------
         liste_abonnements : list[Abonnement]
-            renvoie la liste de tous les abonnements dans la base de données
+            Renvoie la liste de tous les abonnements dans la base de données
         """
         try:
             with DBConnection().connection as connection:

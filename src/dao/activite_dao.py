@@ -46,7 +46,7 @@ class ActiviteDao:
 
         return created
 
-    def trouver_par_id(self, id_activite: int) -> Activite:
+    def trouver_par_id(self, id_activite: int) -> Activite | None:
         """Trouver une activité par son id"""
         try:
             with DBConnection().connection as connection:

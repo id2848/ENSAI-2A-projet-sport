@@ -48,8 +48,7 @@ class AbonnementService:
 
     @log
     def lister_utilisateurs_suiveurs(self, id_utilisateur: int):
-        """Lister tous les utilisateurs suiveurs par un utilisateur donné
-        """
+        """Lister tous les utilisateurs suiveurs par un utilisateur donné"""
         try:
             liste_abonnements = AbonnementDao().lister_suiveurs(id_utilisateur)
             utilisateurs_suiveurs = set()
