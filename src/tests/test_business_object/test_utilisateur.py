@@ -1,3 +1,5 @@
+import pytest
+
 from datetime import date
 from business_object.utilisateur import Utilisateur
 
@@ -7,14 +9,13 @@ def test_age_utilisateur():
     
     # GIVEN
     today = date.today()
-    birthdate = date(today.year - 25, today.month, today.day)  # 25 ans
+    birthdate = date(today.year - 25, today.month, today.day).strftime("%Y-%m-%d")  # 25 ans
     u = Utilisateur(
-        id_utilisateur=1,
-        pseudo="jean_dupont",
+        pseudo="jeandupont",
         nom="Dupont",
         prenom="Jean",
         date_de_naissance=birthdate,
-        sexe="M"
+        sexe="homme"
     )
 
     # WHEN
@@ -24,66 +25,96 @@ def test_age_utilisateur():
     assert age == 25
 
 # Test des validations
-def test_valider_pseudo():
-    """Test pour la validation du pseudo"""
+def test_valider_pseudo_ok():
+    """Test pour la validation du pseudo - valide"""
 
     # GIVEN
     pseudo_valide = "valid123"
-    pseudo_invalide = "in"  # Trop court
 
     # WHEN
-    validation_valide = Utilisateur.valider_pseudo(pseudo_valide)
-    validation_invalide = Utilisateur.valider_pseudo(pseudo_invalide)
+    res = Utilisateur.valider_pseudo(pseudo_valide)
 
     # THEN
-    assert validation_valide is True  # Le pseudo valide doit être accepté
-    assert validation_invalide is False  # Le pseudo invalide doit être rejeté
+    assert res
 
-def test_valider_nom_prenom():
-    """Test pour la validation du nom et prénom"""
+def test_valider_pseudo_ko():
+    """Test pour la validation du pseudo - invalide"""
+
+    # GIVEN
+    pseudo_invalide = "in"  # Trop court
+
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        res = Utilisateur.valider_pseudo(pseudo_invalide)
+
+def test_valider_nom_prenom_ok():
+    """Test pour la validation du nom et prénom - valide"""
 
     # GIVEN
     nom_valide = "Doe"
     prenom_valide = "John"
+
+    # WHEN
+    res = Utilisateur.valider_nom_prenom(nom_valide, prenom_valide)
+
+    # THEN
+    assert res
+
+def test_valider_nom_prenom_ko():
+    """Test pour la validation du nom et prénom - invalide"""
+
+    # GIVEN
     nom_invalide = "Doe123"
     prenom_invalide = "John@"
 
-    # WHEN
-    validation_valide = Utilisateur.valider_nom_prenom(nom_valide, prenom_valide)
-    validation_invalide = Utilisateur.valider_nom_prenom(nom_invalide, prenom_invalide)
-
-    # THEN
-    assert validation_valide is True  # Nom et prénom valides
-    assert validation_invalide is False  # Nom et prénom invalides
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        res = Utilisateur.valider_nom_prenom(nom_invalide, prenom_invalide)
 
 
-def test_valider_date_naissance():
-    """Test pour la validation de la date de naissance"""
+def test_valider_date_naissance_ok():
+    """Test pour la validation de la date de naissance - valide"""
 
     # GIVEN
     date_valide = "1990-01-01"
-    date_invalide = "01-01-1990"  # Mauvais format
 
     # WHEN
-    validation_valide = Utilisateur.valider_date_naissance(date_valide)
-    validation_invalide = Utilisateur.valider_date_naissance(date_invalide)
+    res = Utilisateur.valider_date_naissance(date_valide)
 
     # THEN
-    assert validation_valide is True  # La date doit être valide
-    assert validation_invalide is False  # La date doit être invalide
+    assert res
 
-
-def test_valider_sexe():
-    """Test pour la validation du sexe"""
+def test_valider_date_naissance_ko():
+    """Test pour la validation de la date de naissance - invalide"""
 
     # GIVEN
-    sexe_valide = "homme"
-    sexe_invalide = "invalide"  # Sexe non reconnu
+    date_invalide = "01-01-1990"  # Mauvais format
+
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        res = Utilisateur.valider_date_naissance(date_invalide)
+
+def test_valider_sexe_ok():
+    """Test pour la validation du sexe - valide"""
+
+    # GIVEN
+    sexe_valide = "Femme"
 
     # WHEN
-    validation_valide = Utilisateur.valider_sexe(sexe_valide)
-    validation_invalide = Utilisateur.valider_sexe(sexe_invalide)
+    res = Utilisateur.valider_sexe(sexe_valide)
 
     # THEN
-    assert validation_valide is True  # Sexe valide
-    assert validation_invalide is False  # Sexe invalide
+    assert res
+
+def test_valider_sexe_ko():
+    """Test pour la validation du sexe - invalide"""
+
+    # GIVEN
+    sexe_invalide = 5  # Mauvais format
+
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        res = Utilisateur.valider_sexe(sexe_invalide)
+
+if __name__ == "__main__":
+    pytest.main([__file__])

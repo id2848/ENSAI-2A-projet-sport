@@ -27,7 +27,7 @@ def test_creer_activite_ok():
     # GIVEN
     id_utilisateur = 991  # John Doe
     sport = 'course'
-    date_activite = date(2025, 9, 25)  # Date d'activité existante
+    date_activite = "2025-09-30"
     distance = 5.0
     duree = 30.0
 
@@ -36,7 +36,7 @@ def test_creer_activite_ok():
 
     # THEN
     # Vérifie que l'activité est créée correctement
-    assert activite is True
+    assert activite
 
 def test_creer_activite_echec():
     """Test pour la création d'une activité échouée (par exemple, si l'utilisateur n'existe pas)"""
@@ -48,11 +48,9 @@ def test_creer_activite_echec():
     distance = 5.0
     duree = 30.0
 
-    # WHEN
-    activite = ActiviteService().creer_activite(id_utilisateur, sport, date_activite, distance, duree)
-
-    # THEN
-    assert activite is False
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        activite = ActiviteService().creer_activite(id_utilisateur, sport, date_activite, distance, duree)
 
 def test_lister_activites():
     """Test pour lister les activités d'un utilisateur"""
@@ -126,12 +124,9 @@ def test_trouver_activite_par_id_ko():
     # GIVEN
     id_activite = 99999
 
-    # WHEN
-    activite = ActiviteService().trouver_activite_par_id(id_activite)
-
-    # THEN
-    assert activite is None
-
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        activite = ActiviteService().trouver_activite_par_id(id_activite)
 
 def test_trouver_activite_par_id_ok():
     """Trouver une activité existante par son id"""
@@ -273,11 +268,9 @@ def test_supprimer_activite_echec():
     # GIVEN
     id_activite = 9999  # Une activité qui n'existe pas
 
-    # WHEN
-    result = ActiviteService().supprimer_activite(id_activite)
-
-    # THEN
-    assert result is False
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        ActiviteService().supprimer_activite(id_activite)
 
 def test_trouver_commentaire_par_id_ko():
     """Trouver un commentaire inexistant via l'id_activite"""

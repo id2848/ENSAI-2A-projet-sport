@@ -111,7 +111,7 @@ def test_modifier_ko():
     """Modification d'utilisateur' échouée (id inconnu)"""
 
     # GIVEN
-    utilisateur = Utilisateur(id_utilisateur=8888, pseudo="id inconnu", nom="neant",prenom="rien",date_de_naissance="2020-01-01",sexe="Homme")
+    utilisateur = Utilisateur(id_utilisateur=8888, pseudo="inconnu", nom="neant", prenom="rien",date_de_naissance="2020-01-01",sexe="Homme")
 
     # WHEN / THEN
     with pytest.raises(Exception):

@@ -15,6 +15,8 @@ from dao.activite_dao import ActiviteDao
 from dao.commentaire_dao import CommentaireDao
 from dao.jaime_dao import JaimeDao
 
+from utils.verifier_date import verifier_date
+
 from exceptions import NotFoundError, AlreadyExistsError
 
 import logging
@@ -22,97 +24,78 @@ import logging
 class ActiviteService:
     """Classe contenant les méthodes de service des activités Utilisateurs"""
 
-    def creer_activite(self, id_utilisateur: int, sport: str, date_activite: date, distance: float, duree: timedelta) -> bool:
+    # --- Activités ---
+    
+    def creer_activite(self, id_utilisateur: int, sport: str, date_activite: str, distance: float, duree: timedelta) -> bool:
         """Crée une nouvelle activité"""
-        try:
-            activite = Activite(
-                id_utilisateur=id_utilisateur,
-                sport=sport,
-                date_activite=date_activite,  # Utilisation du paramètre `date_activite` passé
-                distance=distance,
-                duree=duree
-            )
-            return ActiviteDao().creer(activite)  # Appel à DAO pour l'enregistrement
-        except Exception as e:
-            logging.error(f"Erreur lors de la création de l'activité : {e}")  # Affichage de l'erreur pour le diagnostic
-            return False
-            
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError(f"L'utilisateur avec l'id {id_utilisateur} n'existe pas")
+        if not verifier_date(date_activite):
+            raise ValueError(f"Le format de la date {date_activite} est incorrect. Utilisez le format YYYY-MM-DD.")
+        
+        activite = Activite(
+            id_utilisateur=id_utilisateur,
+            sport=sport,
+            date_activite=date_activite,
+            distance=distance,
+            duree=duree
+        )
+        return ActiviteDao().creer(activite) # Appel à DAO pour l'enregistrement
+
     def supprimer_activite(self, id_activite: int) -> bool:
         """Supprime une activité existante"""
-        try:
-            return ActiviteDao().supprimer(id_activite)  # Effectue la suppression dans la base de données
+        if not ActiviteDao().verifier_id_existant(id_activite):
+            raise NotFoundError("Cette activité n'existe pas")
         
-        except Exception as e:
-            logging.error(f"Erreur lors de la suppression de l'activité : {e}")
-            return False
+        return ActiviteDao().supprimer(id_activite)
 
     def modifier_activite(self, id_activite: int, sport: str) -> bool:
         """Modifie une activité existante"""
-        try:
-            activite = ActiviteDao().trouver_par_id(id_activite=id_activite)  # Récupère l'activité par son ID
-            # Si l'activité n'existe pas
-            if activite is None:
-                logging.warning(f"L'activité avec ID {id_activite} n'existe pas.")
-                return False
+        if not ActiviteDao().verifier_id_existant(id_activite):
+            raise NotFoundError("Cette activité n'existe pas")
         
-            activite.sport = sport  # Modification du sport de l'activité
-            return ActiviteDao().modifier(activite)
-        
-        except Exception as e:
-            logging.error(f"Erreur lors de la modification de l'activité : {e}")
-            return False
+        activite = ActiviteDao().trouver_par_id(id_activite=id_activite)  # Récupère l'activité par son ID
+
+        nouveau_activite = Activite(
+            id_utilisateur=activite.id_utilisateur,
+            sport=sport, # Modification du sport de l'activité
+            date_activite=activite.date_activite,
+            distance=activite.distance,
+            duree=activite.duree
+        )
+
+        return ActiviteDao().modifier(activite) # Appel à DAO pour modification dans la base de données
     
     def trouver_activite_par_id(self, id_activite: int):
         """Trouver une activité par son id"""
-        try:
-            activite = ActiviteDao().trouver_par_id(id_activite=id_activite)
-            # Si l'activité n'existe pas
-            if activite is None:
-                logging.warning(f"L'activité avec ID {id_activite} n'existe pas.")
-            return activite
+        if not ActiviteDao().verifier_id_existant(id_activite):
+            raise NotFoundError("Cette activité n'existe pas")
         
-        except Exception as e:
-            logging.error(f"Erreur lors de la récupération de l'activité : {e}")
-            return None
+        return ActiviteDao().trouver_par_id(id_activite=id_activite)
 
     def lister_activites(self, id_utilisateur: int) -> List[Activite]:
         """Liste toutes les activités d'un utilisateur donné"""
-        try:
-            # Recherche des activités par utilisateur
-            activites = ActiviteDao().lister_par_utilisateur(id_utilisateur=id_utilisateur)
-
-            # Vérification si aucune activité n'est trouvée
-            if not activites:
-                logging.warning(f"Aucune activité trouvée pour l'utilisateur avec ID {id_utilisateur}.")
-
-            return activites  # Retourne la liste des activités (peut être vide)
-    
-        except Exception as e:
-            # Gestion des exceptions : affichage du message d'erreur
-            logging.error(f"Erreur lors de la récupération des activités pour l'utilisateur {id_utilisateur}: {e}")
-            return None
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError("Cet utilisateur n'existe pas")
+        
+        return ActiviteDao().lister_par_utilisateur(id_utilisateur=id_utilisateur)
 
     def lister_activites_filtres(self, id_utilisateur: int, sport: str = None, date_debut: str = None, date_fin: str = None) -> List[Activite]:
         """Liste les activités d'un utilisateur avec des filtres optionnels (sport, date_debut, date_fin)"""
-        try:
-            # Recherche des activités filtrées
-            activites = ActiviteDao().lister_activites_filtres(id_utilisateur=id_utilisateur, sport=sport, date_debut=date_debut, date_fin=date_fin)
-
-            # Vérification si aucune activité filtrée n'est trouvée
-            if not activites:
-                logging.warning(f"Aucune activité trouvée pour l'utilisateur avec ID {id_utilisateur} avec les filtres spécifiés.")
-
-            return activites  # Retourne la liste des activités filtrées (peut être vide)
-
-        except Exception as e:
-            # Gestion des exceptions : affichage du message d'erreur
-            logging.error(f"Erreur lors de la récupération des activités filtrées pour l'utilisateur {id_utilisateur}: {e}")
-            return None
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError("Cet utilisateur n'existe pas")
+        if date_debut is not None and not verifier_date(date_debut):
+            raise ValueError(f"Le format de la date {date_debut} est incorrect. Utilisez le format YYYY-MM-DD.")
+        if date_fin is not None and not verifier_date(date_fin):
+            raise ValueError(f"Le format de la date {date_fin} est incorrect. Utilisez le format YYYY-MM-DD.")
+        sport = Activite.valider_sport(sport)
+        
+        return ActiviteDao().lister_activites_filtres(id_utilisateur=id_utilisateur, sport=sport, date_debut=date_debut, date_fin=date_fin)
 
 
     # --- Jaimes ---
 
-    def ajouter_jaime(self, id_activite: int, id_utilisateur: int) -> bool:
+    def ajouter_jaime(self, id_activite: int, id_utilisateur: int) -> Jaime:
         """Ajoute un "j'aime" à une activité"""
         if not ActiviteDao().verifier_id_existant(id_activite):
             raise NotFoundError("Cette activité n'existe pas")
@@ -154,7 +137,7 @@ class ActiviteService:
 
     # --- Commentaires ---
 
-    def ajouter_commentaire(self, id_activite: int, id_utilisateur: int, contenu: str) -> bool:
+    def ajouter_commentaire(self, id_activite: int, id_utilisateur: int, contenu: str) -> Commentaire:
         """Ajoute un commentaire à une activité"""
         if not ActiviteDao().verifier_id_existant(id_activite):
             raise NotFoundError("Cette activité n'existe pas")

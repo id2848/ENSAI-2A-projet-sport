@@ -11,7 +11,7 @@ from business_object.activite import Activite
 from exceptions import DatabaseCreationError, DatabaseDeletionError, DatabaseUpdateError
 
 class ActiviteDao:
-    def creer(self, activite: Activite) -> bool:
+    def creer(self, activite: Activite) -> Activite:
         """Création d'une activité dans la base de données"""
         try:
             with DBConnection().connection as connection:
@@ -46,7 +46,7 @@ class ActiviteDao:
             raise DatabaseCreationError(msg_err)
         
         activite.id_activite = res["id_activite"]
-        return True
+        return activite
 
     def trouver_par_id(self, id_activite: int) -> Activite | None:
         """Trouver une activité par son id"""

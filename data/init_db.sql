@@ -28,7 +28,7 @@ CREATE TABLE credentials (
 -----------------------------------------------------
 DROP TABLE IF EXISTS activite CASCADE ;
 
-CREATE TYPE sport AS ENUM ('course', 'natation', 'vélo', 'randonnée');  
+CREATE TYPE sport AS ENUM ('course', 'natation', 'vélo', 'randonnée', 'autre');  
 
 CREATE TABLE activite (
     id_activite             SERIAL PRIMARY KEY,

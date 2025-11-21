@@ -8,8 +8,6 @@ from business_object.utilisateur import Utilisateur
 from dao.utilisateur_dao import UtilisateurDao
 import logging
 
-from utils.verifier_date import verifier_date
-
 from exceptions import NotFoundError, AlreadyExistsError
 
 class UtilisateurService:
@@ -22,33 +20,17 @@ class UtilisateurService:
         mot_de_passe: str,
         nom: str,
         prenom: str,
-        date_de_naissance: str,
+        date_de_naissance: str | date,
         sexe: str,
     ) -> bool:
         """
         Inscrit un nouvel utilisateur.
         """
-
-        # --- 1) Validations ---
-        if not Utilisateur.valider_pseudo(pseudo):
-            raise ValueError("Pseudo invalide. Il doit être alphanumérique et contenir entre 4 et 16 caractères.")
-
         if UtilisateurDao().verifier_pseudo_existant(pseudo):
             raise AlreadyExistsError("Pseudo déjà existant")
-
-        if not Utilisateur.valider_nom_prenom(nom, prenom):
-            raise ValueError("Nom ou prénom invalide")
-
-        if not verifier_date(date_de_naissance):
-            raise ValueError("Date de naissance invalide. Utilisez le format YYYY-MM-DD")
-
-        if not Utilisateur.valider_sexe(sexe):
-            raise ValueError("Sexe invalide. Il doit être 'homme', 'femme' ou 'autre'")
-
         if not (4 <= len(mot_de_passe) <= 32):
             raise ValueError("Mot de passe invalide. Il doit contenir entre 4 et 32 caractères.")
 
-        # 2) Construire l'objet utilisateur
         utilisateur = Utilisateur(
             pseudo=pseudo,
             nom=nom,
@@ -56,8 +38,6 @@ class UtilisateurService:
             date_de_naissance=date_de_naissance,
             sexe=sexe,
         )
-
-        # 3) DAO
         return UtilisateurDao().creer(utilisateur, mot_de_passe)
 
 

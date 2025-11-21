@@ -60,10 +60,12 @@ def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
 
 @app.get("/me", tags=["Authentification"])
 def me(user = Depends(get_current_user)):
+    """Se connecter ou consulter son profil utilisateur"""
     return user
 
 @app.get("/logout", tags=["Authentification"])
 async def logout(creds: HTTPBasicCredentials = Depends(get_current_user)):
+    """Se déconnecter de son compte utilisateur"""
     return HTMLResponse(content="Vous vous êtes déconnecté", status_code=status.HTTP_401_UNAUTHORIZED)
 
 @app.post("/inscription", tags=["Authentification"])
@@ -104,18 +106,73 @@ async def redirect_to_docs():
 
 # --- Endpoints Gestion des activités ---
 
-@app.get("/activites/{id_utilisateur}")
+@app.post("/activites", tags=["Activité"])
+async def creer_activite(file: UploadFile = File(...), sport: str = "randonnée", user = Depends(get_current_user)):
+    """Créer une nouvelle activité avec un fichier GPX pour l'utilisateur connecté."""
+    # Parsing GPX
+    content = await file.read()
+    try:
+        parsed_activite = parse_gpx(content)
+        date_activite = parsed_activite["date"]
+        distance = parsed_activite["distance totale"]
+        duree = parsed_activite["durée totale"]
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Erreur lors du parsing du fichier GPX")
+
+    # Création Activité
+    try:
+        activite_creee = ActiviteService().creer_activite(user["id_utilisateur"], sport, date_activite, distance, duree)
+        return {"message": "Activité créée", "activite": activite_creee}
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.put("/activites/{id_activite}", tags=["Activité"])
+def modifier_activite(id_activite: int, sport: str, user = Depends(get_current_user)):
+    """Modifier une activité existante appartenant à l'utilisateur connecté."""
+    # Vérification appartenance
+    try:
+        activite = ActiviteService().trouver_activite_par_id(id_activite)
+        if activite.id_utilisateur != user["id_utilisateur"]:
+            raise HTTPException(status_code=403, detail="Cette activité ne vous appartient pas")
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+    try:
+        activite_modifie = ActiviteService().modifier_activite(id_activite, sport)
+        return {"message": "Activité modifiée", "activite": activite_modifie}
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.delete("/activites/{id_activite}", tags=["Activité"])
+def supprimer_activite(id_activite: int, user = Depends(get_current_user)):
+    """Supprimer une activité appartenant à l'utilisateur connecté."""
+    # Vérification appartenance
+    try:
+        activite = ActiviteService().trouver_activite_par_id(id_activite)
+        if activite.id_utilisateur != user["id_utilisateur"]:
+            raise HTTPException(status_code=403, detail="Cette activité ne vous appartient pas")
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+    try:
+        supprime = ActiviteService().supprimer_activite(id_activite)
+        return {"message": "Activité supprimée avec succès"}
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@app.get("/activites/{id_utilisateur}", tags=["Activité"])
 def activites_par_utilisateur(id_utilisateur: int, user = Depends(get_current_user)):
     """Lister les activités d'un utilisateur donné."""
-    utilisateur = UtilisateurService().trouver_par_id(id_utilisateur)
-    if not utilisateur:
-        return {"message": "Cet utilisateur n'existe pas"}
-    liste_activites = ActiviteService().lister_activites(id_utilisateur)
-    if liste_activites is None:
-        raise HTTPException(status_code=400, detail="Erreur lors de la récupération des activités de l'utilisateur")
-    return liste_activites
+    try:
+        return ActiviteService().lister_activites(id_utilisateur)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/activites-filtres/{id_utilisateur}")
+@app.get("/activites-filtres/{id_utilisateur}", tags=["Activité"])
 def activites_par_utilisateur_filtres(
     id_utilisateur: int,
     sport: str = None,
@@ -125,13 +182,6 @@ def activites_par_utilisateur_filtres(
 ):
     """Lister les activités d'un utilisateur avec filtres facultatifs.
     Les dates doivent être au format YYYY-MM-DD"""
-    utilisateur = UtilisateurService().trouver_par_id(id_utilisateur)
-    if not utilisateur:
-        return {"message": "Cet utilisateur n'existe pas"}
-
-    if not verifier_date(date_debut) or not verifier_date(date_fin):
-        return {"message": f"Le format de l'une des dates est incorrect. Utilisez le format YYYY-MM-DD."}
-
     try:
         liste_activites = ActiviteService().lister_activites_filtres(
             id_utilisateur=id_utilisateur,
@@ -139,61 +189,11 @@ def activites_par_utilisateur_filtres(
             date_debut=date_debut,
             date_fin=date_fin,
         )
-    except Exception as e:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Erreur lors de la récupération des activités filtrées : {e}",
-        )
-
-    if liste_activites is None:
-        raise HTTPException(
-            status_code=400,
-            detail="Erreur lors de la récupération des activités de l'utilisateur",
-        )
-
-    return liste_activites
-
-@app.post("/activites")
-async def creer_activite(file: UploadFile = File(...), sport: str = "randonnée", user = Depends(get_current_user)):
-    """Créer une nouvelle activité avec un fichier GPX pour l'utilisateur connecté."""
-    content = await file.read()
-    try:
-        parsed_activite = parse_gpx(content)
-    except Exception as e:
-        return {"message": "Erreur lors du parsing du fichier GPX"}
-    date_activite = parsed_activite["date"]
-    distance = parsed_activite["distance totale"]
-    duree = parsed_activite["durée totale"]
-    activite_creee = ActiviteService().creer_activite(user["id_utilisateur"], sport, date_activite, distance, duree)
-    if not activite_creee:
-        raise HTTPException(status_code=400, detail="Erreur lors de la création de l'activité")
-    return {"message": "Activité créée", "activite": activite_creee}
-
-@app.put("/activites/{id_activite}")
-def modifier_activite(id_activite: int, sport: str, user = Depends(get_current_user)):
-    """Modifier une activité existante appartenant à l'utilisateur connecté."""
-    activite = ActiviteService().trouver_activite_par_id(id_activite)
-    if not activite:
-        return {"message": "Cette activité n'existe pas"}
-    if not activite.id_utilisateur == user["id_utilisateur"]:
-        return {"message": "Cette activité ne vous appartient pas"}
-    activite_modifie = ActiviteService().modifier_activite(id_activite, sport)
-    if not activite_modifie:
-        raise HTTPException(status_code=400, detail="Erreur lors de la modification de l'activité")
-    return {"message": "Activité modifiée", "activite": updated_activite}
-
-@app.delete("/activites/{id_activite}")
-def supprimer_activite(id_activite: int, user = Depends(get_current_user)):
-    """Supprimer une activité appartenant à l'utilisateur connecté."""
-    activite = ActiviteService().trouver_activite_par_id(id_activite)
-    if not activite:
-        return {"message": "Cette activité n'existe pas"}
-    if not activite.id_utilisateur == user["id_utilisateur"]:
-        return {"message": "Cette activité ne vous appartient pas"}
-    supprime = ActiviteService().supprimer_activite(id_activite)
-    if not supprime:
-        raise HTTPException(status_code=400, detail="Erreur lors de la suppression de l'activité")
-    return {"message": "Activité supprimée"}
+        return liste_activites
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # --- Endpoints Utilisateurs ---
@@ -205,7 +205,6 @@ def consulter_utilisateur_par_id(id_utilisateur: int, user = Depends(get_current
         return UtilisateurService().trouver_par_id(id_utilisateur)
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
-    return utilisateur
 
 @app.get("/utilisateurs/pseudo/{pseudo}", tags=["Utilisateur"])
 def consulter_utilisateur_par_pseudo(pseudo: str, user = Depends(get_current_user)):
@@ -223,7 +222,7 @@ def lister_utilisateurs(user = Depends(get_current_user)):
 
 # --- Endpoints Jaimes ---
 
-@app.post("/jaimes")
+@app.post("/jaimes", tags=["Jaime"])
 def ajouter_jaime(id_activite: int, user = Depends(get_current_user)):
     """Ajouter un jaime à une activité pour l'utilisateur connecté."""
     try:
@@ -234,7 +233,7 @@ def ajouter_jaime(id_activite: int, user = Depends(get_current_user)):
     except AlreadyExistsError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
-@app.delete("/jaimes/{id_activite}")
+@app.delete("/jaimes/{id_activite}", tags=["Jaime"])
 def supprimer_jaime(id_activite: int, user = Depends(get_current_user)):
     """Supprimer le jaime appartenant à l'utilisateur connecté d'une activité.""" 
     try:
@@ -243,7 +242,7 @@ def supprimer_jaime(id_activite: int, user = Depends(get_current_user)):
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/jaimes/existe")
+@app.get("/jaimes/existe", tags=["Jaime"])
 def jaime_existe(id_activite: int, id_auteur: int, user = Depends(get_current_user)):
     """Vérifier si un jaime existe pour une activité et un auteur donné."""
     try:
@@ -251,7 +250,7 @@ def jaime_existe(id_activite: int, id_auteur: int, user = Depends(get_current_us
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/jaimes/compter")
+@app.get("/jaimes/compter", tags=["Jaime"])
 def compter_jaimes(id_activite: int, user = Depends(get_current_user)):
     """Compter le nombre de jaimes pour une activité donnée."""
 
@@ -279,7 +278,7 @@ def supprimer_commentaire(id_commentaire: int, user = Depends(get_current_user))
     # Vérification appartenance
     try:
         commentaire = ActiviteService().trouver_commentaire_par_id(id_commentaire)
-        if not commentaire.id_auteur == user["id_utilisateur"]:
+        if commentaire.id_auteur != user["id_utilisateur"]:
             raise HTTPException(status_code=403, detail="Ce commentaire ne vous appartient pas")
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -397,7 +396,7 @@ def statistiques_semaine(id_utilisateur: int, date_reference: str, user = Depend
 
 
 # --- Endpoint Upload GPX ---
-@app.post("/upload-gpx")
+@app.post("/upload-gpx", tags=["Utilitaires"])
 async def upload_gpx(file: UploadFile = File(...)):
     """Upload et parsing d'un fichier GPX."""
     content = await file.read()

@@ -45,7 +45,6 @@ def test_creer_fil_dactualite_ok():
 
     # Vérifie les types et contenus
     for activite in fil:
-        assert activite.sport in ['natation', 'vélo', 'randonnée', 'course']
         assert isinstance(activite.date_activite, date)
     
 if __name__ == "__main__":

@@ -18,9 +18,9 @@ class Utilisateur:
     prenom : str
         prénom
     date_de_naissance : date
-        date de naissance de l'utilisateur
+        date de naissance de l'utilisateur, construit avec une date ou str au format YYYY-MM-DD
     sexe : str
-        sexe de l'utilisateur (ex: 'M', 'F', 'Autre')
+        sexe de l'utilisateur
     """
 
     def __init__(
@@ -28,16 +28,15 @@ class Utilisateur:
         pseudo: str,
         nom: str,
         prenom: str,
-        date_de_naissance: date,
+        date_de_naissance: str | date,
         sexe: str,
         id_utilisateur: Optional[int] = None
     ):
         self.id_utilisateur = id_utilisateur
-        self.pseudo = pseudo
-        self.nom = nom
-        self.prenom = prenom
-        self.date_de_naissance = date_de_naissance
-        self.sexe = sexe
+        self.pseudo = self.valider_pseudo(pseudo)
+        self.nom, self.prenom = self.valider_nom_prenom(nom, prenom)
+        self.date_de_naissance = self.valider_date_naissance(date_de_naissance)
+        self.sexe = self.valider_sexe(sexe)
 
     def __repr__(self) -> str:
         return (
@@ -58,25 +57,44 @@ class Utilisateur:
 
     @staticmethod
     def valider_pseudo(pseudo: str) -> bool:
-        """Valider que le pseudo est valide (entre 4 et 16 caractères)"""
-        return len(pseudo) >= 4 and len(pseudo) <= 16 and pseudo.isalnum()
+        """Valider que le pseudo est valide (alphanumérique entre 4 et 16 caractères)"""
+        if not ( len(pseudo) >= 4 and len(pseudo) <= 16 and pseudo.isalnum() ):
+            raise ValueError("Pseudo invalide. Il doit être alphanumérique et contenir entre 4 et 16 caractères")
+        return pseudo
     
     @staticmethod
-    def valider_nom_prenom(nom: str, prenom: str) -> bool:
+    def valider_nom_prenom(nom: str, prenom: str) -> tuple[str, str]:
         """Valider que le nom et prénom ne contiennent que des lettres et des espaces"""
         pattern = "^[A-Za-zÀ-ÿ ]+$"  # Autorise les lettres et les espaces
-        return bool(re.match(pattern, nom)) and bool(re.match(pattern, prenom))
+        if not ( bool(re.match(pattern, nom)) and bool(re.match(pattern, prenom)) ):
+            raise ValueError("Nom ou prénom invalide")
+        return nom, prenom
 
     @staticmethod
-    def valider_date_naissance(date_de_naissance: str) -> bool:
-        """Valider que la date de naissance est au format YYYY-MM-DD"""
-        try:
-            datetime.strptime(date_de_naissance, "%Y-%m-%d")
-            return True
-        except ValueError:
-            return False
+    def valider_date_naissance(date_de_naissance: date | str) -> date:
+        """Valider que la date de naissance est une date ou bien un str au format YYYY-MM-DD
+        Renvoie un objet 'date'"""
+        if isinstance(date_de_naissance, date):
+            return date_de_naissance
+        elif isinstance(date_de_naissance, str):
+            try:
+                date_de_naissance = datetime.strptime(
+                    date_de_naissance, "%Y-%m-%d"
+                ).date()
+            except ValueError:
+                date_de_naissance = None
+
+        if date_de_naissance is None:
+            raise ValueError(
+                "date_de_naissance doit être un objet 'date' ou un str au format YYYY-MM-DD"
+            )
+
+        return date_de_naissance
 
     @staticmethod
-    def valider_sexe(sexe: str) -> bool:
-        """Valider que le sexe est homme, femme ou autre autre"""
-        return sexe.lower() in ['homme', 'femme', 'autre']
+    def valider_sexe(sexe: str) -> str:
+        """Valider que le sexe est un str
+        Renvoie le sexe en caractères minuscules"""
+        if not isinstance(sexe, str):
+            raise ValueError("Sexe invalide : doit être un str")
+        return sexe.lower()

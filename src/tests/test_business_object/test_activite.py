@@ -8,7 +8,7 @@ def test_calculer_vitesse_ok():
     activite = Activite(
         id_activite=1,
         id_utilisateur=1,
-        sport="Sport",
+        sport="course",
         date_activite=date(2025, 1, 15),
         distance=10.0,
         duree=timedelta(hours=1)
@@ -26,7 +26,7 @@ def test_duree_zero_ok():
     activite = Activite(
         id_activite=6,
         id_utilisateur=1,
-        sport="Sport",
+        sport="course",
         date_activite=date(2025, 1, 15),
         distance=10.0,
         duree=timedelta(seconds=0)
@@ -39,7 +39,7 @@ def test_distance_zero_ok():
     activite = Activite(
         id_activite=7,
         id_utilisateur=1,
-        sport="Sport",
+        sport="course",
         date_activite=date(2025, 1, 15),
         distance=0.0,
         duree=timedelta(seconds=2000)
@@ -52,7 +52,7 @@ def test_distance_et_duree_zeros_ok():
     activite = Activite(
         id_activite=8,
         id_utilisateur=1,
-        sport="Sport",
+        sport="course",
         date_activite=date(2025, 1, 15),
         distance=0.0,
         duree=timedelta(seconds=0)
@@ -65,7 +65,7 @@ def test_calculer_vitesse_ko():
     activite = Activite(
         id_activite=2,
         id_utilisateur=1,
-        sport="Sport",
+        sport="course",
         date_activite=date(2025, 1, 15),
         distance=10.0,
         duree=timedelta(hours=1)
@@ -78,7 +78,7 @@ def test_duree_zero_ko():
     activite = Activite(
         id_activite=9,
         id_utilisateur=1,
-        sport="Sport",
+        sport="course",
         date_activite=date(2025, 1, 15),
         distance=10.0,
         duree=timedelta(seconds=0)
@@ -91,7 +91,7 @@ def test_distance_zero_ko():
     activite = Activite(
         id_activite=10,
         id_utilisateur=1,
-        sport="Sport",
+        sport="course",
         date_activite=date(2025, 1, 15),
         distance=0.0,
         duree=timedelta(seconds=2000)

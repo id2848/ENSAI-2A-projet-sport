@@ -19,11 +19,12 @@ class AbonnementDao:
         Parameters
         ----------
         abonnement : Abonnement
+            L'abonnement à insérer
 
         Returns
         -------
-        created : bool
-            True si la création est un succès
+        Abonnement
+            L'abonnement inséré dans la base de données
         """
 
         try:

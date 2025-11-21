@@ -21,12 +21,12 @@ class JaimeDao:
         Parameters
         ----------
         jaime : Jaime
+            Le jaime à insérer
 
         Returns
         -------
-        created : bool
-            True si la création est un succès
-            False sinon
+        Jaime
+            Le jaime inséré dans la base de données
         """
         res = None
 
