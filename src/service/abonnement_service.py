@@ -25,15 +25,11 @@ class AbonnementService:
         if self.abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi):
             raise AlreadyExistsError(f"L'abonnement existe déjà")
         
-        try:
-            abonnement = Abonnement(
-                id_utilisateur_suiveur=id_utilisateur_suiveur,
-                id_utilisateur_suivi=id_utilisateur_suivi,
-            )
-            return AbonnementDao().creer(abonnement)
-        except Exception as e:
-            logging.error(f"Erreur lors de la création de l'abonnement : {e}")
-            raise
+        abonnement = Abonnement(
+            id_utilisateur_suiveur=id_utilisateur_suiveur,
+            id_utilisateur_suivi=id_utilisateur_suivi,
+        )
+        return AbonnementDao().creer(abonnement)
 
     @log
     def supprimer_abonnement(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int) -> bool:
@@ -46,11 +42,7 @@ class AbonnementService:
         if not self.abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi):
             raise NotFoundError(f"L'abonnement n'existe pas")
         
-        try:
-            return AbonnementDao().supprimer(id_utilisateur_suiveur, id_utilisateur_suivi)
-        except Exception as e:
-            logging.error(f"Erreur lors de la suppression de l'abonnement : {e}")
-            raise
+        return AbonnementDao().supprimer(id_utilisateur_suiveur, id_utilisateur_suivi)
 
     @log
     def lister_utilisateurs_suivis(self, id_utilisateur: int):
@@ -58,15 +50,11 @@ class AbonnementService:
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
             raise NotFoundError(f"L'utilisateur avec l'id {id_utilisateur} n'existe pas")
         
-        try:
-            liste_abonnements = AbonnementDao().lister_suivis(id_utilisateur)
-            utilisateurs_suivis = set()
-            for j in liste_abonnements:
-                utilisateurs_suivis.add(j.id_utilisateur_suivi)
-            return utilisateurs_suivis
-        except Exception as e:
-            logging.error(f"Erreur lors de la récupération des utilisateurs suivis : {e}")
-            raise
+        liste_abonnements = AbonnementDao().lister_suivis(id_utilisateur)
+        utilisateurs_suivis = set()
+        for j in liste_abonnements:
+            utilisateurs_suivis.add(j.id_utilisateur_suivi)
+        return utilisateurs_suivis
 
     @log
     def lister_utilisateurs_suiveurs(self, id_utilisateur: int):
@@ -74,15 +62,11 @@ class AbonnementService:
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
             raise NotFoundError(f"L'utilisateur avec l'id {id_utilisateur} n'existe pas")
         
-        try:
-            liste_abonnements = AbonnementDao().lister_suiveurs(id_utilisateur)
-            utilisateurs_suiveurs = set()
-            for j in liste_abonnements:
-                utilisateurs_suiveurs.add(j.id_utilisateur_suiveur)
-            return utilisateurs_suiveurs
-        except Exception as e:
-            logging.error(f"Erreur lors de la récupération des utilisateurs suiveurs : {e}")
-            raise
+        liste_abonnements = AbonnementDao().lister_suiveurs(id_utilisateur)
+        utilisateurs_suiveurs = set()
+        for j in liste_abonnements:
+            utilisateurs_suiveurs.add(j.id_utilisateur_suiveur)
+        return utilisateurs_suiveurs
     
     def abonnement_existe(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int) -> bool:
         """Vérifie si un abonnement existe dans la base de données"""
@@ -91,9 +75,5 @@ class AbonnementService:
         if not UtilisateurDao().verifier_id_existant(id_utilisateur_suivi):
             raise NotFoundError(f"L'utilisateur avec l'id {id_utilisateur_suivi} n'existe pas")
         
-        try:
-            abonnement = AbonnementDao().trouver_par_ids(id_utilisateur_suiveur, id_utilisateur_suivi)
-            return abonnement is not None
-        except Exception as e:
-            logging.error(f"Erreur lors de la vérification de l'abonnement : {e}")
-            raise
+        abonnement = AbonnementDao().trouver_par_ids(id_utilisateur_suiveur, id_utilisateur_suivi)
+        return abonnement is not None

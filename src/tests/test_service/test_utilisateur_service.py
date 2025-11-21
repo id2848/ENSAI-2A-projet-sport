@@ -32,10 +32,10 @@ def test_inscrire_utilisateur_ok():
     sexe = "homme"
 
     # WHEN
-    sortie = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
+    res = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
 
     # THEN
-    assert sortie["success"] is True  # Le résultat doit être True si l'inscription réussit
+    assert res is True  # Le résultat doit être True si l'inscription réussit
 
 
 def test_inscrire_utilisateur_pseudo_deja_utilise():
@@ -49,13 +49,9 @@ def test_inscrire_utilisateur_pseudo_deja_utilise():
     date_de_naissance = "1990-01-01"
     sexe = "homme"
 
-    # WHEN
-    sortie = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
-
-    # THEN
-    # Le pseudo existe déjà, l'inscription doit échouer
-    assert sortie["success"] is False
-    assert sortie["error"] == "Pseudo déjà existant"
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        res = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
 
 
 def test_inscrire_utilisateur_donnees_invalides():
@@ -69,13 +65,10 @@ def test_inscrire_utilisateur_donnees_invalides():
     date_de_naissance = "1990-01-01"
     sexe = "homme"
 
-    # WHEN
-    sortie = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
+    # WHEN / THEN
+    with pytest.raises(ValueError):
+        res = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
 
-    # THEN
-    # Le pseudo est invalide, l'inscription doit échouer
-    assert sortie["success"] is False
-    assert sortie["error"] == "Pseudo invalide. Il doit être alphanumérique et contenir entre 4 et 16 caractères."
 
 
 # Test de la connexion
@@ -101,11 +94,9 @@ def test_se_connecter_utilisateur_mot_de_passe_incorrect():
     pseudo = "johndoe"  # Pseudo existant
     mot_de_passe = "wrongpassword"  # Mot de passe incorrect
 
-    # WHEN
-    utilisateur = UtilisateurService().se_connecter(pseudo, mot_de_passe)
-
-    # THEN
-    assert utilisateur is None  # La connexion échoue car le mot de passe est incorrect
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        utilisateur = UtilisateurService().se_connecter(pseudo, mot_de_passe)
 
 
 def test_se_connecter_utilisateur_inexistant():
@@ -115,8 +106,10 @@ def test_se_connecter_utilisateur_inexistant():
     pseudo = "unknownuser"  # Pseudo inexistant
     mot_de_passe = "password"  # Mot de passe correct
 
-    # WHEN
-    utilisateur = UtilisateurService().se_connecter(pseudo, mot_de_passe)
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        utilisateur = UtilisateurService().se_connecter(pseudo, mot_de_passe)
 
-    # THEN
-    assert utilisateur is None  # La connexion échoue car l'utilisateur n'existe pas
+if __name__ == "__main__":
+    pytest.main([__file__])
+    

@@ -10,6 +10,8 @@ import logging
 
 from utils.verifier_date import verifier_date
 
+from exceptions import NotFoundError, AlreadyExistsError
+
 class UtilisateurService:
     """Classe contenant les méthodes de service d'Utilisateurs"""
 
@@ -22,65 +24,41 @@ class UtilisateurService:
         prenom: str,
         date_de_naissance: str,
         sexe: str,
-    ):
+    ) -> bool:
         """
         Inscrit un nouvel utilisateur.
-        Retourne un dict standardisé :
-        { success: bool, result: utilisateur | None, error: message | None }
         """
 
-        try:
-            # --- 1) Validations ---
-            if not Utilisateur.valider_pseudo(pseudo):
-                return {"success": False, "result": None, "error": "Pseudo invalide. Il doit être alphanumérique et contenir entre 4 et 16 caractères."}
+        # --- 1) Validations ---
+        if not Utilisateur.valider_pseudo(pseudo):
+            raise ValueError("Pseudo invalide. Il doit être alphanumérique et contenir entre 4 et 16 caractères.")
 
-            if UtilisateurDao().verifier_pseudo_existant(pseudo):
-                return {"success": False, "result": None, "error": "Pseudo déjà existant"}
+        if UtilisateurDao().verifier_pseudo_existant(pseudo):
+            raise AlreadyExistsError("Pseudo déjà existant")
 
-            if not Utilisateur.valider_nom_prenom(nom, prenom):
-                return {"success": False, "result": None, "error": "Nom ou prénom invalide"}
+        if not Utilisateur.valider_nom_prenom(nom, prenom):
+            raise ValueError("Nom ou prénom invalide")
 
-            if not verifier_date(date_de_naissance):
-                return {"success": False, "result": None, "error": "Date de naissance invalide. Utilisez le format YYYY-MM-DD"}
+        if not verifier_date(date_de_naissance):
+            raise ValueError("Date de naissance invalide. Utilisez le format YYYY-MM-DD")
 
-            if not Utilisateur.valider_sexe(sexe):
-                return {"success": False, "result": None, "error": "Sexe invalide. Il doit être 'homme', 'femme' ou 'autre'"}
+        if not Utilisateur.valider_sexe(sexe):
+            raise ValueError("Sexe invalide. Il doit être 'homme', 'femme' ou 'autre'")
 
-            if not (4 <= len(mot_de_passe) <= 32):
-                return {"success": False, "result": None, "error": "Mot de passe invalide. Il doit contenir entre 4 et 32 caractères."}
+        if not (4 <= len(mot_de_passe) <= 32):
+            raise ValueError("Mot de passe invalide. Il doit contenir entre 4 et 32 caractères.")
 
-            # 2) Construire l'objet utilisateur
-            utilisateur = Utilisateur(
-                pseudo=pseudo,
-                nom=nom,
-                prenom=prenom,
-                date_de_naissance=date_de_naissance,
-                sexe=sexe,
-            )
+        # 2) Construire l'objet utilisateur
+        utilisateur = Utilisateur(
+            pseudo=pseudo,
+            nom=nom,
+            prenom=prenom,
+            date_de_naissance=date_de_naissance,
+            sexe=sexe,
+        )
 
-            # 3) DAO
-            creation = UtilisateurDao().creer(utilisateur, mot_de_passe)
-
-            if not creation:
-                return {
-                    "success": False,
-                    "result": None,
-                    "error": "Erreur lors de la création en base de données",
-                }
-
-            return {
-                "success": True,
-                "result": utilisateur,
-                "error": None,
-            }
-
-        except Exception as e:
-            logging.error(f"Erreur lors de la création de l'utilisateur : {e}")
-            return {
-                "success": False,
-                "result": None,
-                "error": "Erreur interne lors de l'inscription",
-            }
+        # 3) DAO
+        return UtilisateurDao().creer(utilisateur, mot_de_passe)
 
 
     @log
@@ -88,49 +66,25 @@ class UtilisateurService:
         """
         Vérifie identifiants et renvoie un objet Utilisateur ou None.
         """
-        try:
-            if not pseudo or not mot_de_passe:
-                logging.error("Pseudo ou mot de passe manquant.")
-                return None
+        if not pseudo or not mot_de_passe:
+            raise ValueError("Pseudo ou mot de passe manquant.")
 
-            utilisateur = UtilisateurDao().se_connecter(pseudo, mot_de_passe)
-
-            if utilisateur is None:
-                logging.warning(f"Connexion échouée pour pseudo : {pseudo}")
-                return None
-
-            return utilisateur
-
-        except Exception as e:
-            logging.error(f"Erreur lors de la connexion de l'utilisateur {pseudo} : {e}")
-            return None
+        return UtilisateurDao().se_connecter(pseudo, mot_de_passe)
 
     def lister_utilisateurs(self) -> List[Utilisateur]:
         """Lister toutes les utilisateurs"""
-        try:
-            # Recherche des utilisateurs
-            liste = UtilisateurDao().lister_tous()
+        return UtilisateurDao().lister_tous() # Retourne la liste des utilisateurs (peut être vide)
 
-            return liste  # Retourne la liste des utilisateurs (peut être vide)
-    
-        except Exception as e:
-            logging.error(f"Erreur lors de la récupération des utilisateurs: {e}")
-            return None
-
-
-    def trouver_par_id(self, id_utilisateur) -> Utilisateur:
+    def trouver_par_id(self, id_utilisateur: int) -> Utilisateur:
         """Trouver un Utilisateur à partir de son id"""
-        try:
-            return UtilisateurDao().trouver_par_id(id_utilisateur)
-        except Exception as e:
-            logging.error(f"Erreur lors de la récupération de l'utilisateur avec l'id {id_utilisateur} : {e}")
-            return None
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError(f"L'utilisateur avec l'id {id_utilisateur} n'existe pas")
+        
+        return UtilisateurDao().trouver_par_id(id_utilisateur)
 
-
-    def trouver_par_pseudo(self, pseudo) -> Utilisateur:
+    def trouver_par_pseudo(self, pseudo: str) -> Utilisateur:
         """Trouver un Utilisateur à partir de son pseudo"""
-        try:
-            return UtilisateurDao().trouver_par_pseudo(pseudo)
-        except Exception as e:
-            logging.error(f"Erreur lors de la récupération de l'utilisateur avec pseudo {pseudo} : {e}")
-            return None
+        if not UtilisateurDao().verifier_pseudo_existant(pseudo):
+            raise NotFoundError(f"L'utilisateur avec le pseudo {pseudo} n'existe pas")
+        
+        return UtilisateurDao().trouver_par_pseudo(pseudo)

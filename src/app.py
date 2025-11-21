@@ -38,15 +38,20 @@ def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     username = credentials.username
     password = credentials.password
 
-    #utilisateur = UtilisateurService().se_connecter(username, password)
-    #if not utilisateur:
+    """try:
+        return UtilisateurService().se_connecter(username, password)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except InvalidPasswordError as e:
+        raise HTTPException(status_code=401, detail=str(e))"""
     user = USERS.get(username)
     if not user or not secrets.compare_digest(password, user["password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Identifiants invalides",
         )
-    #return utilisateur
     return user
 
 # ----------------------------------------------------------
@@ -73,20 +78,20 @@ def inscription(
     """Créer un nouveau compte utilisateur.
     La date de naissance doit être au format YYYY-MM-DD
     """
-
-    res = UtilisateurService().inscrire(
-        pseudo=pseudo,
-        mot_de_passe=mot_de_passe,
-        nom=nom,
-        prenom=prenom,
-        date_de_naissance=date_de_naissance,
-        sexe=sexe,
-    )
-
-    if not res["success"]:
-        raise HTTPException(status_code=400, detail=res["error"])
-
-    return {"message": "Utilisateur inscrit avec succès"}
+    try:
+        UtilisateurService().inscrire(
+            pseudo=pseudo,
+            mot_de_passe=mot_de_passe,
+            nom=nom,
+            prenom=prenom,
+            date_de_naissance=date_de_naissance,
+            sexe=sexe,
+        )
+        return {"message": "Utilisateur inscrit avec succès"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except AlreadyExistsError as e:
+        raise HTTPException(status_code=409, detail=str(e))
 
 
 # --- Endpoints de base ---
@@ -193,30 +198,28 @@ def supprimer_activite(id_activite: int, user = Depends(get_current_user)):
 
 # --- Endpoints Utilisateurs ---
 
-@app.get("/utilisateurs/{id_utilisateur}")
+@app.get("/utilisateurs/{id_utilisateur}", tags=["Utilisateur"])
 def consulter_utilisateur_par_id(id_utilisateur: int, user = Depends(get_current_user)):
     """Récupérer un utilisateur grâce à son ID."""
-    utilisateur = UtilisateurService().trouver_par_id(id_utilisateur)
-    if not utilisateur:
-        raise HTTPException(status_code=400, detail="Cet utilisateur n'existe pas")
+    try:
+        return UtilisateurService().trouver_par_id(id_utilisateur)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     return utilisateur
 
-@app.get("/utilisateurs/pseudo/{pseudo}")
+@app.get("/utilisateurs/pseudo/{pseudo}", tags=["Utilisateur"])
 def consulter_utilisateur_par_pseudo(pseudo: str, user = Depends(get_current_user)):
     """Récupérer un utilisateur grâce à son pseudo."""
-    utilisateur = UtilisateurService().trouver_par_pseudo(pseudo)
-    if not utilisateur:
-        raise HTTPException(status_code=400, detail="Cet utilisateur n'existe pas")
-    return utilisateur
+    try:
+        return UtilisateurService().trouver_par_pseudo(pseudo)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/utilisateurs")
+@app.get("/utilisateurs", tags=["Utilisateur"])
 def lister_utilisateurs(user = Depends(get_current_user)):
     """Lister tous les utilisateurs."""
-    utilisateurs = UtilisateurService().lister_utilisateurs()
-    if utilisateurs is None:
-        raise HTTPException(status_code=400, detail="Erreur lors de la récupération des utilisateurs")
-    return utilisateurs
-        
+    return UtilisateurService().lister_utilisateurs() # pas de paramètres donc pas d'erreur côté client
+
 
 # --- Endpoints Jaimes ---
 
@@ -345,7 +348,8 @@ def supprimer_abonnement(id_utilisateur_suivi: int, user = Depends(get_current_u
 def abonnement_existe(id_utilisateur_suiveur: int, id_utilisateur_suivi: int, user = Depends(get_current_user)):
     """Vérifier si un abonnement existe entre deux utilisateurs."""
     try:
-        return AbonnementService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
+        existe = AbonnementService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
+        return {"existe": existe}
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
