@@ -62,22 +62,22 @@ def test_supprimer_ok():
     """Suppression de commentaire réussie"""
 
     # GIVEN
-    commentaire = Commentaire(id_commentaire=991, id_activite=991, id_auteur=992, contenu='Super activité !', date_commentaire='2025-09-26')
+    id_commentaire = 991
 
     # WHEN
-    suppression_ok = CommentaireDao().supprimer(commentaire)
+    suppression_ok = CommentaireDao().supprimer(id_commentaire)
 
     # THEN
     assert suppression_ok
 
 def test_supprimer_ko():
-    """Suppression de commentaire échouée (id inconnu)"""
+    """Suppression de commentaire échouée (id inexistant)"""
 
     # GIVEN
-    commentaire = Commentaire(id_activite=123, id_auteur=456, contenu="ok !", date_commentaire=2025-10-21)
+    id_commentaire = 9999
 
     # WHEN
-    suppression_ok = CommentaireDao().supprimer(commentaire)
+    suppression_ok = CommentaireDao().supprimer(id_commentaire)
 
     # THEN
     assert not suppression_ok

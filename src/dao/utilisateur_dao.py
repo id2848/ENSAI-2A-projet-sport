@@ -88,7 +88,7 @@ class UtilisateurDao:
 
 
     @log
-    def trouver_par_pseudo(self, pseudo) -> Utilisateur:
+    def trouver_par_pseudo(self, pseudo: str) -> Utilisateur:
         """Trouver un utilisateur grâce à son pseudo
 
         Parameters
@@ -126,7 +126,7 @@ class UtilisateurDao:
         return None
 
     @log
-    def trouver_par_id(self, id_utilisateur) -> Utilisateur:
+    def trouver_par_id(self, id_utilisateur: int) -> Utilisateur:
         """Trouver un utilisateur par son ID"""
         try:
             with DBConnection().connection as connection:
@@ -193,7 +193,7 @@ class UtilisateurDao:
         return liste_utilisateurs
 
     @log
-    def modifier(self, utilisateur) -> bool:
+    def modifier(self, utilisateur: int) -> bool:
         """Modification d'un utilisateur dans la base de données
 
         Parameters
@@ -235,13 +235,13 @@ class UtilisateurDao:
         return res == 1
 
     @log
-    def supprimer(self, utilisateur) -> bool:
+    def supprimer(self, id_utilisateur: int) -> bool:
         """Suppression d'un utilisateur dans la base de données
 
         Parameters
         ----------
-        utilisateur : Utilisateur
-            Utilisateur à supprimer de la base de données
+        id_utilisateur : int
+            l'id de l'utilisateur à supprimer de la base de données
 
         Returns
         -------
@@ -252,7 +252,7 @@ class UtilisateurDao:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "DELETE FROM utilisateur WHERE id_utilisateur = %(id_utilisateur)s;",
-                        {"id_utilisateur": utilisateur.id_utilisateur},
+                        {"id_utilisateur": id_utilisateur},
                     )
                     res = cursor.rowcount
         except Exception as e:

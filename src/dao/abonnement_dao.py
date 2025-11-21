@@ -205,8 +205,8 @@ class AbonnementDao:
 
         Parameters
         ----------
-        abonnement : Abonnement
-            abonnement à supprimer de la base de données
+        id_abonnement : int
+            l'id de l'abonnement à supprimer de la base de données
 
         Returns
         -------

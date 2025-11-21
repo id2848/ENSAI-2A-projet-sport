@@ -43,7 +43,7 @@ class CommentaireDao:
                     )
                     res = cursor.fetchone()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
 
         created = False
         if res:
@@ -53,7 +53,7 @@ class CommentaireDao:
         return created
     
     @log
-    def lister_par_activite(self, id_activite) -> list[Commentaire]:
+    def lister_par_activite(self, id_activite: int) -> list[Commentaire]:
         """lister tous les commentaires
 
         Parameters
@@ -77,7 +77,7 @@ class CommentaireDao:
                     )
                     res = cursor.fetchall()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
 
         liste_commentaires = []
@@ -98,13 +98,13 @@ class CommentaireDao:
 
 
     @log
-    def supprimer(self, commentaire) -> bool:
+    def supprimer(self, id_commentaire: int) -> bool:
         """Suppression d'un commentaire dans la base de données
 
         Parameters
         ----------
-        commentaire : Commentaire
-            commentaire à supprimer de la base de données
+        id_commentaire : int
+            l'id du commentaire à supprimer de la base de données
 
         Returns
         -------
@@ -118,16 +118,16 @@ class CommentaireDao:
                     cursor.execute(
                         "DELETE FROM commentaire                  "
                         " WHERE id_commentaire=%(id_commentaire)s      ",
-                        {"id_commentaire": commentaire.id_commentaire},
+                        {"id_commentaire": id_commentaire},
                     )
                     res = cursor.rowcount
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
 
         return res > 0
 
-    def trouver_par_id(self, id_commentaire) -> Commentaire:
+    def trouver_par_id(self, id_commentaire: int) -> Commentaire:
         """Trouver un commentaire par son id"""
         try:
             with DBConnection().connection as connection:
@@ -138,7 +138,7 @@ class CommentaireDao:
                     )
                     res = cursor.fetchone()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
 
         commentaire = None

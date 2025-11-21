@@ -124,20 +124,16 @@ def test_supprimer_ok():
     """Suppression d'utilisateur réussie"""
 
     # GIVEN
-    utilisateur = Utilisateur(id_utilisateur=995, pseudo="mikebrown", nom="Brown", prenom="Mike", date_de_naissance="1988-11-30", sexe="Homme")
-    
-    # Vérification que l'utilisateur est bien présent
-    utilisateur_bdd = UtilisateurDao().trouver_par_id(utilisateur.id_utilisateur)
-    assert utilisateur_bdd is not None, "L'utilisateur n'est pas trouvé dans la base de données"
+    id_utilisateur = 995 # existant dans les données test
 
     # WHEN
-    suppression_ok = UtilisateurDao().supprimer(utilisateur)
+    suppression_ok = UtilisateurDao().supprimer(id_utilisateur)
 
     # THEN
     assert suppression_ok, "La suppression de l'utilisateur a échoué"
 
     # Vérification supplémentaire : après suppression, l'utilisateur ne doit plus exister dans la base de données
-    utilisateur_supprime = UtilisateurDao().trouver_par_id(utilisateur.id_utilisateur)
+    utilisateur_supprime = UtilisateurDao().trouver_par_id(id_utilisateur)
     assert utilisateur_supprime is None, "L'utilisateur n'a pas été correctement supprimé de la base de données"
 
 
@@ -145,10 +141,10 @@ def test_supprimer_ko():
     """Suppression d'utilisateur échouée (id inconnu)"""
 
     # GIVEN
-    utilisateur = Utilisateur(id_utilisateur=8888, pseudo="id inconnu", nom="nada", prenom="yapa", date_de_naissance="1988-11-30", sexe="Homme")
+    id_utilisateur = 8888
 
     # WHEN
-    suppression_ok = UtilisateurDao().supprimer(utilisateur)
+    suppression_ok = UtilisateurDao().supprimer(id_utilisateur)
 
     # THEN
     assert not suppression_ok

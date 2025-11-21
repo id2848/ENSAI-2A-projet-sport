@@ -155,16 +155,8 @@ class ActiviteService:
     def supprimer_commentaire(self, id_commentaire: int) -> bool:
         """Supprime un commentaire d'une activité"""
         try:
-            # Récupérer le commentaire par son ID
-            commentaire = CommentaireDao().trouver_par_id(id_commentaire=id_commentaire)
-
-            # Si le commentaire n'existe pas
-            if commentaire is None:
-                logging.warning(f"Le commentaire avec ID {id_commentaire} n'existe pas.")
-                return False
-
             # Supprimer le commentaire de la base de données
-            return CommentaireDao().supprimer(commentaire)
+            return CommentaireDao().supprimer(id_commentaire)
 
         except Exception as e:
             logging.error(f"Erreur lors de la suppression du commentaire : {e}")
