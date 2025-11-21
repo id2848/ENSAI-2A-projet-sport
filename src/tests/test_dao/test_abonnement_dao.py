@@ -13,7 +13,6 @@ def setup_test_environment():
         ResetDatabase().lancer(test_dao=True)
         yield
 
-
 def test_creer_abonnement_ok():
     """Test de création d'un abonnement réussi"""
 

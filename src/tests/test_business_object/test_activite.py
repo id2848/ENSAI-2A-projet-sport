@@ -1,3 +1,5 @@
+import pytest
+
 from datetime import date, timedelta
 from business_object.activite import Activite  
 
@@ -97,3 +99,6 @@ def test_distance_zero_ko():
         duree=timedelta(seconds=2000)
     )
     assert activite.calculer_vitesse() != 1.0
+
+if __name__ == "__main__":
+    pytest.main([__file__])

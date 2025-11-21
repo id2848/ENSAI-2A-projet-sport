@@ -88,7 +88,8 @@ class ActiviteService:
             raise ValueError(f"Le format de la date {date_debut} est incorrect. Utilisez le format YYYY-MM-DD.")
         if date_fin is not None and not verifier_date(date_fin):
             raise ValueError(f"Le format de la date {date_fin} est incorrect. Utilisez le format YYYY-MM-DD.")
-        sport = Activite.valider_sport(sport)
+        if sport is not None:
+            sport = Activite.valider_sport(sport)
         
         return ActiviteDao().lister_activites_filtres(id_utilisateur=id_utilisateur, sport=sport, date_debut=date_debut, date_fin=date_fin)
 

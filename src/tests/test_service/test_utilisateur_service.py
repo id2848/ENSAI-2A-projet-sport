@@ -1,3 +1,4 @@
+import os
 import pytest
 from datetime import date
 from unittest.mock import patch
@@ -7,7 +8,6 @@ from dao.utilisateur_dao import UtilisateurDao
 from business_object.utilisateur import Utilisateur
 
 from utils.reset_database import ResetDatabase
-import os
 
 
 @pytest.fixture(autouse=True)

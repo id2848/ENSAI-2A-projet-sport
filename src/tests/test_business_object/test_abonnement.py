@@ -8,3 +8,5 @@ def test_str():
     expected_str = "Abonnement: Utilisateur 1 suit l'utilisateur 2"
     assert(str(abonnement)== expected_str)
 
+if __name__ == "__main__":
+    pytest.main([__file__])

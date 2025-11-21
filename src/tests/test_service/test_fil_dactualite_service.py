@@ -1,3 +1,7 @@
+import os
+import pytest
+from unittest.mock import patch
+from utils.reset_database import ResetDatabase
 
 from service.fil_dactualite_service import Fildactualite
 
@@ -11,11 +15,6 @@ from business_object.utilisateur import Utilisateur
 from business_object.activite import Activite
 
 from datetime import date, timedelta
-
-import os
-import pytest
-from unittest.mock import patch
-from utils.reset_database import ResetDatabase
 
 @pytest.fixture(autouse=True)
 def setup_test_environment():

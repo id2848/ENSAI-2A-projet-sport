@@ -8,7 +8,7 @@ from business_object.activite import Activite
 from service.statistiques_service import StatistiquesService
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(autouse=True)
 def setup_test_environment():
     """Initialisation des données de test dans le schéma dédié aux tests"""
     with patch.dict(os.environ, {"SCHEMA": "projet_test_dao"}):

@@ -7,7 +7,7 @@ from utils.reset_database import ResetDatabase
 from dao.activite_dao import ActiviteDao
 from business_object.activite import Activite
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(autouse=True)
 def setup_test_environment():
     """Initialisation des données de test dans le schéma dédié aux tests"""
     with patch.dict(os.environ, {"SCHEMA": "projet_test_dao"}):
@@ -252,5 +252,4 @@ def test_verifier_id_non_existant():
     assert existe is False
 
 if __name__ == "__main__":
-    import pytest
     pytest.main([__file__])
