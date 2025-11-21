@@ -23,7 +23,7 @@ class AbonnementService:
             )
             return nouveau_abonnement if AbonnementDao().creer(nouveau_abonnement) else None
         except Exception as e:
-            print(f"Erreur lors de la création de l'abonnement : {e}")
+            logging.error(f"Erreur lors de la création de l'abonnement : {e}")
             return False        
 
     @log
@@ -33,7 +33,7 @@ class AbonnementService:
             abonnement = Abonnement(id_utilisateur_suiveur, id_utilisateur_suivi)
             return AbonnementDao().supprimer(abonnement)
         except Exception as e:
-            print(f"Erreur lors de la suppression de l'abonnement : {e}")
+            logging.error(f"Erreur lors de la suppression de l'abonnement : {e}")
             return False
 
     @log
@@ -47,7 +47,7 @@ class AbonnementService:
                 utilisateurs_suivis.add(j.id_utilisateur_suivi)
             return utilisateurs_suivis
         except Exception as e:
-            print(f"Erreur lors de la récupération des utilisateurs suivis : {e}")
+            logging.error(f"Erreur lors de la récupération des utilisateurs suivis : {e}")
             return None
 
     @log
@@ -61,5 +61,5 @@ class AbonnementService:
                 utilisateurs_suiveurs.add(j.id_utilisateur_suiveur)
             return utilisateurs_suiveurs
         except Exception as e:
-            print(f"Erreur lors de la récupération des utilisateurs suiveurs : {e}")
+            logging.error(f"Erreur lors de la récupération des utilisateurs suiveurs : {e}")
             return None

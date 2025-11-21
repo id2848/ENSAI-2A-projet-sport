@@ -26,7 +26,6 @@ def test_trouver_par_id_existant():
     id_utilisateur = 992
 
     # WHEN
-    print(UtilisateurDao())
     utilisateur = UtilisateurDao().trouver_par_id(id_utilisateur)
 
     # THEN
