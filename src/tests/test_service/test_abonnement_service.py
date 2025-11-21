@@ -20,8 +20,8 @@ def test_creer_ok():
     """ "Création de Abonnement réussie"""
 
     # GIVEN
-    id_u_suiveur= 991
-    id_u_suivi=993
+    id_u_suiveur = 991
+    id_u_suivi = 993
 
     # WHEN
     abonnement = AbonnementService().creer_abonnement(id_u_suiveur, id_u_suivi)
@@ -96,6 +96,4 @@ def test_supprimer_abonnement_ko():
 
 
 if __name__ == "__main__":
-    import pytest
-
     pytest.main([__file__])

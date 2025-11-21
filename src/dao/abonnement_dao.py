@@ -200,7 +200,7 @@ class AbonnementDao:
         return liste_abonnements
 
     @log
-    def supprimer(self, abonnement: Abonnement) -> bool:
+    def supprimer(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int) -> bool:
         """Suppression d'un abonnement dans la base de données
 
         Parameters
@@ -221,8 +221,8 @@ class AbonnementDao:
                         " WHERE id_utilisateur_suiveur = %(id_utilisateur_suiveur)s "
                         "   AND id_utilisateur_suivi = %(id_utilisateur_suivi)s;    ",
                         {
-                            "id_utilisateur_suiveur": abonnement.id_utilisateur_suiveur,
-                            "id_utilisateur_suivi": abonnement.id_utilisateur_suivi,
+                            "id_utilisateur_suiveur": id_utilisateur_suiveur,
+                            "id_utilisateur_suivi": id_utilisateur_suivi,
                         },
                     )
                     res = cursor.rowcount

@@ -24,14 +24,13 @@ class AbonnementService:
             return nouveau_abonnement if AbonnementDao().creer(nouveau_abonnement) else None
         except Exception as e:
             logging.error(f"Erreur lors de la création de l'abonnement : {e}")
-            return False        
+            return False
 
     @log
     def supprimer_abonnement(self, id_utilisateur_suiveur, id_utilisateur_suivi) -> bool:
         """Supprimer un abonnement"""
         try:
-            abonnement = Abonnement(id_utilisateur_suiveur, id_utilisateur_suivi)
-            return AbonnementDao().supprimer(abonnement)
+            return AbonnementDao().supprimer(id_utilisateur_suiveur, id_utilisateur_suivi)
         except Exception as e:
             logging.error(f"Erreur lors de la suppression de l'abonnement : {e}")
             return False
