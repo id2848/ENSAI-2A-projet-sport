@@ -367,14 +367,13 @@ def lister_abonnements_suiveurs(id_utilisateur: int, user = Depends(get_current_
 
 # --- Endpoints Fil d'actualité ---
 
-@app.get("/fil-dactualite/{id_utilisateur}")
+@app.get("/fil-dactualite/{id_utilisateur}", tags=["Fil d'actualité"])
 def fil_dactualite(id_utilisateur: int, user = Depends(get_current_user)):
     """Afficher le fil d'actualités de l'utilisateur."""
-    fil_dactualite = Fildactualite().creer_fil_dactualite(id_utilisateur)
-    if fil_dactualite:
-        return fil_dactualite
-    else:
-        return {"message": "Erreur"}
+    try:
+        return Fildactualite().creer_fil_dactualite(id_utilisateur)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 # --- Endpoints Statistiques ---

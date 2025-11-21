@@ -49,6 +49,4 @@ def test_creer_fil_dactualite_ok():
         assert isinstance(activite.date_activite, date)
     
 if __name__ == "__main__":
-    import pytest
-
     pytest.main([__file__])

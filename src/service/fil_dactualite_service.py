@@ -1,4 +1,3 @@
-from tabulate import tabulate
 from utils.log_decorator import log
 
 from dao.abonnement_dao import AbonnementDao
@@ -17,18 +16,23 @@ from business_object.utilisateur import Utilisateur
 
 from datetime import datetime
 
+from exceptions import NotFoundError
+
 
 class Fildactualite:
     """Classe contenant les méthodes de service pour le fil d'actualité"""
-
+    @log
     def __init__(self):
         self.utilisateur_dao = UtilisateurDao()
         self.abonnement_dao = AbonnementDao()
         self.activite_dao = ActiviteDao()
+    
     @log
     def creer_fil_dactualite(self, id_utilisateur: int) -> list:
         """Retourne le fil d'actualité d'un utilisateur"""
-
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError(f"Cet utilisateur n'existe pas")
+        
         set_id_suivis = AbonnementService().lister_utilisateurs_suivis(id_utilisateur)
         ls_activites = []
         for u in set_id_suivis:
