@@ -228,6 +228,29 @@ def test_lister_activites_filtres_sans_filtre():
         assert isinstance(a, Activite)
         assert a.id_utilisateur == id_utilisateur
 
+def test_verifier_id_existant():
+    """Vérifier que la méthode retourne True si l'id_activite existe"""
+    # GIVEN
+    id_activite_existant = 991
+    
+    # WHEN
+    existe = ActiviteDao().verifier_id_existant(id_activite_existant)
+    
+    # THEN
+    assert existe is True
+
+
+def test_verifier_id_non_existant():
+    """Vérifier que la méthode retourne False si l'id_activite n'existe pas"""
+    # GIVEN
+    id_activite_non_existant = 99999
+    
+    # WHEN
+    existe = ActiviteDao().verifier_id_existant(id_activite_non_existant)
+    
+    # THEN
+    assert existe is False
+
 if __name__ == "__main__":
     import pytest
     pytest.main([__file__])

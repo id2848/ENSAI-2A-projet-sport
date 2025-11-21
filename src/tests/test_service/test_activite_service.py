@@ -219,24 +219,22 @@ def test_ajouter_commentaire_ok():
     contenu = "Très belle randonnée !"
 
     # WHEN
-    result = ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, contenu)
+    res = ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, contenu)
 
     # THEN
-    assert result is True
+    assert res
 
 def test_ajouter_commentaire_echec():
     """Test pour l'échec de l'ajout d'un commentaire (par exemple, si l'activité n'existe pas)"""
 
     # GIVEN
-    id_utilisateur = 999  # Un utilisateur qui n'existe pas
-    id_activite = 999  # Une activité qui n'existe pas
+    id_utilisateur = 991
+    id_activite = 9999  # Une activité qui n'existe pas
     contenu = "Super activité !"
 
-    # WHEN
-    result = ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, contenu)
-
-    # THEN
-    assert result is False
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, contenu)
 
 def test_supprimer_commentaire_ok():
     """Suppression de commentaire réussie"""
@@ -256,11 +254,9 @@ def test_supprimer_commentaire_ko():
     # GIVEN
     id_commentaire = 9999
 
-    # WHEN
-    suppression_ok = ActiviteService().supprimer_commentaire(id_commentaire)
-
-    # THEN
-    assert not suppression_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        suppression_ok = ActiviteService().supprimer_commentaire(id_commentaire)
 
 def test_supprimer_activite_ok():
     """Test pour la suppression d'une activité"""
@@ -291,11 +287,9 @@ def test_trouver_commentaire_par_id_ko():
     # GIVEN
     id_commentaire = 99999
 
-    # WHEN
-    commentaire = ActiviteService().trouver_commentaire_par_id(id_commentaire)
-
-    # THEN
-    assert commentaire is None
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        commentaire = ActiviteService().trouver_commentaire_par_id(id_commentaire)
 
 def test_trouver_commentaire_par_id_ok():
     """Trouver un commentaire existant par son id"""

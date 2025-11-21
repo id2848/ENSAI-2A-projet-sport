@@ -23,10 +23,10 @@ def test_creer_ok():
     commentaire = Commentaire(id_activite=991, id_auteur=992, contenu='Super activité !', date_commentaire='2025-09-26')
 
     # WHEN
-    creation_ok = CommentaireDao().creer(commentaire)
+    res = CommentaireDao().creer(commentaire)
 
     # THEN
-    assert creation_ok
+    assert res
     assert commentaire.id_commentaire
 
 
@@ -38,7 +38,7 @@ def test_creer_ko():
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        creation_ok = CommentaireDao().creer(commentaire)
+        res = CommentaireDao().creer(commentaire)
 
 def test_lister_par_activite():
     """Vérifie que la méthode renvoie une liste de Joueur

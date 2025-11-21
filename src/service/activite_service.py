@@ -15,6 +15,8 @@ from dao.activite_dao import ActiviteDao
 from dao.commentaire_dao import CommentaireDao
 from dao.jaime_dao import JaimeDao
 
+from exceptions import NotFoundError
+
 import logging
 
 class ActiviteService:
@@ -110,6 +112,8 @@ class ActiviteService:
             return None
 
 
+    # --- Jaimes ---
+
     def ajouter_jaime(self, id_activite: int, id_utilisateur: int) -> bool:
         """Ajoute un "j'aime" à une activité"""
         try:
@@ -126,6 +130,14 @@ class ActiviteService:
         except Exception as e:
             logging.error(f"Erreur lors de la suppression du 'j'aime' : {e}")
             return False
+        
+    def jaime_existe(self, id_activite: int, id_auteur: int) -> bool:
+        """Vérifier si un jaime existe dans la base de données"""
+        try:
+             return JaimeDao().existe(id_activite, id_auteur)
+        except Exception as e:
+            logging.error(f"Erreur lors de la vérification du jaime : {e}")
+            return None
     
     def compter_jaimes_par_activite(self, id_activite: int) -> int:
         """Compte le nombre de jaimes pour une activité donnée."""
@@ -136,58 +148,43 @@ class ActiviteService:
             logging.error(f"Erreur lors du comptage des jaimes d'une activité : {e}")
             return None
 
+
+    # --- Commentaires ---
+
     def ajouter_commentaire(self, id_utilisateur: int, id_activite: int, contenu: str) -> bool:
         """Ajoute un commentaire à une activité"""
-        try:
-            activite = ActiviteDao().trouver_par_id(id_activite=id_activite)
-            utilisateur = UtilisateurDao().trouver_par_id(id_utilisateur=id_utilisateur)
-            nouveau_commentaire = Commentaire(
-                id_activite=id_activite,
-                id_auteur=id_utilisateur,
-                contenu=contenu,
-                date_commentaire=datetime.now()
-            )
-            return CommentaireDao().creer(nouveau_commentaire)
-        except Exception as e:
-            logging.error(f"Erreur lors de l'ajout du commentaire : {e}")
-            return False
+        if not UtilisateurDao().verifier_id_existant(id_utilisateur):
+            raise NotFoundError("Cet utilisateur n'existe pas")
+        if not ActiviteDao().verifier_id_existant(id_activite):
+            raise NotFoundError("Cette activité n'existe pas")
+        
+        commentaire = Commentaire(
+            id_activite=id_activite,
+            id_auteur=id_utilisateur,
+            contenu=contenu,
+            date_commentaire=datetime.now()
+        )
+        return CommentaireDao().creer(commentaire)
 
     def supprimer_commentaire(self, id_commentaire: int) -> bool:
         """Supprime un commentaire d'une activité"""
-        try:
-            # Supprimer le commentaire de la base de données
-            return CommentaireDao().supprimer(id_commentaire)
+        commentaire = CommentaireDao().trouver_par_id(id_commentaire)
+        if not commentaire:
+            raise NotFoundError("Ce commentaire n'existe pas")
 
-        except Exception as e:
-            logging.error(f"Erreur lors de la suppression du commentaire : {e}")
-            return False
+        return CommentaireDao().supprimer(id_commentaire)
 
     def lister_commentaires(self, id_activite: int) -> List[Commentaire]:
-        """Liste tous les commentaires d'une activité"""
-        try:
-             commentaires = CommentaireDao().lister_par_activite(id_activite=id_activite)  # Méthode dans le DAO
-             return commentaires
-        except Exception as e:
-            logging.error(f"Erreur lors de la récupération des commentaires : {e}")
-            return None
+        """Lister tous les commentaires d'une activité"""
+        if not ActiviteDao().verifier_id_existant(id_activite):
+            raise NotFoundError("Cette activité n'existe pas")
+        
+        return CommentaireDao().lister_par_activite(id_activite=id_activite)
     
     def trouver_commentaire_par_id(self, id_commentaire: int) -> Commentaire:
         """Trouver un commentaire par son id"""
-        try:
-            commentaire = CommentaireDao().trouver_par_id(id_commentaire=id_commentaire)
-            # Si le commentaire n'existe pas
-            if commentaire is None:
-                logging.warning(f"Le commentaire avec ID {id_commentaire} n'existe pas.")
-            return commentaire
+        commentaire = CommentaireDao().trouver_par_id(id_commentaire)
+        if not commentaire:
+            raise NotFoundError("Ce commentaire n'existe pas")
         
-        except Exception as e:
-            logging.error(f"Erreur lors de la récupération du commentaire : {e}")
-            return None
-
-    def jaime_existe(self, id_activite: int, id_auteur: int) -> bool:
-        """Vérifier si un jaime existe dans la base de données"""
-        try:
-             return JaimeDao().existe(id_activite, id_auteur)
-        except Exception as e:
-            logging.error(f"Erreur lors de la vérification du jaime : {e}")
-            return None
+        return commentaire

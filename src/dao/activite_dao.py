@@ -206,3 +206,18 @@ class ActiviteDao:
                 liste_activites.append(activite)
         
         return liste_activites
+    
+    def verifier_id_existant(self, id_activite: int) -> bool:
+        """Vérifier si une activité existe avec un id donné"""
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT 1 FROM activite WHERE id_activite = %(id_activite)s;",
+                        {"id_activite": id_activite},
+                    )
+                    res = cursor.fetchone()
+                    return res is not None
+        except Exception as e:
+            logging.error(f"Erreur lors de la vérification de l'id {id_activite}: {e}")
+            raise

@@ -58,15 +58,15 @@ def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
 
 # --- Endpoints Authentification ---
 
-@app.get("/me")
+@app.get("/me", tags=["Authentification"])
 def me(user = Depends(get_current_user)):
     return user
 
-@app.get("/logout")
+@app.get("/logout", tags=["Authentification"])
 async def logout(creds: HTTPBasicCredentials = Depends(get_current_user)):
     return HTMLResponse(content="Vous vous êtes déconnecté", status_code=status.HTTP_401_UNAUTHORIZED)
 
-@app.post("/inscription")
+@app.post("/inscription", tags=["Authentification"])
 def inscription(
     pseudo: str,
     mot_de_passe: str,
@@ -283,42 +283,39 @@ def compter_jaimes(id_activite: int, user = Depends(get_current_user)):
 
 # --- Endpoints Commentaires ---
 
-@app.post("/commentaires")
+@app.post("/commentaires", tags=["Commentaire"])
 def ajouter_commentaire(id_activite: int, commentaire: str, user = Depends(get_current_user)):
     """Ajouter un commentaire à une activité pour l'utilisateur connecté."""
-    activite = ActiviteService().trouver_activite_par_id(id_activite)
-    if not activite:
-        return {"message": "Cette activité n'existe pas"}
-    commentaire_cree = ActiviteService().ajouter_commentaire(user["id_utilisateur"], id_activite, commentaire)
-    if not commentaire_cree:
-        raise HTTPException(status_code=400, detail="Erreur lors de la création du commentaire")
-    return {"message": "Commentaire ajouté", "commentaire": commentaire_cree}
+    try:
+        id_utilisateur = user["id_utilisateur"]
+        return ActiviteService().ajouter_commentaire(id_utilisateur, id_activite, commentaire)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
-@app.delete("/commentaires/{id_commentaire}")
+@app.delete("/commentaires/{id_commentaire}", tags=["Commentaire"])
 def supprimer_commentaire(id_commentaire: int, user = Depends(get_current_user)):
     """Supprimer un commentaire appartenant à l'utilisateur connecté."""
-    commentaire = ActiviteService().trouver_commentaire_par_id(id_commentaire)
-    if not commentaire:
-        return {"message": "Ce commentaire n'existe pas"}
-    if not commentaire.id_auteur == user["id_utilisateur"]:
-        return {"message": "Ce commentaire ne vous appartient pas"}
-    supprime = ActiviteService().supprimer_commentaire(id_commentaire)
-    if not supprime:
-        raise HTTPException(status_code=400, detail="Erreur lors de la suppression du commentaire")
-    return {"message": "Commentaire supprimé"}
+    # Vérification appartenance
+    try:
+        commentaire = ActiviteService().trouver_commentaire_par_id(id_commentaire)
+        if not commentaire.id_auteur == user["id_utilisateur"]:
+            raise HTTPException(status_code=403, detail="Ce commentaire ne vous appartient pas")
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+    try:
+        ActiviteService().supprimer_commentaire(id_commentaire)
+        return {"message": "Commentaire supprimé avec succès"}
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/commentaires/{id_activite}")
+@app.get("/commentaires/{id_activite}", tags=["Commentaire"])
 def lister_commentaires(id_activite: int, user = Depends(get_current_user)):
     """Lister les commentaires d'une activité donnée."""
-    activite = ActiviteService().trouver_activite_par_id(id_activite)
-    if not activite:
-        raise HTTPException(status_code=400, detail="Cette activité n'existe pas")
-
-    commentaires = ActiviteService().lister_commentaires(id_activite)
-    if commentaires is None:
-        raise HTTPException(status_code=400, detail="Erreur lors de la récupération des commentaires")
-
-    return commentaires
+    try:
+        return ActiviteService().lister_commentaires(id_activite)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 # --- Endpoints Abonnements ---
@@ -349,7 +346,7 @@ def abonnement_existe(id_utilisateur_suiveur: int, id_utilisateur_suivi: int, us
     """Vérifier si un abonnement existe entre deux utilisateurs."""
     try:
         existe = AbonnementService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
-        return {"existe": existe}
+        return existe
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 

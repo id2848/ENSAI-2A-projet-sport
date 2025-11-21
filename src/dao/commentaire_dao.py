@@ -27,8 +27,6 @@ class CommentaireDao:
             True si la création est un succès
             False sinon
         """
-        res = None
-
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -54,7 +52,7 @@ class CommentaireDao:
             raise DatabaseCreationError(msg_err)
         
         commentaire.id_commentaire = res["id_commentaire"]
-        return True
+        return commentaire
     
     @log
     def lister_par_activite(self, id_activite: int) -> List[Commentaire]:

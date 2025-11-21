@@ -171,6 +171,31 @@ def test_verifier_pseudo_non_existant():
     # THEN
     assert existe is False  # Le pseudo n'existe pas dans la base de données
 
+def test_verifier_id_existant():
+    """Vérifier que la méthode retourne True si l'id_utilisateur existe"""
+    # GIVEN
+    utilisateur_dao = UtilisateurDao()
+    id_utilisateur_existant = 991
+    
+    # WHEN
+    existe = utilisateur_dao.verifier_id_existant(id_utilisateur_existant)
+    
+    # THEN
+    assert existe is True
+
+
+def test_verifier_id_non_existant():
+    """Vérifier que la méthode retourne False si l'id_utilisateur n'existe pas"""
+    # GIVEN
+    utilisateur_dao = UtilisateurDao()
+    id_utilisateur_non_existant = 99999
+    
+    # WHEN
+    existe = utilisateur_dao.verifier_id_existant(id_utilisateur_non_existant)
+    
+    # THEN
+    assert existe is False
+
 
 def test_creer_ok():
     """Création valide d'un utilisateur"""
