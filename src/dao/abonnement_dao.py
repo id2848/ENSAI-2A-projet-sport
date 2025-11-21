@@ -13,7 +13,7 @@ class AbonnementDao:
     """Classe contenant les méthodes pour accéder aux abonnements de la base de données"""
 
     @log
-    def creer(self, abonnement: Abonnement) -> bool:
+    def creer(self, abonnement: Abonnement) -> Abonnement:
         """Création d'un abonnement dans la base de données
 
         Parameters
@@ -48,7 +48,7 @@ class AbonnementDao:
             logging.error(msg_err)
             raise DatabaseCreationError(msg_err)
 
-        return True
+        return abonnement
     
     @log
     def trouver_par_ids(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int) -> Abonnement | None:

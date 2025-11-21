@@ -17,6 +17,8 @@ from service.fil_dactualite_service import Fildactualite
 from utils.gpx_parser import parse_gpx
 from utils.verifier_date import verifier_date
 
+from exceptions import NotFoundError, AlreadyExistsError
+
 # --- Configuration ---
 
 app = FastAPI(title="Webservice Sports ENSAI")
@@ -317,68 +319,50 @@ def lister_commentaires(id_activite: int, user = Depends(get_current_user)):
 
 # --- Endpoints Abonnements ---
 
-@app.post("/abonnements")
+@app.post("/abonnements", tags=["Abonnement"])
 def creer_abonnement(id_utilisateur_suivi: int, user = Depends(get_current_user)):
     """S'abonner à un utilisateur par l'utilisateur connecté."""
-    utilisateur_suivi = UtilisateurService().trouver_par_id(id_utilisateur_suivi)
-    if not utilisateur_suivi:
-        return {"message": "Cet utilisateur n'existe pas"}
-    id_utilisateur_suiveur = user["id_utilisateur"]
-    abonnement_cree = AbonnementService().creer_abonnement(id_utilisateur_suiveur, id_utilisateur_suivi)
-    if not abonnement_cree:
-        raise HTTPException(status_code=400, detail="Erreur lors de la création de l'abonnement")
-    return {"message": "Abonnement créé", "abonnement": abonnement_cree}
+    try:
+        id_utilisateur_suiveur = user["id_utilisateur"]
+        return AbonnementService().creer_abonnement(id_utilisateur_suiveur, id_utilisateur_suivi)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except AlreadyExistsError as e:
+        raise HTTPException(status_code=409, detail=str(e))
 
-@app.delete("/abonnements")
+@app.delete("/abonnements", tags=["Abonnement"])
 def supprimer_abonnement(id_utilisateur_suivi: int, user = Depends(get_current_user)):
     """Se désabonner d'un utilisateur par l'utilisateur connecté."""
-    utilisateur_suivi = UtilisateurService().trouver_par_id(id_utilisateur_suivi)
-    if not utilisateur_suivi:
-        return {"message": "Cet utilisateur n'existe pas"}
-    id_utilisateur_suiveur = user["id_utilisateur"]
-    abonnement = ActiviteService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
-    if not abonnement:
-        return {"message": "Cet abonnement n'existe pas"}
-    supprime = AbonnementService().supprimer_abonnement(id_utilisateur_suiveur, id_utilisateur_suivi)
-    if not supprime:
-        raise HTTPException(status_code=400, detail="Erreur lors de la suppression de l'abonnement")
-    return {"message": "Abonnement supprimé"}
+    try:
+        id_utilisateur_suiveur = user["id_utilisateur"]
+        AbonnementService().supprimer_abonnement(id_utilisateur_suiveur, id_utilisateur_suivi)
+        return {"message": "Abonnement supprimé avec succès"}
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/abonnements/existe")
+@app.get("/abonnements/existe", tags=["Abonnement"])
 def abonnement_existe(id_utilisateur_suiveur: int, id_utilisateur_suivi: int, user = Depends(get_current_user)):
     """Vérifier si un abonnement existe entre deux utilisateurs."""
-    utilisateur_suiveur = UtilisateurService().trouver_par_id(id_utilisateur_suiveur)
-    utilisateur_suivi = UtilisateurService().trouver_par_id(id_utilisateur_suivi)
+    try:
+        return AbonnementService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
-    if not utilisateur_suiveur or not utilisateur_suivi:
-        raise HTTPException(status_code=400, detail="L'un des utilisateurs n'existe pas")
-
-    existe = ActiviteService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
-    return existe
-
-@app.get("/abonnements/suivis/{id_utilisateur}")
+@app.get("/abonnements/suivis/{id_utilisateur}", tags=["Abonnement"])
 def lister_abonnements_suivis(id_utilisateur: int, user = Depends(get_current_user)):
     """Lister les utilisateurs suivis par l'utilisateur donné."""
-    utilisateur_suiveur = UtilisateurService().trouver_par_id(id_utilisateur)
-    if not utilisateur_suiveur:
-        return {"message": "Cet utilisateur n'existe pas"}
-    suivis = AbonnementService().lister_utilisateurs_suivis(id_utilisateur)
-    if suivis:
-        return suivis
-    else:
-        return {"message": "Erreur"}
+    try:
+        return AbonnementService().lister_utilisateurs_suivis(id_utilisateur)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/abonnements/suiveurs/{id_utilisateur}")
+@app.get("/abonnements/suiveurs/{id_utilisateur}", tags=["Abonnement"])
 def lister_abonnements_suiveurs(id_utilisateur: int, user = Depends(get_current_user)):
     """Lister les utilisateurs qui suivent l'utilisateur."""
-    utilisateur_suivi = UtilisateurService().trouver_par_id(id_utilisateur)
-    if not utilisateur_suivi:
-        return {"message": "Cet utilisateur n'existe pas"}
-    suiveurs = AbonnementService().lister_utilisateurs_suiveurs(id_utilisateur)
-    if suiveurs:
-        return suiveurs
-    else:
-        return {"message": "Erreur"}
+    try:
+        return AbonnementService().lister_utilisateurs_suiveurs(id_utilisateur)
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 # --- Endpoints Fil d'actualité ---

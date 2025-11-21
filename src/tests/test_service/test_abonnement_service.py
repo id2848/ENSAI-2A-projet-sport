@@ -36,11 +36,9 @@ def test_creer_echec():
     # GIVEN
     id_u_suiveur, id_u_suivi = 123, 100
 
-    # WHEN
-    abonnement = AbonnementService().creer_abonnement(id_u_suiveur, id_u_suivi)
-
-    # THEN
-    assert abonnement is False
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        abonnement = AbonnementService().creer_abonnement(id_u_suiveur, id_u_suivi)
 
 
 def test_lister_utilisateurs_suivis_succes():
@@ -88,11 +86,36 @@ def test_supprimer_abonnement_ko():
     id_utilisateur_suiveur=991
     id_utilisateur_suivi=995
 
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        suppression_ok = AbonnementService().supprimer_abonnement(id_utilisateur_suiveur, id_utilisateur_suivi)
+
+def test_abonnement_existe_ok():
+    """Vérifier qu'un abonnement existe pour une activité et un auteur donnés"""
+
+    # GIVEN
+    id_utilisateur_suiveur=991
+    id_utilisateur_suivi=992
+
     # WHEN
-    suppression_ok = AbonnementService().supprimer_abonnement(id_utilisateur_suiveur, id_utilisateur_suivi)
+    existe = AbonnementService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
 
     # THEN
-    assert not suppression_ok
+    assert existe
+
+
+def test_abonnement_existe_ko():
+    """Vérifier qu'un abonnement n'existe pas"""
+
+    # GIVEN
+    id_utilisateur_suiveur = 991
+    id_utilisateur_suivi = 995
+
+    # WHEN
+    existe = AbonnementService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
+
+    # THEN
+    assert (not existe)
 
 
 if __name__ == "__main__":

@@ -360,33 +360,6 @@ def test_compter_jaimes_par_activite_inexistante():
     assert isinstance(count, int)
     assert count == 0
 
-def test_abonnement_existe_ok():
-    """Vérifier qu'un abonnement existe pour une activité et un auteur donnés"""
-
-    # GIVEN
-    id_utilisateur_suiveur=991
-    id_utilisateur_suivi=992
-
-    # WHEN
-    existe = ActiviteService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
-
-    # THEN
-    assert existe
-
-
-def test_abonnement_existe_ko():
-    """Vérifier qu'un abonnement n'existe pas"""
-
-    # GIVEN
-    id_utilisateur_suiveur = 991
-    id_utilisateur_suivi = 995
-
-    # WHEN
-    existe = ActiviteService().abonnement_existe(id_utilisateur_suiveur, id_utilisateur_suivi)
-
-    # THEN
-    assert (not existe)
-
 if __name__ == "__main__":
     import pytest
     pytest.main([__file__])

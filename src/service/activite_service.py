@@ -185,18 +185,9 @@ class ActiviteService:
             return None
 
     def jaime_existe(self, id_activite: int, id_auteur: int) -> bool:
-        """Vérifie si un jaime existe dans la base de données"""
+        """Vérifier si un jaime existe dans la base de données"""
         try:
              return JaimeDao().existe(id_activite, id_auteur)
         except Exception as e:
             logging.error(f"Erreur lors de la vérification du jaime : {e}")
-            return None
-
-    def abonnement_existe(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int) -> bool:
-        """Vérifie si un abonnement existe dans la base de données"""
-        try:
-            abonnement = AbonnementDao().trouver_par_ids(id_utilisateur_suiveur, id_utilisateur_suivi)
-            return abonnement is not None
-        except Exception as e:
-            logging.error(f"Erreur lors de la vérification de l'abonnement : {e}")
             return None

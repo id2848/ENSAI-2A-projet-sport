@@ -23,10 +23,10 @@ def test_creer_abonnement_ok():
     abonnement = Abonnement(id_utilisateur_suiveur=id_u_suiveur, id_utilisateur_suivi=id_u_suivi)
 
     # WHEN
-    creation_ok = AbonnementDao().creer(abonnement)
+    res = AbonnementDao().creer(abonnement)
 
     # THEN
-    assert creation_ok
+    assert res
 
 
 def test_creer_abonnement_ko():
@@ -38,7 +38,7 @@ def test_creer_abonnement_ko():
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        creation_ok = AbonnementDao().creer(abonnement)
+        res = AbonnementDao().creer(abonnement)
 
 
 def test_trouver_par_ids():

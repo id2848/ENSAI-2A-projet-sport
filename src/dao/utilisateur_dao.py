@@ -7,7 +7,7 @@ from dao.db_connection import DBConnection
 
 from business_object.utilisateur import Utilisateur
 
-from exceptions import DatabaseCreationError, DatabaseDeletionError, DatabaseUpdateError, UserNotFoundError, InvalidPasswordError
+from exceptions import DatabaseCreationError, DatabaseDeletionError, DatabaseUpdateError, NotFoundError, InvalidPasswordError
 
 class UtilisateurDao:
     """Classe contenant les méthodes pour accéder aux utilisateurs de la base de données"""
@@ -27,7 +27,22 @@ class UtilisateurDao:
                     return res is not None  # Si un résultat est trouvé, le pseudo existe déjà
         except Exception as e:
             logging.error(f"Erreur lors de la vérification du pseudo {pseudo}: {e}")
-            return False
+            raise
+    
+    def verifier_id_existant(self, id_utilisateur: int) -> bool:
+        """Vérifier si un utilisateur existe avec un id donné"""
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT 1 FROM utilisateur WHERE id_utilisateur = %(id_utilisateur)s;",
+                        {"id_utilisateur": id_utilisateur},
+                    )
+                    res = cursor.fetchone()
+                    return res is not None
+        except Exception as e:
+            logging.error(f"Erreur lors de la vérification de l'id {id_utilisateur}: {e}")
+            raise
 
 
     @log
@@ -292,7 +307,7 @@ class UtilisateurDao:
             if res is None:
                 msg_err = f"Aucun utilisateur trouvé avec le pseudo {pseudo}"
                 logging.error(msg_err)
-                raise UserNotFoundError(msg_err)
+                raise NotFoundError(msg_err)
 
             # Vérification du mot de passe
             if not verifier_mot_de_passe(mot_de_passe, res["sel"], res["mot_de_passe_hash"]):
