@@ -113,11 +113,9 @@ def test_modifier_ko():
     # GIVEN
     utilisateur = Utilisateur(id_utilisateur=8888, pseudo="id inconnu", nom="neant",prenom="rien",date_de_naissance="2020-01-01",sexe="Homme")
 
-    # WHEN
-    modification_ok = UtilisateurDao().modifier(utilisateur)
-
-    # THEN
-    assert not modification_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        modification_ok = UtilisateurDao().modifier(utilisateur)
 
 
 def test_supprimer_ok():
@@ -143,11 +141,9 @@ def test_supprimer_ko():
     # GIVEN
     id_utilisateur = 8888
 
-    # WHEN
-    suppression_ok = UtilisateurDao().supprimer(id_utilisateur)
-
-    # THEN
-    assert not suppression_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        suppression_ok = UtilisateurDao().supprimer(id_utilisateur)
 
 
 def test_verifier_pseudo_existant():
@@ -214,13 +210,10 @@ def test_creer_ko():
         sexe="Homme"
     )
     mot_de_passe = "1234"
-
-    # WHEN
-    res = UtilisateurDao().creer(u, mot_de_passe)
-
-    # THEN
-    assert res is False
-    assert u.id_utilisateur is None
+    
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        res = UtilisateurDao().creer(u, mot_de_passe)
 
 
 def test_se_connecter_ko():
@@ -230,11 +223,9 @@ def test_se_connecter_ko():
     pseudo = "janedoe"
     mauvais_mdp = "mauvais_mdp"
 
-    # WHEN
-    utilisateur = UtilisateurDao().se_connecter(pseudo, mauvais_mdp)
-
-    # THEN
-    assert utilisateur is None
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        utilisateur = UtilisateurDao().se_connecter(pseudo, mauvais_mdp)
 
 
 def test_se_connecter_ok():
@@ -254,3 +245,6 @@ def test_se_connecter_ok():
     # THEN
     assert utilisateur is not None
     assert utilisateur.pseudo == "janedoe"
+
+if __name__ == "__main__":
+    pytest.main([__file__])

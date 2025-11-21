@@ -36,11 +36,9 @@ def test_creer_abonnement_ko():
     id_u_suiveur, id_u_suivi = 123, 100 # non existants
     abonnement = Abonnement(id_utilisateur_suiveur=id_u_suiveur, id_utilisateur_suivi=id_u_suivi)
 
-    # WHEN
-    creation_ok = AbonnementDao().creer(abonnement)
-
-    # THEN
-    assert not creation_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        creation_ok = AbonnementDao().creer(abonnement)
 
 
 def test_trouver_par_ids():
@@ -118,13 +116,10 @@ def test_supprimer_abonnement_ko():
     id_utilisateur_suiveur = 991
     id_utilisateur_suivi = 995
 
-    # WHEN
-    suppression_ok = AbonnementDao().supprimer(id_utilisateur_suiveur, id_utilisateur_suivi)
-
-    # THEN
-    assert not suppression_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        suppression_ok = AbonnementDao().supprimer(id_utilisateur_suiveur, id_utilisateur_suivi)
 
 
 if __name__ == "__main__":
     pytest.main([__file__])
-

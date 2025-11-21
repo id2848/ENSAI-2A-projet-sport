@@ -21,17 +21,15 @@ def test_creer_ko_utilisateur_inexistant():
     activite = Activite(
         id_activite=3001,
         id_utilisateur=99999,  # utilisateur inexistant
-        sport="Natation",
+        sport="natation",
         date_activite="2025-01-01",
         distance=1.2,
         duree=30
     )
 
-    # WHEN
-    creation_ok = ActiviteDao().creer(activite)
-
-    # THEN
-    assert not creation_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        creation_ok = ActiviteDao().creer(activite)
 
 
 def test_creer_ok_utilisateur_existant():
@@ -54,7 +52,7 @@ def test_creer_ok_utilisateur_existant():
 
 
 def test_lister_par_utilisateur_ok():
-    """Lister les activités d’un utilisateur existant"""
+    """Lister les activités d'un utilisateur existant"""
     # GIVEN
     id_utilisateur = 991
 
@@ -69,7 +67,7 @@ def test_lister_par_utilisateur_ok():
 
 
 def test_lister_par_utilisateur_vide():
-    """Lister les activités d’un utilisateur sans activité"""
+    """Lister les activités d'un utilisateur sans activité"""
     # GIVEN
     id_utilisateur = 9999
 
@@ -137,11 +135,9 @@ def test_modifier_ko():
         duree=2000.0
     )
 
-    # WHEN
-    modification_ok = ActiviteDao().modifier(activite)
-
-    # THEN
-    assert not modification_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        modification_ok = ActiviteDao().modifier(activite)
 
 
 def test_supprimer_ok():
@@ -161,14 +157,12 @@ def test_supprimer_ko():
     # GIVEN
     id_activite = 99999
 
-    # WHEN
-    suppression_ok = ActiviteDao().supprimer(id_activite)
-
-    # THEN
-    assert not suppression_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        suppression_ok = ActiviteDao().supprimer(id_activite)
 
 def test_lister_activites_filtres_par_sport():
-    """Lister les activités d’un utilisateur filtrées par sport"""
+    """Lister les activités d'un utilisateur filtrées par sport"""
     # GIVEN
     id_utilisateur = 991
     sport_filtre = "natation"  # Exemple de filtre
@@ -183,7 +177,7 @@ def test_lister_activites_filtres_par_sport():
         assert a.sport == sport_filtre
 
 def test_lister_activites_filtres_par_date():
-    """Lister les activités d’un utilisateur filtrées par plage de dates"""
+    """Lister les activités d'un utilisateur filtrées par plage de dates"""
     # GIVEN
     id_utilisateur = 991
     date_debut = "2025-01-01"
@@ -201,7 +195,7 @@ def test_lister_activites_filtres_par_date():
         assert date_debut <= a.date_activite <= date_fin
 
 def test_lister_activites_filtres_par_sport_et_date():
-    """Lister les activités d’un utilisateur filtrées par sport et plage de dates"""
+    """Lister les activités d'un utilisateur filtrées par sport et plage de dates"""
     # GIVEN
     id_utilisateur = 991
     sport_filtre = "natation"
@@ -221,7 +215,7 @@ def test_lister_activites_filtres_par_sport_et_date():
         assert date_debut <= a.date_activite <= date_fin
 
 def test_lister_activites_filtres_sans_filtre():
-    """Lister toutes les activités d’un utilisateur sans appliquer de filtres"""
+    """Lister toutes les activités d'un utilisateur sans appliquer de filtres"""
     # GIVEN
     id_utilisateur = 991
 

@@ -8,10 +8,11 @@ from dao.db_connection import DBConnection
 from business_object.utilisateur import Utilisateur
 from business_object.activite import Activite
 
+from exceptions import DatabaseCreationError, DatabaseDeletionError, DatabaseUpdateError
+
 class ActiviteDao:
     def creer(self, activite: Activite) -> bool:
         """Création d'une activité dans la base de données"""
-        res = None
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -37,14 +38,15 @@ class ActiviteDao:
                     res = cursor.fetchone()
         except Exception as e:
             logging.error(f"Erreur lors de la création d'une activité : {e}")
-            return False
+            raise
         
-        created = False
-        if res:
-            activite.id_activite = res["id_activite"]
-            created = True
-
-        return created
+        if res is None:
+            msg_err = "Echec de la création de l'activité : aucune ligne retournée par la base"
+            logging.error(msg_err)
+            raise DatabaseCreationError(msg_err)
+        
+        activite.id_activite = res["id_activite"]
+        return True
 
     def trouver_par_id(self, id_activite: int) -> Activite | None:
         """Trouver une activité par son id"""
@@ -75,7 +77,6 @@ class ActiviteDao:
 
     def modifier(self, activite: Activite) -> bool:
         """Modifier une activité existante dans la base de données"""
-        res = None
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -102,12 +103,17 @@ class ActiviteDao:
         except Exception as e:
             logging.error(e)
             raise
-        return res == 1
+
+        if res < 1:
+            msg_err = "Echec de la modification de l'activité : aucune ligne retournée par la base"
+            logging.error(msg_err)
+            raise DatabaseUpdateError(msg_err)
+
+        return True
 
     
     def supprimer(self, id_activite: int) -> bool:
         """Supprimer une activité de la base de données"""
-        res = None
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -119,7 +125,13 @@ class ActiviteDao:
         except Exception as e:
             logging.error(e)
             raise
-        return res > 0
+
+        if res < 1:
+            msg_err = "Echec de la suppression de l'activité : aucune ligne retournée par la base"
+            logging.error(msg_err)
+            raise DatabaseDeletionError(msg_err)
+
+        return True
 
     def lister_par_utilisateur(self, id_utilisateur: int) -> List[Activite]:
         """Lister toutes les activités d'un utilisateur"""

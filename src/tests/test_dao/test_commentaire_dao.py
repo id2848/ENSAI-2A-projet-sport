@@ -36,11 +36,9 @@ def test_creer_ko():
     # GIVEN
     commentaire = Commentaire(id_activite='z', id_auteur='a', contenu=5871, date_commentaire='t')
 
-    # WHEN
-    creation_ok = CommentaireDao().creer(commentaire)
-
-    # THEN
-    assert not creation_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        creation_ok = CommentaireDao().creer(commentaire)
 
 def test_lister_par_activite():
     """Vérifie que la méthode renvoie une liste de Joueur
@@ -76,11 +74,9 @@ def test_supprimer_ko():
     # GIVEN
     id_commentaire = 9999
 
-    # WHEN
-    suppression_ok = CommentaireDao().supprimer(id_commentaire)
-
-    # THEN
-    assert not suppression_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        suppression_ok = CommentaireDao().supprimer(id_commentaire)
 
 def test_trouver_par_id_ko():
     """Trouver un commentaire inexistant via l'id_activite"""

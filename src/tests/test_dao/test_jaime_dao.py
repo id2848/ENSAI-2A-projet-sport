@@ -89,11 +89,9 @@ def test_supprimer_ko_1():
     id_activite = 991
     id_auteur = 995
 
-    # WHEN
-    suppression_ok = JaimeDao().supprimer(id_activite, id_auteur)
-
-    # THEN
-    assert not suppression_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        suppression_ok = JaimeDao().supprimer(id_activite, id_auteur)
 
 def test_supprimer_ko_id_activite():
     """Suppression d'un jaime échouée (id_activite inexistant)"""
@@ -102,11 +100,9 @@ def test_supprimer_ko_id_activite():
     id_activite = 9999
     id_auteur = 995
 
-    # WHEN
-    suppression_ok = JaimeDao().supprimer(id_activite, id_auteur)
-
-    # THEN
-    assert not suppression_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        suppression_ok = JaimeDao().supprimer(id_activite, id_auteur)
 
 def test_supprimer_ko_id_auteur():
     """Suppression d'un jaime échouée (id_auteur inexistant)"""
@@ -115,11 +111,9 @@ def test_supprimer_ko_id_auteur():
     id_activite = 991
     id_auteur = 99999
 
-    # WHEN
-    suppression_ok = JaimeDao().supprimer(id_activite, id_auteur)
-
-    # THEN
-    assert not suppression_ok
+    # WHEN / THEN
+    with pytest.raises(Exception):
+        suppression_ok = JaimeDao().supprimer(id_activite, id_auteur)
 
 def test_existe_ok():
     """Vérifier qu'un jaime existe pour une activité et un auteur donnés"""
@@ -197,3 +191,6 @@ def test_compter_par_activite_inexistante():
     # THEN
     assert isinstance(count, int)
     assert count == 0
+
+if __name__ == "__main__":
+    pytest.main([__file__])

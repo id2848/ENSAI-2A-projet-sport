@@ -1,3 +1,5 @@
+from typing import List
+
 import logging
 
 from utils.singleton import Singleton
@@ -8,7 +10,7 @@ from dao.db_connection import DBConnection
 from business_object.commentaire import Commentaire
 from business_object.utilisateur import Utilisateur
 
-
+from exceptions import DatabaseCreationError, DatabaseDeletionError
 
 class CommentaireDao:
     """Classe contenant les méthodes pour accéder aux Commentaires de la base de données"""
@@ -44,16 +46,18 @@ class CommentaireDao:
                     res = cursor.fetchone()
         except Exception as e:
             logging.error(e)
+            raise
 
-        created = False
-        if res:
-            commentaire.id_commentaire = res["id_commentaire"]
-            created = True
-
-        return created
+        if res is None:
+            msg_err = "Echec de la création du commentaire : aucune ligne retournée par la base"
+            logging.error(msg_err)
+            raise DatabaseCreationError(msg_err)
+        
+        commentaire.id_commentaire = res["id_commentaire"]
+        return True
     
     @log
-    def lister_par_activite(self, id_activite: int) -> list[Commentaire]:
+    def lister_par_activite(self, id_activite: int) -> List[Commentaire]:
         """lister tous les commentaires
 
         Parameters
@@ -62,7 +66,7 @@ class CommentaireDao:
 
         Returns
         -------
-        liste_commentaires : list[Commentaire]
+        liste_commentaires : List[Commentaire]
             renvoie la liste de tous les commentaires dans la base de données
         """
 
@@ -125,7 +129,12 @@ class CommentaireDao:
             logging.error(e)
             raise
 
-        return res > 0
+        if res < 1:
+            msg_err = "Echec de la suppression du commentaire : aucune ligne retournée par la base"
+            logging.error(msg_err)
+            raise DatabaseDeletionError(msg_err)
+
+        return True
 
     def trouver_par_id(self, id_commentaire: int) -> Commentaire | None:
         """Trouver un commentaire par son id"""

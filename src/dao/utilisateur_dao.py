@@ -1,9 +1,13 @@
+from typing import List
+
 import logging
 from utils.log_decorator import log
 from utils.securite import hash_password, generer_salt, verifier_mot_de_passe
 from dao.db_connection import DBConnection
 
 from business_object.utilisateur import Utilisateur
+
+from exceptions import DatabaseCreationError, DatabaseDeletionError, DatabaseUpdateError, UserNotFoundError, InvalidPasswordError
 
 class UtilisateurDao:
     """Classe contenant les méthodes pour accéder aux utilisateurs de la base de données"""
@@ -30,11 +34,6 @@ class UtilisateurDao:
     def creer(self, utilisateur: Utilisateur, mot_de_passe: str) -> bool:
         """Création d'un utilisateur et de ses credentials associés"""
         try:
-            # Vérification si le pseudo existe déjà
-            if self.verifier_pseudo_existant(utilisateur.pseudo):
-                logging.error(f"L'utilisateur avec le pseudo {utilisateur.pseudo} existe déjà.")
-                return False
-
             # Générer un sel et le hash correspondant
             sel = generer_salt()
             mot_de_passe_hash = hash_password(mot_de_passe, sel)
@@ -57,8 +56,8 @@ class UtilisateurDao:
                         },
                     )
                     res = cursor.fetchone()
-                    if not res:
-                        raise Exception("Échec de la création de l'utilisateur.")
+                    if res is None:
+                        raise DatabaseCreationError("Echec de la création de l'utilisateur.")
 
                     # Récupération de l'id auto-généré
                     utilisateur.id_utilisateur = res["id_utilisateur"]
@@ -75,13 +74,14 @@ class UtilisateurDao:
                             "sel": sel,
                         },
                     )
+                # Si on arrive ici, commit du bloc, sinon, rollback automatique (donc l'utilisateur et les credentials sont forcément créés ensemble)
 
             logging.info(f"Utilisateur {utilisateur.pseudo} créé avec succès (id={utilisateur.id_utilisateur}).")
             return True
 
         except Exception as e:
             logging.error(f"Erreur lors de la création de l'utilisateur {utilisateur.pseudo}: {e}")
-            return False
+            raise
 
 
     @log
@@ -150,7 +150,7 @@ class UtilisateurDao:
         return None
 
     @log
-    def lister_tous(self) -> list[Utilisateur]:
+    def lister_tous(self) -> List[Utilisateur]:
         """Lister tous les utilisateurs
 
         Parameters
@@ -159,7 +159,7 @@ class UtilisateurDao:
 
         Returns
         -------
-        liste_utilisateurs : list[Utilisateur]
+        liste_utilisateurs : List[Utilisateur]
             Renvoie la liste de tous les utilisateurs dans la base de données
         """
         try:
@@ -228,8 +228,14 @@ class UtilisateurDao:
                     res = cursor.rowcount
         except Exception as e:
             logging.error(f"Erreur lors de la modification de l'utilisateur: {e}")
+            raise
+        
+        if res < 1:
+            msg_err = "Echec de la modification de l'utilisateur : aucune ligne retournée par la base"
+            logging.error(msg_err)
+            raise DatabaseUpdateError(msg_err)
 
-        return res == 1
+        return True
 
     @log
     def supprimer(self, id_utilisateur: int) -> bool:
@@ -256,7 +262,12 @@ class UtilisateurDao:
             logging.error(f"Erreur lors de la suppression de l'utilisateur: {e}")
             raise
 
-        return res > 0
+        if res < 1:
+            msg_err = "Echec de la suppression de l'utilisateur : aucune ligne retournée par la base"
+            logging.error(msg_err)
+            raise DatabaseDeletionError(msg_err)
+
+        return True
 
 
     @log
@@ -278,16 +289,18 @@ class UtilisateurDao:
                     )
                     res = cursor.fetchone()
 
-            if not res:
-                logging.warning(f"Aucun utilisateur trouvé avec le pseudo {pseudo}")
-                return None
+            if res is None:
+                msg_err = f"Aucun utilisateur trouvé avec le pseudo {pseudo}"
+                logging.error(msg_err)
+                raise UserNotFoundError(msg_err)
 
             # Vérification du mot de passe
             if not verifier_mot_de_passe(mot_de_passe, res["sel"], res["mot_de_passe_hash"]):
-                logging.warning(f"Mot de passe incorrect pour {pseudo}")
-                return None
+                msg_err = f"Mot de passe incorrect pour {pseudo}"
+                logging.error(msg_err)
+                raise InvalidPasswordError(msg_err)
 
-            # Création de l’objet métier Utilisateur
+            # Création de l'objet métier Utilisateur
             utilisateur = Utilisateur(
                 id_utilisateur=res["id_utilisateur"],
                 pseudo=res["pseudo"],
@@ -300,5 +313,5 @@ class UtilisateurDao:
             return utilisateur
 
         except Exception as e:
-            logging.error(f"Erreur lors de la connexion avec pseudo {pseudo}: {e}")
-            return None
+            logging.error(e)
+            raise

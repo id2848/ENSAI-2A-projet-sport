@@ -7,6 +7,8 @@ from dao.db_connection import DBConnection
 
 from business_object.abonnement import Abonnement
 
+from exceptions import DatabaseCreationError, DatabaseDeletionError
+
 class AbonnementDao:
     """Classe contenant les méthodes pour accéder aux abonnements de la base de données"""
 
@@ -22,9 +24,7 @@ class AbonnementDao:
         -------
         created : bool
             True si la création est un succès
-            False sinon
         """
-        res = None
 
         try:
             with DBConnection().connection as connection:
@@ -41,12 +41,14 @@ class AbonnementDao:
                     res = cursor.fetchone()
         except Exception as e:
             logging.error(e)
+            raise
 
-        created = False
-        if res:
-            created = True
+        if res is None:
+            msg_err = "Echec de la création de l'abonnement : aucune ligne retournée par la base"
+            logging.error(msg_err)
+            raise DatabaseCreationError(msg_err)
 
-        return created
+        return True
     
     @log
     def trouver_par_ids(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int) -> Abonnement | None:
@@ -62,7 +64,7 @@ class AbonnementDao:
         Returns
         -------
         abonnement : Abonnement
-            renvoie l'abonnement que l'on cherche
+            Renvoie l'abonnement que l'on cherche
         """
         try:
             with DBConnection().connection as connection:
@@ -90,6 +92,7 @@ class AbonnementDao:
             )
 
         return abonnement
+    
     @log
     def lister_suivis(self, id_utilisateur: int) -> List[Abonnement]:
         """Lister tous les abonnements d'un utilisateur (personnes qu'il suit)
@@ -101,7 +104,7 @@ class AbonnementDao:
 
         Returns
         -------
-        liste_abonnements : list[Abonnement]
+        liste_abonnements : List[Abonnement]
             liste des abonnements où l'utilisateur est suiveur
         """
         try:
@@ -141,7 +144,7 @@ class AbonnementDao:
 
         Returns
         -------
-        liste_abonnements : list[Abonnement]
+        liste_abonnements : List[Abonnement]
             liste des abonnements où l'utilisateur est suivi
         """
         try:
@@ -176,7 +179,7 @@ class AbonnementDao:
 
         Returns
         -------
-        liste_abonnements : list[Abonnement]
+        liste_abonnements : List[Abonnement]
             Renvoie la liste de tous les abonnements dans la base de données
         """
         try:
@@ -234,4 +237,9 @@ class AbonnementDao:
             logging.error(e)
             raise
 
-        return res > 0
+        if not res:
+            msg_err = "Echec de la suppression de l'abonnement : aucune ligne retournée par la base"
+            logging.error(msg_err)
+            raise DatabaseDeletionError(msg_err)
+
+        return True

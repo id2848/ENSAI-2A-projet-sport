@@ -40,7 +40,7 @@ def test_creer_echec():
     abonnement = AbonnementService().creer_abonnement(id_u_suiveur, id_u_suivi)
 
     # THEN
-    assert abonnement is None
+    assert abonnement is False
 
 
 def test_lister_utilisateurs_suivis_succes():

@@ -238,6 +238,30 @@ def test_ajouter_commentaire_echec():
     # THEN
     assert result is False
 
+def test_supprimer_commentaire_ok():
+    """Suppression de commentaire réussie"""
+
+    # GIVEN
+    id_commentaire = 991
+
+    # WHEN
+    suppression_ok = ActiviteService().supprimer_commentaire(id_commentaire)
+
+    # THEN
+    assert suppression_ok
+
+def test_supprimer_commentaire_ko():
+    """Suppression de commentaire échouée (id inexistant)"""
+
+    # GIVEN
+    id_commentaire = 9999
+
+    # WHEN
+    suppression_ok = ActiviteService().supprimer_commentaire(id_commentaire)
+
+    # THEN
+    assert not suppression_ok
+
 def test_supprimer_activite_ok():
     """Test pour la suppression d'une activité"""
 

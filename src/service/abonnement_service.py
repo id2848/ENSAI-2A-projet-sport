@@ -1,3 +1,5 @@
+import logging
+
 from tabulate import tabulate
 
 from utils.log_decorator import log

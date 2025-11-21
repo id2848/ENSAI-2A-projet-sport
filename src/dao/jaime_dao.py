@@ -9,6 +9,8 @@ from dao.db_connection import DBConnection
 
 from business_object.jaime import Jaime
 
+from exceptions import DatabaseCreationError, DatabaseDeletionError
+
 class JaimeDao:
     """Classe contenant les méthodes pour accéder aux Jaimes de la base de données"""
 
@@ -45,11 +47,12 @@ class JaimeDao:
             logging.error(f"Erreur lors de la création d'un jaime : {e}")
             raise
 
-        created = False
-        if res:
-            created = True
-
-        return created
+        if res is None:
+            msg_err = "Echec de la création du jaime : aucune ligne retournée par la base"
+            logging.error(msg_err)
+            raise DatabaseCreationError(msg_err)
+        
+        return True
     
     @log
     def lister_par_activite(self, id_activite: int) -> List[Jaime]:
@@ -127,7 +130,12 @@ class JaimeDao:
             logging.error(f"Erreur lors de la suppression d'un jaime : {e}")
             raise
 
-        return res > 0
+        if res < 1:
+            msg_err = "Echec de la suppression du jaime : aucune ligne retournée par la base"
+            logging.error(msg_err)
+            raise DatabaseDeletionError(msg_err)
+        
+        return True
     
     @log
     def existe(self, id_activite: int, id_auteur: int) -> bool:
