@@ -129,12 +129,12 @@ def test_modifier_ko():
     """Modification échouée pour une activité inexistante"""
     # GIVEN
     activite = Activite(
-        id_activite=99999,
+        id_activite=9999,
         id_utilisateur=991,
-        sport="Marche",
+        sport="randonnée",
         date_activite="2025-01-03",
         distance=6.0,
-        duree=2000
+        duree=2000.0
     )
 
     # WHEN
@@ -147,17 +147,10 @@ def test_modifier_ko():
 def test_supprimer_ok():
     """Suppression d'une activité existante réussie"""
     # GIVEN
-    activite = Activite(
-        id_activite=994,
-        id_utilisateur=994,
-        sport="randonnée",
-        date_activite="2025-09-28",
-        distance=10.0,
-        duree=120.0
-    )
+    id_activite = 994
     
     # WHEN
-    suppression_ok = ActiviteDao().supprimer(activite)
+    suppression_ok = ActiviteDao().supprimer(id_activite)
 
     # THEN
     assert suppression_ok
@@ -166,17 +159,10 @@ def test_supprimer_ok():
 def test_supprimer_ko():
     """Suppression échouée pour une activité inexistante"""
     # GIVEN
-    activite = Activite(
-        id_activite=99999,
-        id_utilisateur=991,
-        sport="natation",
-        date_activite="2025-01-03",
-        distance=3.0,
-        duree=1000
-    )
+    id_activite = 99999
 
     # WHEN
-    suppression_ok = ActiviteDao().supprimer(activite)
+    suppression_ok = ActiviteDao().supprimer(id_activite)
 
     # THEN
     assert not suppression_ok
@@ -247,3 +233,7 @@ def test_lister_activites_filtres_sans_filtre():
     for a in activites:
         assert isinstance(a, Activite)
         assert a.id_utilisateur == id_utilisateur
+
+if __name__ == "__main__":
+    import pytest
+    pytest.main([__file__])

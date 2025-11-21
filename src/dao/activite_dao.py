@@ -46,7 +46,7 @@ class ActiviteDao:
 
         return created
 
-    def trouver_par_id(self, id_activite) -> Activite:
+    def trouver_par_id(self, id_activite: int) -> Activite:
         """Trouver une activité par son id"""
         try:
             with DBConnection().connection as connection:
@@ -57,7 +57,7 @@ class ActiviteDao:
                     )
                     res = cursor.fetchone()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
 
         activite = None
@@ -100,11 +100,12 @@ class ActiviteDao:
                     )
                     res = cursor.rowcount
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
+            raise
         return res == 1
 
     
-    def supprimer(self, activite: Activite) -> bool:
+    def supprimer(self, id_activite: int) -> bool:
         """Supprimer une activité de la base de données"""
         res = None
         try:
@@ -112,15 +113,15 @@ class ActiviteDao:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "DELETE FROM activite WHERE id_activite=%(id_activite)s;",
-                        {"id_activite": activite.id_activite}
+                        {"id_activite": id_activite}
                     )
                     res = cursor.rowcount
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
         return res > 0
 
-    def lister_par_utilisateur(self, id_utilisateur) -> List[Activite]:
+    def lister_par_utilisateur(self, id_utilisateur: int) -> List[Activite]:
         """Lister toutes les activités d'un utilisateur"""
         res = None
         try:
@@ -132,7 +133,7 @@ class ActiviteDao:
                     )
                     res = cursor.fetchall()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
 
         liste_activites = []
@@ -149,7 +150,7 @@ class ActiviteDao:
                 liste_activites.append(activite)
         return liste_activites
     
-    def lister_activites_filtres(self, id_utilisateur, sport=None, date_debut=None, date_fin=None) -> List[Activite]:
+    def lister_activites_filtres(self, id_utilisateur: int, sport: str = None, date_debut: str = None, date_fin: str = None) -> List[Activite]:
         """Lister les activités d'un utilisateur avec des filtres optionnels (sport, date de début, date de fin)."""
         
         query = "SELECT * FROM activite WHERE id_utilisateur = %(id_utilisateur)s"
@@ -176,7 +177,7 @@ class ActiviteDao:
                     cursor.execute(query, params)
                     res = cursor.fetchall()
         except Exception as e:
-            logging.info(e)
+            logging.error(e)
             raise
 
         liste_activites = []

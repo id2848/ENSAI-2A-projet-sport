@@ -184,7 +184,7 @@ def test_supprimer_jaime_ok():
     # THEN
     assert suppression_ok
 
-def test_supprimer_ko():
+def test_supprimer_jaime_ko():
     """Suppression d'un jaime échouée (jaime inexistant)"""
 
     # GIVEN

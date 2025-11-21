@@ -40,14 +40,7 @@ class ActiviteService:
     def supprimer_activite(self, id_activite: int) -> bool:
         """Supprime une activité existante"""
         try:
-            activite = ActiviteDao().trouver_par_id(id_activite=id_activite)  # Récupère l'activité par son ID
-        
-            # Si l'activité n'existe pas
-            if activite is None:
-                logging.warning(f"L'activité avec ID {id_activite} n'existe pas.")
-                return False
-        
-            return ActiviteDao().supprimer(activite=activite)  # Effectue la suppression dans la base de données
+            return ActiviteDao().supprimer(id_activite)  # Effectue la suppression dans la base de données
         
         except Exception as e:
             logging.error(f"Erreur lors de la suppression de l'activité : {e}")

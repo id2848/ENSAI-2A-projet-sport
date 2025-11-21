@@ -1,20 +1,17 @@
 from tabulate import tabulate
 
 from utils.log_decorator import log
-from utils.securite import hash_password
 
-from business_object.joueur import Joueur
 from business_object.abonnement import Abonnement
 
 from dao.abonnement_dao import AbonnementDao
-from dao.joueur_dao import JoueurDao
 
 
 class AbonnementService:
     """Classe contenant les méthodes de service de Abonnement"""
 
     @log
-    def creer_abonnement(self, id_utilisateur_suiveur, id_utilisateur_suivi) -> Joueur:
+    def creer_abonnement(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int) -> Abonnement:
         """Créer un abonnement"""
         try:
             nouveau_abonnement = Abonnement(
@@ -27,7 +24,7 @@ class AbonnementService:
             return False
 
     @log
-    def supprimer_abonnement(self, id_utilisateur_suiveur, id_utilisateur_suivi) -> bool:
+    def supprimer_abonnement(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int) -> bool:
         """Supprimer un abonnement"""
         try:
             return AbonnementDao().supprimer(id_utilisateur_suiveur, id_utilisateur_suivi)
@@ -36,7 +33,7 @@ class AbonnementService:
             return False
 
     @log
-    def lister_utilisateurs_suivis(self, id_utilisateur):
+    def lister_utilisateurs_suivis(self, id_utilisateur: int):
         """Lister tous les utilisateurs suivis par un utilisateur donné
         """
         try:
@@ -50,7 +47,7 @@ class AbonnementService:
             return None
 
     @log
-    def lister_utilisateurs_suiveurs(self, id_utilisateur):
+    def lister_utilisateurs_suiveurs(self, id_utilisateur: int):
         """Lister tous les utilisateurs suiveurs par un utilisateur donné
         """
         try:
