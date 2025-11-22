@@ -224,7 +224,7 @@ def display_activity_list(activites_list: List[dict], show_delete_button: bool =
         if not activity_id:
             continue
 
-        # --- RÉCUPÉRER LE PSEUDO DE L’AUTEUR ---
+        # --- RÉCUPÉRER LE PSEUDO DE L'AUTEUR ---
         auteur_id = a.get("id_utilisateur")
         pseudo_auteur = auteur_id  # fallback si erreur
 

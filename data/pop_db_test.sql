@@ -3,11 +3,11 @@
 -----------------------------------------------------
 INSERT INTO utilisateur (id_utilisateur, pseudo, nom, prenom, date_de_naissance, sexe)
 VALUES 
-    (991,'johndoe', 'Doe', 'John', '1990-01-01', 'Homme'),
-    (992,'janedoe', 'Doe', 'Jane', '1992-02-02', 'Femme'),
-    (993,'samsmith', 'Smith', 'Sam', '1985-05-15', 'Homme'),
-    (994,'emilyjones', 'Jones', 'Emily', '1995-03-20', 'Femme'),
-    (995,'mikebrown', 'Brown', 'Mike', '1988-11-30', 'Homme');
+    (991, 'johndoe', 'Doe', 'John', '1990-01-01', 'Homme'),
+    (992, 'janedoe', 'Doe', 'Jane', '1992-02-02', 'Femme'),
+    (993, 'samsmith', 'Smith', 'Sam', '1985-05-15', 'Homme'),
+    (994, 'emilyjones', 'Jones', 'Emily', '1995-03-20', 'Femme'),
+    (995, 'mikebrown', 'Brown', 'Mike', '1988-11-30', 'Homme');
 
 -----------------------------------------------------
 -- Insertion des credentials (identifiants)

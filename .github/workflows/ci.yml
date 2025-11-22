@@ -43,7 +43,6 @@ jobs:
 
     - name: Create .env file
       run: |
-        echo "WEBSERVICE_HOST=https://pokeapi.co/api/v2" > .env
         echo "POSTGRES_HOST=localhost" >> .env
         echo "POSTGRES_PORT=5432" >> .env
         echo "POSTGRES_DATABASE=test_db" >> .env

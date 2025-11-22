@@ -63,7 +63,7 @@ Vous n'aurez généralement pas besoin de modifier ces fichiers, sauf le `.env`.
 ```bash
 pip install -r requirements.txt
 pip list
-````
+```
 
 ## :arrow\_forward: Variables d'environnement
 
@@ -89,6 +89,17 @@ POSTGRES_USER=idxxxx
 POSTGRES_PASSWORD=idxxxx
 POSTGRES_SCHEMA=projet
 ```
+
+### Initialiser la base de données
+
+Après avoir créé votre base PostgreSQL et configuré le fichier `.env`, vous devez initialiser la base de données la toute première fois.
+
+Dans un terminal :
+
+```bash
+python src/utils/reset_database.py
+```
+
 
 ## :arrow\_forward: Lancer l'application
 
@@ -126,6 +137,7 @@ streamlit run src/streamlit_app.py
 ```
 
 *Votre navigateur devrait s'ouvrir automatiquement.*
+*Si ce n'est pas le cas, ouvrez manuellement l'URL affichée dans le terminal (par défaut : http://localhost:8501).*
 
 ## :arrow\_forward: Fonctionnalités détaillées
 
