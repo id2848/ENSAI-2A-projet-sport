@@ -31,7 +31,7 @@ def test_creer_ok():
 
 
 def test_creer_ko():
-    """Création de Joueur échouée (id_activite, id_auteur, contenu et date_commentaire incorrects)"""
+    """Création de Commentaire échouée (id_activite, id_auteur, contenu et date_commentaire incorrects)"""
 
     # GIVEN
     commentaire = Commentaire(id_activite='z', id_auteur='a', contenu=5871, date_commentaire='t')
@@ -41,7 +41,7 @@ def test_creer_ko():
         res = CommentaireDao().creer(commentaire)
 
 def test_lister_par_activite():
-    """Vérifie que la méthode renvoie une liste de Joueur
+    """Vérifie que la méthode renvoie une liste de Commentaire
     de taille supérieure ou égale à 2
     """
     # GIVEN

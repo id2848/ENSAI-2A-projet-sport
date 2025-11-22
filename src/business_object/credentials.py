@@ -18,6 +18,6 @@ class Credentials:
         mot_de_passe_hash: str,
         sel: str
     ):
-        self.id_joueur = id_joueur
+        self.id_utilisateur = id_utilisateur
         self.mot_de_passe_hash = mot_de_passe_hash
         self.sel = sel
