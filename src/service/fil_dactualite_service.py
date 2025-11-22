@@ -13,7 +13,7 @@ from business_object.activite import Activite
 from exceptions import NotFoundError
 
 
-class Fildactualite:
+class FilDactualiteService:
     """Classe contenant les méthodes de service pour le fil d'actualité"""
 
     @log

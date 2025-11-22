@@ -9,7 +9,7 @@ from service.activite_service import ActiviteService
 from service.utilisateur_service import UtilisateurService
 from service.abonnement_service import AbonnementService
 from service.statistiques_service import StatistiquesService
-from service.fil_dactualite_service import Fildactualite
+from service.fil_dactualite_service import FilDactualiteService
 
 from utils.gpx_parser import parse_gpx
 
@@ -395,7 +395,7 @@ def lister_abonnements_suiveurs(id_utilisateur: int, user=Depends(get_current_us
 def fil_dactualite(id_utilisateur: int, user=Depends(get_current_user)):
     """Afficher le fil d'actualités de l'utilisateur."""
     try:
-        return Fildactualite().creer_fil_dactualite(id_utilisateur)
+        return FilDactualiteService().creer_fil_dactualite(id_utilisateur)
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 

@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import patch
 from utils.reset_database import ResetDatabase
 
-from service.fil_dactualite_service import Fildactualite
+from service.fil_dactualite_service import FilDactualiteService
 
 from datetime import date
 
@@ -23,7 +23,7 @@ def test_creer_fil_dactualite_ok():
     id_utilisateur = 992  # suiveur
 
     # WHEN
-    fil = Fildactualite().creer_fil_dactualite(id_utilisateur)
+    fil = FilDactualiteService().creer_fil_dactualite(id_utilisateur)
 
     # THEN
     # 3 utilisateurs suivis : 991 (3 activités), 993 (1), 994 (1)
