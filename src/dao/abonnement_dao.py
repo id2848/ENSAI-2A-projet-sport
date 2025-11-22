@@ -213,8 +213,10 @@ class AbonnementDao:
 
         Parameters
         ----------
-        id_abonnement : int
-            l'id de l'abonnement à supprimer de la base de données
+        id_utilisateur_suiveur: int
+            l'id de l'utilisateur suiveur de l'abonnement à supprimer
+        id_utilisateur_suivi: int
+            l'id de l'utilisateur suivi de l'abonnement à supprimer
 
         Returns
         -------

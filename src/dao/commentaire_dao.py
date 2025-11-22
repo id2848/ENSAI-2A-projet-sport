@@ -66,8 +66,8 @@ class CommentaireDao:
 
         Returns
         -------
-        liste_commentaires : List[Commentaire]
-            renvoie la liste de tous les commentaires dans la base de données
+        List[Commentaire]
+            La liste de tous les commentaires dans la base de données
         """
 
         try:

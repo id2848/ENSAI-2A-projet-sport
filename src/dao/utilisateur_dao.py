@@ -12,39 +12,6 @@ from exceptions import DatabaseCreationError, DatabaseDeletionError, DatabaseUpd
 class UtilisateurDao:
     """Classe contenant les méthodes pour accéder aux utilisateurs de la base de données"""
 
-   
-    @log
-    def verifier_pseudo_existant(self, pseudo: str) -> bool:
-        """Vérifier si un pseudo est déjà utilisé dans la base de données"""
-        try:
-            with DBConnection().connection as connection:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "SELECT 1 FROM utilisateur WHERE pseudo = %(pseudo)s;",
-                        {"pseudo": pseudo},
-                    )
-                    res = cursor.fetchone()
-                    return res is not None  # Si un résultat est trouvé, le pseudo existe déjà
-        except Exception as e:
-            logging.error(f"Erreur lors de la vérification du pseudo {pseudo}: {e}")
-            raise
-    
-    def verifier_id_existant(self, id_utilisateur: int) -> bool:
-        """Vérifier si un utilisateur existe avec un id donné"""
-        try:
-            with DBConnection().connection as connection:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "SELECT 1 FROM utilisateur WHERE id_utilisateur = %(id_utilisateur)s;",
-                        {"id_utilisateur": id_utilisateur},
-                    )
-                    res = cursor.fetchone()
-                    return res is not None
-        except Exception as e:
-            logging.error(f"Erreur lors de la vérification de l'id {id_utilisateur}: {e}")
-            raise
-
-
     @log
     def creer(self, utilisateur: Utilisateur, mot_de_passe: str) -> bool:
         """Création d'un utilisateur et de ses credentials associés"""
@@ -174,7 +141,7 @@ class UtilisateurDao:
 
         Returns
         -------
-        liste_utilisateurs : List[Utilisateur]
+        List[Utilisateur]
             Renvoie la liste de tous les utilisateurs dans la base de données
         """
         try:
@@ -205,7 +172,7 @@ class UtilisateurDao:
         return liste_utilisateurs
 
     @log
-    def modifier(self, utilisateur: int) -> bool:
+    def modifier(self, utilisateur: Utilisateur) -> bool:
         """Modification d'un utilisateur dans la base de données
 
         Parameters
@@ -284,6 +251,37 @@ class UtilisateurDao:
 
         return True
 
+    @log
+    def verifier_pseudo_existant(self, pseudo: str) -> bool:
+        """Vérifier si un pseudo est déjà utilisé dans la base de données"""
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT 1 FROM utilisateur WHERE pseudo = %(pseudo)s;",
+                        {"pseudo": pseudo},
+                    )
+                    res = cursor.fetchone()
+                    return res is not None  # Si un résultat est trouvé, le pseudo existe déjà
+        except Exception as e:
+            logging.error(f"Erreur lors de la vérification du pseudo {pseudo}: {e}")
+            raise
+    
+    @log
+    def verifier_id_existant(self, id_utilisateur: int) -> bool:
+        """Vérifier si un utilisateur existe avec un id donné"""
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT 1 FROM utilisateur WHERE id_utilisateur = %(id_utilisateur)s;",
+                        {"id_utilisateur": id_utilisateur},
+                    )
+                    res = cursor.fetchone()
+                    return res is not None
+        except Exception as e:
+            logging.error(f"Erreur lors de la vérification de l'id {id_utilisateur}: {e}")
+            raise
 
     @log
     def se_connecter(self, pseudo: str, mot_de_passe: str) -> Utilisateur | None:

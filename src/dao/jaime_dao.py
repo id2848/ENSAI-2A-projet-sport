@@ -65,7 +65,7 @@ class JaimeDao:
 
         Returns
         -------
-        liste_jaimes : List[Jaime]
+        List[Jaime]
             La liste de tous les jaimes d'une activité
         """
 
@@ -103,7 +103,7 @@ class JaimeDao:
 
         Parameters
         ----------
-        jaime : int
+        id_activite : int
             L'id de l'activité du jaime à supprimer
         id_auteur : int
             L'id de l'auteur du jaime à supprimer
