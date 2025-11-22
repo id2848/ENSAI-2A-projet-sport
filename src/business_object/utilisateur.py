@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from typing import Optional
+
 import re
+from utils.utils_date import valider_date
 
 
 class Utilisateur:
@@ -18,7 +20,7 @@ class Utilisateur:
     prenom : str
         prénom
     date_de_naissance : date
-        date de naissance de l'utilisateur, construit avec une date ou str au format YYYY-MM-DD
+        date de naissance de l'utilisateur, construit avec une date ou un str au format YYYY-MM-DD
     sexe : str
         sexe de l'utilisateur
     """
@@ -28,7 +30,7 @@ class Utilisateur:
         pseudo: str,
         nom: str,
         prenom: str,
-        date_de_naissance: str | date,
+        date_de_naissance: date | str,
         sexe: str,
         id_utilisateur: Optional[int] = None
     ):
@@ -74,22 +76,10 @@ class Utilisateur:
     def valider_date_naissance(date_de_naissance: date | str) -> date:
         """Valider que la date de naissance est une date ou bien un str au format YYYY-MM-DD
         Renvoie un objet 'date'"""
-        if isinstance(date_de_naissance, date):
-            return date_de_naissance
-        elif isinstance(date_de_naissance, str):
-            try:
-                date_de_naissance = datetime.strptime(
-                    date_de_naissance, "%Y-%m-%d"
-                ).date()
-            except ValueError:
-                date_de_naissance = None
-
-        if date_de_naissance is None:
-            raise ValueError(
-                "date_de_naissance doit être un objet 'date' ou un str au format YYYY-MM-DD"
-            )
-
-        return date_de_naissance
+        try:
+            return valider_date(date_de_naissance)
+        except ValueError:
+            raise ValueError("date_de_naissance doit être un objet 'date' ou un str au format YYYY-MM-DD")
 
     @staticmethod
     def valider_sexe(sexe: str) -> str:

@@ -14,7 +14,7 @@ from business_object.abonnement import Abonnement
 from business_object.utilisateur import Utilisateur
 from business_object.activite import Activite
 
-from datetime import date, timedelta
+from datetime import date
 
 @pytest.fixture(autouse=True)
 def setup_test_environment():

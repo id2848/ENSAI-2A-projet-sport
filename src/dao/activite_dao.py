@@ -11,6 +11,9 @@ from business_object.activite import Activite
 from exceptions import DatabaseCreationError, DatabaseDeletionError, DatabaseUpdateError
 
 class ActiviteDao:
+    """Classe contenant les méthodes pour accéder aux activités de la base de données"""
+
+    @log
     def creer(self, activite: Activite) -> Activite:
         """Création d'une activité dans la base de données"""
         try:
@@ -48,6 +51,7 @@ class ActiviteDao:
         activite.id_activite = res["id_activite"]
         return activite
 
+    @log
     def trouver_par_id(self, id_activite: int) -> Activite | None:
         """Trouver une activité par son id"""
         try:
@@ -74,7 +78,7 @@ class ActiviteDao:
             )
         return activite
 
-
+    @log
     def modifier(self, activite: Activite) -> bool:
         """Modifier une activité existante dans la base de données"""
         try:
@@ -111,7 +115,7 @@ class ActiviteDao:
 
         return True
 
-    
+    @log
     def supprimer(self, id_activite: int) -> bool:
         """Supprimer une activité de la base de données"""
         try:
@@ -133,6 +137,7 @@ class ActiviteDao:
 
         return True
 
+    @log
     def lister_par_utilisateur(self, id_utilisateur: int) -> List[Activite]:
         """Lister toutes les activités d'un utilisateur"""
         res = None
@@ -162,6 +167,7 @@ class ActiviteDao:
                 liste_activites.append(activite)
         return liste_activites
     
+    @log
     def lister_activites_filtres(self, id_utilisateur: int, sport: str = None, date_debut: str = None, date_fin: str = None) -> List[Activite]:
         """Lister les activités d'un utilisateur avec des filtres optionnels (sport, date de début, date de fin)."""
         
@@ -207,6 +213,7 @@ class ActiviteDao:
         
         return liste_activites
     
+    @log
     def verifier_id_existant(self, id_activite: int) -> bool:
         """Vérifier si une activité existe avec un id donné"""
         try:

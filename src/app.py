@@ -15,7 +15,7 @@ from service.statistiques_service import StatistiquesService
 from service.fil_dactualite_service import Fildactualite
 
 from utils.gpx_parser import parse_gpx
-from utils.verifier_date import verifier_date
+from utils.utils_date import verifier_date
 
 from exceptions import NotFoundError, AlreadyExistsError
 

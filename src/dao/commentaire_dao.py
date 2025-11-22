@@ -14,6 +14,8 @@ from exceptions import DatabaseCreationError, DatabaseDeletionError
 
 class CommentaireDao:
     """Classe contenant les méthodes pour accéder aux Commentaires de la base de données"""
+
+    @log
     def creer(self, commentaire: Commentaire) -> Commentaire:
         """Création d'un commentaire dans la base de données
 
@@ -134,6 +136,7 @@ class CommentaireDao:
 
         return True
 
+    @log
     def trouver_par_id(self, id_commentaire: int) -> Commentaire | None:
         """Trouver un commentaire par son id"""
         try:

@@ -68,6 +68,7 @@ class AbonnementService:
             utilisateurs_suiveurs.add(j.id_utilisateur_suiveur)
         return utilisateurs_suiveurs
     
+    @log
     def abonnement_existe(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int) -> bool:
         """Vérifie si un abonnement existe dans la base de données"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur_suiveur):

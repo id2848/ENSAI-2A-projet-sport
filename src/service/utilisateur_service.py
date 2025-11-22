@@ -51,10 +51,12 @@ class UtilisateurService:
 
         return UtilisateurDao().se_connecter(pseudo, mot_de_passe)
 
+    @log
     def lister_utilisateurs(self) -> List[Utilisateur]:
         """Lister toutes les utilisateurs"""
         return UtilisateurDao().lister_tous() # Retourne la liste des utilisateurs (peut être vide)
 
+    @log
     def trouver_par_id(self, id_utilisateur: int) -> Utilisateur:
         """Trouver un Utilisateur à partir de son id"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
@@ -62,6 +64,7 @@ class UtilisateurService:
         
         return UtilisateurDao().trouver_par_id(id_utilisateur)
 
+    @log
     def trouver_par_pseudo(self, pseudo: str) -> Utilisateur:
         """Trouver un Utilisateur à partir de son pseudo"""
         if not UtilisateurDao().verifier_pseudo_existant(pseudo):

@@ -1,5 +1,5 @@
 from typing import List
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 
 from utils.log_decorator import log
 
@@ -15,7 +15,7 @@ from dao.activite_dao import ActiviteDao
 from dao.commentaire_dao import CommentaireDao
 from dao.jaime_dao import JaimeDao
 
-from utils.verifier_date import verifier_date
+from utils.utils_date import verifier_date
 
 from exceptions import NotFoundError, AlreadyExistsError
 
@@ -26,8 +26,8 @@ class ActiviteService:
 
     # --- Activités ---
     
-    def creer_activite(self, id_utilisateur: int, sport: str, date_activite: str, distance: float, duree: timedelta) -> bool:
-        """Crée une nouvelle activité"""
+    def creer_activite(self, id_utilisateur: int, sport: str, date_activite: str, distance: float, duree: float) -> bool:
+        """Crée une nouvelle activité (distance en km, durée en minutes)"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
             raise NotFoundError(f"L'utilisateur avec l'id {id_utilisateur} n'existe pas")
         if not verifier_date(date_activite):
@@ -138,6 +138,7 @@ class ActiviteService:
 
     # --- Commentaires ---
 
+    @log
     def ajouter_commentaire(self, id_activite: int, id_utilisateur: int, contenu: str) -> Commentaire:
         """Ajoute un commentaire à une activité"""
         if not ActiviteDao().verifier_id_existant(id_activite):
@@ -153,6 +154,7 @@ class ActiviteService:
         )
         return CommentaireDao().creer(commentaire)
 
+    @log
     def supprimer_commentaire(self, id_commentaire: int) -> bool:
         """Supprime un commentaire d'une activité"""
         commentaire = CommentaireDao().trouver_par_id(id_commentaire)
@@ -161,6 +163,7 @@ class ActiviteService:
 
         return CommentaireDao().supprimer(id_commentaire)
 
+    @log
     def lister_commentaires(self, id_activite: int) -> List[Commentaire]:
         """Lister tous les commentaires d'une activité"""
         if not ActiviteDao().verifier_id_existant(id_activite):
@@ -168,6 +171,7 @@ class ActiviteService:
         
         return CommentaireDao().lister_par_activite(id_activite=id_activite)
     
+    @log
     def trouver_commentaire_par_id(self, id_commentaire: int) -> Commentaire:
         """Trouver un commentaire par son id"""
         commentaire = CommentaireDao().trouver_par_id(id_commentaire)

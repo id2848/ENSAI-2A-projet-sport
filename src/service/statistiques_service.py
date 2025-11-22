@@ -8,7 +8,7 @@ from business_object.activite import Activite
 from dao.utilisateur_dao import UtilisateurDao
 
 from datetime import datetime
-from utils.verifier_date import verifier_date
+from utils.utils_date import verifier_date
 
 from exceptions import NotFoundError
 

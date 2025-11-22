@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import patch
 from utils.reset_database import ResetDatabase
 
-from datetime import date, timedelta
+from datetime import date
 
 from service.activite_service import ActiviteService
 
