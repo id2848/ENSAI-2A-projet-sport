@@ -107,7 +107,7 @@ class ActiviteDao:
         Parameters
         ----------
         activite : Activite
-            L’activité contenant les nouvelles valeurs à mettre à jour
+            L'activité contenant les nouvelles valeurs à mettre à jour
 
         Returns
         -------
@@ -193,7 +193,7 @@ class ActiviteDao:
         Returns
         -------
         List[Activite]
-            La liste des activités associées à l’utilisateur (liste vide si aucune)
+            La liste des activités associées à l'utilisateur (liste vide si aucune)
         """
         res = None
         try:
@@ -303,7 +303,7 @@ class ActiviteDao:
         Returns
         -------
         bool
-            True si une activité correspondant à l’id existe, False sinon
+            True si une activité correspondant à l'id existe, False sinon
         """
         try:
             with DBConnection().connection as connection:

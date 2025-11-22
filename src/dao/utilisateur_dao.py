@@ -296,7 +296,7 @@ class UtilisateurDao:
         Parameters
         ----------
         pseudo : str
-            Le pseudo dont on veut vérifier l’existence
+            Le pseudo dont on veut vérifier l'existence
 
         Returns
         -------
@@ -325,12 +325,12 @@ class UtilisateurDao:
         Parameters
         ----------
         id_utilisateur : int
-            Identifiant de l’utilisateur à vérifier
+            Identifiant de l'utilisateur à vérifier
 
         Returns
         -------
         bool
-            True si l’utilisateur existe, False sinon
+            True si l'utilisateur existe, False sinon
         """
         try:
             with DBConnection().connection as connection:
@@ -354,15 +354,15 @@ class UtilisateurDao:
         Parameters
         ----------
         pseudo : str
-            Le pseudo de l’utilisateur tentant de se connecter
+            Le pseudo de l'utilisateur tentant de se connecter
         mot_de_passe : str
             Le mot de passe fourni lors de la connexion
 
         Returns
         -------
         Utilisateur | None
-            L’objet Utilisateur correspondant si l’authentification réussit.
-            None n’est jamais retourné car une exception est levée en cas d’échec.
+            L'objet Utilisateur correspondant si l'authentification réussit.
+            None n'est jamais retourné car une exception est levée en cas d'échec.
         """
         try:
             with DBConnection().connection as connection:

@@ -1,4 +1,4 @@
-from typing import List
+from typing import Set
 
 from utils.log_decorator import log
 
@@ -55,7 +55,7 @@ class AbonnementService:
         return AbonnementDao().supprimer(id_utilisateur_suiveur, id_utilisateur_suivi)
 
     @log
-    def lister_utilisateurs_suivis(self, id_utilisateur: int) -> List[int]:
+    def lister_utilisateurs_suivis(self, id_utilisateur: int) -> Set[int]:
         """Lister tous les ids des utilisateurs suivis par un utilisateur donné"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
             raise NotFoundError(
@@ -69,7 +69,7 @@ class AbonnementService:
         return utilisateurs_suivis
 
     @log
-    def lister_utilisateurs_suiveurs(self, id_utilisateur: int) -> List[int]:
+    def lister_utilisateurs_suiveurs(self, id_utilisateur: int) -> Set[int]:
         """Lister tous les ids des utilisateurs suiveurs par un utilisateur donné"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
             raise NotFoundError(

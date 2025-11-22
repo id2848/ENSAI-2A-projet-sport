@@ -30,7 +30,7 @@ class ActiviteService:
         date_activite: str,
         distance: float,
         duree: float,
-    ) -> bool:
+    ) -> Activite:
         """Crée une nouvelle activité (distance en km, durée en minutes)"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
             raise NotFoundError(
@@ -49,14 +49,6 @@ class ActiviteService:
             duree=duree,
         )
         return ActiviteDao().creer(activite)  # Appel à DAO pour l'enregistrement
-
-    @log
-    def supprimer_activite(self, id_activite: int) -> bool:
-        """Supprime une activité existante"""
-        if not ActiviteDao().verifier_id_existant(id_activite):
-            raise NotFoundError("Cette activité n'existe pas")
-
-        return ActiviteDao().supprimer(id_activite)
 
     @log
     def modifier_activite(self, id_activite: int, sport: str) -> bool:
@@ -79,9 +71,17 @@ class ActiviteService:
         return ActiviteDao().modifier(
             nouveau_activite
         )  # Appel à DAO pour modification dans la base de données
+    
+    @log
+    def supprimer_activite(self, id_activite: int) -> bool:
+        """Supprime une activité existante"""
+        if not ActiviteDao().verifier_id_existant(id_activite):
+            raise NotFoundError("Cette activité n'existe pas")
+
+        return ActiviteDao().supprimer(id_activite)
 
     @log
-    def trouver_activite_par_id(self, id_activite: int):
+    def trouver_activite_par_id(self, id_activite: int) -> Activite:
         """Trouver une activité par son id"""
         if not ActiviteDao().verifier_id_existant(id_activite):
             raise NotFoundError("Cette activité n'existe pas")
