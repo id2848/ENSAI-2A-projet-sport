@@ -2,7 +2,6 @@ import logging
 
 from typing import List
 
-from utils.singleton import Singleton
 from utils.log_decorator import log
 
 from dao.db_connection import DBConnection
@@ -10,6 +9,7 @@ from dao.db_connection import DBConnection
 from business_object.jaime import Jaime
 
 from exceptions import DatabaseCreationError, DatabaseDeletionError
+
 
 class JaimeDao:
     """Classe contenant les méthodes pour accéder aux Jaimes de la base de données"""
@@ -39,7 +39,7 @@ class JaimeDao:
                         "  RETURNING id_activite, id_auteur;                         ",
                         {
                             "id_activite": jaime.id_activite,
-                            "id_auteur": jaime.id_auteur
+                            "id_auteur": jaime.id_auteur,
                         },
                     )
                     res = cursor.fetchone()
@@ -48,12 +48,14 @@ class JaimeDao:
             raise
 
         if res is None:
-            msg_err = "Echec de la création du jaime : aucune ligne retournée par la base"
+            msg_err = (
+                "Echec de la création du jaime : aucune ligne retournée par la base"
+            )
             logging.error(msg_err)
             raise DatabaseCreationError(msg_err)
-        
+
         return jaime
-    
+
     @log
     def lister_par_activite(self, id_activite: int) -> List[Jaime]:
         """Lister tous les jaimes d'une activité
@@ -76,11 +78,13 @@ class JaimeDao:
                         "SELECT *                               "
                         "  FROM jaime                           "
                         "  WHERE id_activite= %(id_activite)s;  ",
-                        {"id_activite": id_activite}
+                        {"id_activite": id_activite},
                     )
                     res = cursor.fetchall()
         except Exception as e:
-            logging.error(f"Erreur lors de la récupération des jaimes d'une activité : {e}")
+            logging.error(
+                f"Erreur lors de la récupération des jaimes d'une activité : {e}"
+            )
             raise
 
         liste_jaimes = []
@@ -88,14 +92,12 @@ class JaimeDao:
         if res:
             for row in res:
                 jaime = Jaime(
-                    id_activite=row["id_activite"],
-                    id_auteur=row["id_auteur"]
+                    id_activite=row["id_activite"], id_auteur=row["id_auteur"]
                 )
 
                 liste_jaimes.append(jaime)
 
         return liste_jaimes
-
 
     @log
     def supprimer(self, id_activite: int, id_auteur: int) -> bool:
@@ -120,10 +122,7 @@ class JaimeDao:
                         "DELETE FROM jaime                      "
                         "WHERE id_activite = %(id_activite)s    "
                         "AND id_auteur = %(id_auteur)s          ",
-                        {
-                            "id_activite": id_activite,
-                            "id_auteur": id_auteur
-                        }
+                        {"id_activite": id_activite, "id_auteur": id_auteur},
                     )
                     res = cursor.rowcount
         except Exception as e:
@@ -131,12 +130,14 @@ class JaimeDao:
             raise
 
         if res < 1:
-            msg_err = "Echec de la suppression du jaime : aucune ligne retournée par la base"
+            msg_err = (
+                "Echec de la suppression du jaime : aucune ligne retournée par la base"
+            )
             logging.error(msg_err)
             raise DatabaseDeletionError(msg_err)
-        
+
         return True
-    
+
     @log
     def existe(self, id_activite: int, id_auteur: int) -> bool:
         """Vérifie si un jaime existe déjà dans la base de données
@@ -147,7 +148,7 @@ class JaimeDao:
             L'identifiant de l'activité
         id_auteur : int
             L'identifiant de l'auteur
-        
+
         Returns
         -------
         bool
@@ -160,16 +161,13 @@ class JaimeDao:
                         "SELECT 1 FROM jaime "
                         "WHERE id_activite = %(id_activite)s "
                         "AND id_auteur = %(id_auteur)s LIMIT 1;",
-                        {
-                            "id_activite": id_activite,
-                            "id_auteur": id_auteur
-                        }
+                        {"id_activite": id_activite, "id_auteur": id_auteur},
                     )
                     res = cursor.fetchone()
         except Exception as e:
             logging.error(f"Erreur lors de la vérification d'un jaime : {e}")
             raise
-        
+
         return res is not None
 
     @log
@@ -191,10 +189,10 @@ class JaimeDao:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "SELECT COUNT(*) FROM jaime WHERE id_activite = %(id_activite)s;",
-                        {"id_activite": id_activite}
+                        {"id_activite": id_activite},
                     )
                     res = cursor.fetchone()
-                    return res['count']
+                    return res["count"]
         except Exception as e:
             logging.error(f"Erreur lors du comptage des jaimes : {e}")
             raise

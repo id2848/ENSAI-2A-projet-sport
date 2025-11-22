@@ -2,15 +2,14 @@ from typing import List
 
 import logging
 
-from utils.singleton import Singleton
 from utils.log_decorator import log
 
 from dao.db_connection import DBConnection
 
 from business_object.commentaire import Commentaire
-from business_object.utilisateur import Utilisateur
 
 from exceptions import DatabaseCreationError, DatabaseDeletionError
+
 
 class CommentaireDao:
     """Classe contenant les méthodes pour accéder aux Commentaires de la base de données"""
@@ -52,10 +51,10 @@ class CommentaireDao:
             msg_err = "Echec de la création du commentaire : aucune ligne retournée par la base"
             logging.error(msg_err)
             raise DatabaseCreationError(msg_err)
-        
+
         commentaire.id_commentaire = res["id_commentaire"]
         return commentaire
-    
+
     @log
     def lister_par_activite(self, id_activite: int) -> List[Commentaire]:
         """Lister tous les commentaires
@@ -99,7 +98,6 @@ class CommentaireDao:
                 liste_commentaires.append(commentaire)
 
         return liste_commentaires
-
 
     @log
     def supprimer(self, id_commentaire: int) -> bool:
@@ -155,7 +153,7 @@ class CommentaireDao:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "SELECT * FROM commentaire WHERE id_commentaire = %(id_commentaire)s;",
-                        {"id_commentaire": id_commentaire}
+                        {"id_commentaire": id_commentaire},
                     )
                     res = cursor.fetchone()
         except Exception as e:
@@ -169,7 +167,6 @@ class CommentaireDao:
                 id_activite=res["id_activite"],
                 id_auteur=res["id_auteur"],
                 contenu=res["contenu"],
-                date_commentaire=res["date_commentaire"]
+                date_commentaire=res["date_commentaire"],
             )
         return commentaire
-        

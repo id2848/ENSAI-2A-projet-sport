@@ -13,7 +13,7 @@ from utils.securite import hash_password, generer_salt
 
 class ResetDatabase(metaclass=Singleton):
     """
-    Reinitialisation de la base de données
+    Réinitialisation de la base de données
     """
 
     @log
@@ -30,7 +30,9 @@ class ResetDatabase(metaclass=Singleton):
 
         schema = os.environ["POSTGRES_SCHEMA"]
 
-        create_schema = f"DROP SCHEMA IF EXISTS {schema} CASCADE; CREATE SCHEMA {schema};"
+        create_schema = (
+            f"DROP SCHEMA IF EXISTS {schema} CASCADE; CREATE SCHEMA {schema};"
+        )
 
         init_db = open("data/init_db.sql", encoding="utf-8")
         init_db_as_string = init_db.read()
@@ -48,7 +50,9 @@ class ResetDatabase(metaclass=Singleton):
                     cursor.execute(pop_db_as_string)
 
                     # Récupérer tous les credentials et remplacer les mots de passe bruts
-                    cursor.execute("SELECT id_utilisateur, mot_de_passe_hash FROM credentials;")
+                    cursor.execute(
+                        "SELECT id_utilisateur, mot_de_passe_hash FROM credentials;"
+                    )
                     credentials = cursor.fetchall()
 
                     for cred in credentials:

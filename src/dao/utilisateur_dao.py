@@ -7,7 +7,14 @@ from dao.db_connection import DBConnection
 
 from business_object.utilisateur import Utilisateur
 
-from exceptions import DatabaseCreationError, DatabaseDeletionError, DatabaseUpdateError, NotFoundError, InvalidPasswordError
+from exceptions import (
+    DatabaseCreationError,
+    DatabaseDeletionError,
+    DatabaseUpdateError,
+    NotFoundError,
+    InvalidPasswordError,
+)
+
 
 class UtilisateurDao:
     """Classe contenant les méthodes pour accéder aux utilisateurs de la base de données"""
@@ -52,7 +59,9 @@ class UtilisateurDao:
                     )
                     res = cursor.fetchone()
                     if res is None:
-                        raise DatabaseCreationError("Echec de la création de l'utilisateur.")
+                        raise DatabaseCreationError(
+                            "Echec de la création de l'utilisateur."
+                        )
 
                     # Récupération de l'id auto-généré
                     utilisateur.id_utilisateur = res["id_utilisateur"]
@@ -71,11 +80,15 @@ class UtilisateurDao:
                     )
                 # Si on arrive ici, commit du bloc, sinon, rollback automatique (donc l'utilisateur et les credentials sont forcément créés ensemble)
 
-            logging.info(f"Utilisateur {utilisateur.pseudo} créé avec succès (id={utilisateur.id_utilisateur}).")
+            logging.info(
+                f"Utilisateur {utilisateur.pseudo} créé avec succès (id={utilisateur.id_utilisateur})."
+            )
             return True
 
         except Exception as e:
-            logging.error(f"Erreur lors de la création de l'utilisateur {utilisateur.pseudo}: {e}")
+            logging.error(
+                f"Erreur lors de la création de l'utilisateur {utilisateur.pseudo}: {e}"
+            )
             raise
 
     @log
@@ -96,12 +109,14 @@ class UtilisateurDao:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "SELECT * FROM utilisateur WHERE pseudo = %(pseudo)s;", 
-                        {"pseudo": pseudo}
+                        "SELECT * FROM utilisateur WHERE pseudo = %(pseudo)s;",
+                        {"pseudo": pseudo},
                     )
                     res = cursor.fetchone()
         except Exception as e:
-            logging.error(f"Erreur lors de la recherche de l'utilisateur par pseudo {pseudo}: {e}")
+            logging.error(
+                f"Erreur lors de la recherche de l'utilisateur par pseudo {pseudo}: {e}"
+            )
             return None
 
         if res:
@@ -111,7 +126,7 @@ class UtilisateurDao:
                 prenom=res["prenom"],
                 date_de_naissance=res["date_de_naissance"],
                 sexe=res["sexe"],
-                id_utilisateur=res["id_utilisateur"]
+                id_utilisateur=res["id_utilisateur"],
             )
             return utilisateur
         return None
@@ -134,12 +149,14 @@ class UtilisateurDao:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "SELECT * FROM utilisateur WHERE id_utilisateur = %(id_utilisateur)s;", 
-                        {"id_utilisateur": id_utilisateur}
+                        "SELECT * FROM utilisateur WHERE id_utilisateur = %(id_utilisateur)s;",
+                        {"id_utilisateur": id_utilisateur},
                     )
                     res = cursor.fetchone()
         except Exception as e:
-            logging.error(f"Erreur lors de la recherche de l'utilisateur par ID {id_utilisateur}: {e}")
+            logging.error(
+                f"Erreur lors de la recherche de l'utilisateur par ID {id_utilisateur}: {e}"
+            )
             return None
 
         if res:
@@ -149,7 +166,7 @@ class UtilisateurDao:
                 prenom=res["prenom"],
                 date_de_naissance=res["date_de_naissance"],
                 sexe=res["sexe"],
-                id_utilisateur=res["id_utilisateur"]
+                id_utilisateur=res["id_utilisateur"],
             )
             return utilisateur
         return None
@@ -170,9 +187,7 @@ class UtilisateurDao:
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
-                    cursor.execute(
-                        "SELECT * FROM utilisateur;"
-                    )
+                    cursor.execute("SELECT * FROM utilisateur;")
                     res = cursor.fetchall()
         except Exception as e:
             logging.error(f"Erreur lors de la récupération des utilisateurs: {e}")
@@ -234,7 +249,7 @@ class UtilisateurDao:
         except Exception as e:
             logging.error(f"Erreur lors de la modification de l'utilisateur: {e}")
             raise
-        
+
         if res < 1:
             msg_err = "Echec de la modification de l'utilisateur : aucune ligne retournée par la base"
             logging.error(msg_err)
@@ -296,11 +311,13 @@ class UtilisateurDao:
                         {"pseudo": pseudo},
                     )
                     res = cursor.fetchone()
-                    return res is not None  # Si un résultat est trouvé, le pseudo existe déjà
+                    return (
+                        res is not None
+                    )  # Si un résultat est trouvé, le pseudo existe déjà
         except Exception as e:
             logging.error(f"Erreur lors de la vérification du pseudo {pseudo}: {e}")
             raise
-    
+
     @log
     def verifier_id_existant(self, id_utilisateur: int) -> bool:
         """Vérifier si un utilisateur existe via son identifiant
@@ -325,7 +342,9 @@ class UtilisateurDao:
                     res = cursor.fetchone()
                     return res is not None
         except Exception as e:
-            logging.error(f"Erreur lors de la vérification de l'id {id_utilisateur}: {e}")
+            logging.error(
+                f"Erreur lors de la vérification de l'id {id_utilisateur}: {e}"
+            )
             raise
 
     @log
@@ -367,7 +386,9 @@ class UtilisateurDao:
                 raise NotFoundError(msg_err)
 
             # Vérification du mot de passe
-            if not verifier_mot_de_passe(mot_de_passe, res["sel"], res["mot_de_passe_hash"]):
+            if not verifier_mot_de_passe(
+                mot_de_passe, res["sel"], res["mot_de_passe_hash"]
+            ):
                 msg_err = f"Mot de passe incorrect pour {pseudo}"
                 logging.error(msg_err)
                 raise InvalidPasswordError(msg_err)

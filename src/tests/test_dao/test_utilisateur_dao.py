@@ -4,7 +4,6 @@ import pytest
 from unittest.mock import patch
 
 from utils.reset_database import ResetDatabase
-from utils.securite import hash_password
 
 from dao.utilisateur_dao import UtilisateurDao
 
@@ -51,7 +50,7 @@ def test_trouver_par_pseudo_ok():
     """Recherche par pseudo d'un utilisateur existant"""
 
     # GIVEN
-    pseudo = 'samsmith'
+    pseudo = "samsmith"
 
     # WHEN
     utilisateur = UtilisateurDao().trouver_par_pseudo(pseudo)
@@ -64,7 +63,7 @@ def test_trouver_par_pseudo_ko():
     """Recherche par pseudo d'un utilisateur n'existant pas"""
 
     # GIVEN
-    pseudo = 'iiiiii'
+    pseudo = "iiiiii"
 
     # WHEN
     utilisateur = UtilisateurDao().trouver_par_pseudo(pseudo)
@@ -96,9 +95,16 @@ def test_modifier_ok():
     # GIVEN
     new_nom = "Black"
     new_prenom = "White"
-    new_date="2010-01-01"
-    new_sexe="Femme"
-    utilisateur = Utilisateur(id_utilisateur=995, pseudo="mikebrown", nom=new_nom, prenom=new_prenom, date_de_naissance=new_date, sexe=new_sexe)
+    new_date = "2010-01-01"
+    new_sexe = "Femme"
+    utilisateur = Utilisateur(
+        id_utilisateur=995,
+        pseudo="mikebrown",
+        nom=new_nom,
+        prenom=new_prenom,
+        date_de_naissance=new_date,
+        sexe=new_sexe,
+    )
 
     # WHEN
     modification_ok = UtilisateurDao().modifier(utilisateur)
@@ -111,18 +117,25 @@ def test_modifier_ko():
     """Modification d'utilisateur' échouée (id inconnu)"""
 
     # GIVEN
-    utilisateur = Utilisateur(id_utilisateur=8888, pseudo="inconnu", nom="neant", prenom="rien",date_de_naissance="2020-01-01",sexe="Homme")
+    utilisateur = Utilisateur(
+        id_utilisateur=8888,
+        pseudo="inconnu",
+        nom="neant",
+        prenom="rien",
+        date_de_naissance="2020-01-01",
+        sexe="Homme",
+    )
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        modification_ok = UtilisateurDao().modifier(utilisateur)
+        UtilisateurDao().modifier(utilisateur)
 
 
 def test_supprimer_ok():
     """Suppression d'utilisateur réussie"""
 
     # GIVEN
-    id_utilisateur = 995 # existant dans les données test
+    id_utilisateur = 995  # existant dans les données test
 
     # WHEN
     suppression_ok = UtilisateurDao().supprimer(id_utilisateur)
@@ -132,7 +145,9 @@ def test_supprimer_ok():
 
     # Vérification supplémentaire : après suppression, l'utilisateur ne doit plus exister dans la base de données
     utilisateur_supprime = UtilisateurDao().trouver_par_id(id_utilisateur)
-    assert utilisateur_supprime is None, "L'utilisateur n'a pas été correctement supprimé de la base de données"
+    assert (
+        utilisateur_supprime is None
+    ), "L'utilisateur n'a pas été correctement supprimé de la base de données"
 
 
 def test_supprimer_ko():
@@ -143,7 +158,7 @@ def test_supprimer_ko():
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        suppression_ok = UtilisateurDao().supprimer(id_utilisateur)
+        UtilisateurDao().supprimer(id_utilisateur)
 
 
 def test_verifier_pseudo_existant():
@@ -151,10 +166,10 @@ def test_verifier_pseudo_existant():
     # GIVEN
     utilisateur_dao = UtilisateurDao()
     pseudo_existant = "samsmith"  # Exemple d'un pseudo existant dans la base de données
-    
+
     # WHEN
     existe = utilisateur_dao.verifier_pseudo_existant(pseudo_existant)
-    
+
     # THEN
     assert existe is True  # Le pseudo existe dans la base de données
 
@@ -163,23 +178,26 @@ def test_verifier_pseudo_non_existant():
     """Vérifier que la méthode retourne False si le pseudo n'existe pas"""
     # GIVEN
     utilisateur_dao = UtilisateurDao()
-    pseudo_non_existant = "nouveau_pseudo"  # Un pseudo qui n'existe pas dans la base de données
-    
+    pseudo_non_existant = (
+        "nouveau_pseudo"  # Un pseudo qui n'existe pas dans la base de données
+    )
+
     # WHEN
     existe = utilisateur_dao.verifier_pseudo_existant(pseudo_non_existant)
-    
+
     # THEN
     assert existe is False  # Le pseudo n'existe pas dans la base de données
+
 
 def test_verifier_id_existant():
     """Vérifier que la méthode retourne True si l'id_utilisateur existe"""
     # GIVEN
     utilisateur_dao = UtilisateurDao()
     id_utilisateur_existant = 991
-    
+
     # WHEN
     existe = utilisateur_dao.verifier_id_existant(id_utilisateur_existant)
-    
+
     # THEN
     assert existe is True
 
@@ -189,10 +207,10 @@ def test_verifier_id_non_existant():
     # GIVEN
     utilisateur_dao = UtilisateurDao()
     id_utilisateur_non_existant = 99999
-    
+
     # WHEN
     existe = utilisateur_dao.verifier_id_existant(id_utilisateur_non_existant)
-    
+
     # THEN
     assert existe is False
 
@@ -206,7 +224,7 @@ def test_creer_ok():
         nom="Dup",
         prenom="Dup",
         date_de_naissance="2000-01-01",
-        sexe="Homme"
+        sexe="Homme",
     )
     mot_de_passe = "supermdp"
 
@@ -228,17 +246,17 @@ def test_creer_ko():
 
     # GIVEN
     u = Utilisateur(
-        pseudo="johndoe",     # déjà dans pop_db_test.sql
+        pseudo="johndoe",  # déjà dans pop_db_test.sql
         nom="Dup",
         prenom="Dup",
         date_de_naissance="2000-01-01",
-        sexe="Homme"
+        sexe="Homme",
     )
     mot_de_passe = "1234"
-    
+
     # WHEN / THEN
     with pytest.raises(Exception):
-        res = UtilisateurDao().creer(u, mot_de_passe)
+        UtilisateurDao().creer(u, mot_de_passe)
 
 
 def test_se_connecter_ko():
@@ -250,7 +268,7 @@ def test_se_connecter_ko():
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        utilisateur = UtilisateurDao().se_connecter(pseudo, mauvais_mdp)
+        UtilisateurDao().se_connecter(pseudo, mauvais_mdp)
 
 
 def test_se_connecter_ok():
@@ -262,7 +280,7 @@ def test_se_connecter_ok():
 
     # GIVEN
     pseudo = "janedoe"
-    bon_mdp = "mdp2"   # avant le hashing + salt effectué au reset
+    bon_mdp = "mdp2"  # avant le hashing + salt effectué au reset
 
     # WHEN
     utilisateur = UtilisateurDao().se_connecter(pseudo, bon_mdp)
@@ -270,6 +288,7 @@ def test_se_connecter_ok():
     # THEN
     assert utilisateur is not None
     assert utilisateur.pseudo == "janedoe"
+
 
 if __name__ == "__main__":
     pytest.main([__file__])

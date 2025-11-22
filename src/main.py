@@ -1,12 +1,11 @@
 import gpxpy
-import os  
+import os
 
 
 if __name__ == "__main__":
     print("Répertoire actuel:", os.getcwd())
     with open("./src/strava_trail_run_12k.gpx", "r", encoding="utf-8") as f:
         gpx = gpxpy.parse(f)
-
 
     # Distance totale en 3D (mètres)
     distance_m = gpx.length_3d()
@@ -28,5 +27,7 @@ if __name__ == "__main__":
     print(f"Durée totale: {duration_s/60:.1f} min")
     print(f"Temps en mouvement: {moving.moving_time/60:.1f} min")
     print(f"Distance en mouvement: {moving.moving_distance/1000:.2f} km")
-    print(f"Vitesse moyenne (moving): {moving.moving_distance/moving.moving_time*3.6:.2f} km/h")
+    print(
+        f"Vitesse moyenne (moving): {moving.moving_distance/moving.moving_time*3.6:.2f} km/h"
+    )
     print(f"Vitesse max: {moving.max_speed*3.6:.2f} km/h")

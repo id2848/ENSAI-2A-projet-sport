@@ -1,11 +1,8 @@
 import os
 import pytest
-from datetime import date
 from unittest.mock import patch
 
 from service.utilisateur_service import UtilisateurService
-from dao.utilisateur_dao import UtilisateurDao
-from business_object.utilisateur import Utilisateur
 
 from utils.reset_database import ResetDatabase
 
@@ -32,7 +29,9 @@ def test_inscrire_utilisateur_ok():
     sexe = "homme"
 
     # WHEN
-    res = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
+    res = UtilisateurService().inscrire(
+        pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe
+    )
 
     # THEN
     assert res is True  # Le résultat doit être True si l'inscription réussit
@@ -51,7 +50,9 @@ def test_inscrire_utilisateur_pseudo_deja_utilise():
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        res = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
+        UtilisateurService().inscrire(
+            pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe
+        )
 
 
 def test_inscrire_utilisateur_donnees_invalides():
@@ -67,8 +68,9 @@ def test_inscrire_utilisateur_donnees_invalides():
 
     # WHEN / THEN
     with pytest.raises(ValueError):
-        res = UtilisateurService().inscrire(pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe)
-
+        UtilisateurService().inscrire(
+            pseudo, mot_de_passe, nom, prenom, date_de_naissance, sexe
+        )
 
 
 # Test de la connexion
@@ -96,7 +98,7 @@ def test_se_connecter_utilisateur_mot_de_passe_incorrect():
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        utilisateur = UtilisateurService().se_connecter(pseudo, mot_de_passe)
+        UtilisateurService().se_connecter(pseudo, mot_de_passe)
 
 
 def test_se_connecter_utilisateur_inexistant():
@@ -108,8 +110,8 @@ def test_se_connecter_utilisateur_inexistant():
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        utilisateur = UtilisateurService().se_connecter(pseudo, mot_de_passe)
+        UtilisateurService().se_connecter(pseudo, mot_de_passe)
+
 
 if __name__ == "__main__":
     pytest.main([__file__])
-    

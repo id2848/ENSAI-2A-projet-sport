@@ -1,7 +1,7 @@
 import pytest
 
 from datetime import date
-from business_object.activite import Activite  
+from business_object.activite import Activite
 
 
 def test_calculer_vitesse_ok():
@@ -13,7 +13,7 @@ def test_calculer_vitesse_ok():
         sport="course",
         date_activite=date(2025, 1, 15),
         distance=10.0,
-        duree=60.0
+        duree=60.0,
     )
 
     # WHEN
@@ -31,7 +31,7 @@ def test_duree_zero_ok():
         sport="course",
         date_activite=date(2025, 1, 15),
         distance=10.0,
-        duree=0.0
+        duree=0.0,
     )
     assert activite.calculer_vitesse() == 0.0
 
@@ -44,7 +44,7 @@ def test_distance_zero_ok():
         sport="course",
         date_activite=date(2025, 1, 15),
         distance=0.0,
-        duree=30.0
+        duree=30.0,
     )
     assert activite.calculer_vitesse() == 0.0
 
@@ -57,7 +57,7 @@ def test_distance_et_duree_zeros_ok():
         sport="course",
         date_activite=date(2025, 1, 15),
         distance=0.0,
-        duree=0.0
+        duree=0.0,
     )
     assert activite.calculer_vitesse() == 0.0
 
@@ -70,7 +70,7 @@ def test_calculer_vitesse_ko():
         sport="course",
         date_activite=date(2025, 1, 15),
         distance=10.0,
-        duree=60.0
+        duree=60.0,
     )
     assert activite.calculer_vitesse() != 5.0
 
@@ -83,7 +83,7 @@ def test_duree_zero_ko():
         sport="course",
         date_activite=date(2025, 1, 15),
         distance=10.0,
-        duree=0.0
+        duree=0.0,
     )
     assert activite.calculer_vitesse() != 1.0
 
@@ -96,9 +96,10 @@ def test_distance_zero_ko():
         sport="course",
         date_activite=date(2025, 1, 15),
         distance=0.0,
-        duree=30.0
+        duree=30.0,
     )
     assert activite.calculer_vitesse() != 1.0
+
 
 if __name__ == "__main__":
     pytest.main([__file__])

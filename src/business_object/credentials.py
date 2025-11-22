@@ -11,12 +11,8 @@ class Credentials:
     sel : str
         sel de l'utilisateur
     """
-    def __init__(
-        self,
-        id_utilisateur: int,
-        mot_de_passe_hash: str,
-        sel: str
-    ):
+
+    def __init__(self, id_utilisateur: int, mot_de_passe_hash: str, sel: str):
         self.id_utilisateur = id_utilisateur
         self.mot_de_passe_hash = mot_de_passe_hash
         self.sel = sel

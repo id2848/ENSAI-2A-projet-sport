@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date
 from typing import Optional
 
 import re
@@ -31,7 +31,7 @@ class Utilisateur:
         prenom: str,
         date_de_naissance: date | str,
         sexe: str,
-        id_utilisateur: Optional[int] = None
+        id_utilisateur: Optional[int] = None,
     ):
         self.id_utilisateur = id_utilisateur
         self.pseudo = self.valider_pseudo(pseudo)
@@ -52,22 +52,29 @@ class Utilisateur:
     def calculer_age(self) -> int:
         """Calcule l'âge de l'utilisateur en années."""
         today = date.today()
-        return today.year - self.date_de_naissance.year - (
-            (today.month, today.day) < (self.date_de_naissance.month, self.date_de_naissance.day)
+        return (
+            today.year
+            - self.date_de_naissance.year
+            - (
+                (today.month, today.day)
+                < (self.date_de_naissance.month, self.date_de_naissance.day)
+            )
         )
 
     @staticmethod
     def valider_pseudo(pseudo: str) -> bool:
         """Valider que le pseudo est valide (alphanumérique entre 4 et 16 caractères)"""
-        if not ( len(pseudo) >= 4 and len(pseudo) <= 16 and pseudo.isalnum() ):
-            raise ValueError("Pseudo invalide. Il doit être alphanumérique et contenir entre 4 et 16 caractères")
+        if not (len(pseudo) >= 4 and len(pseudo) <= 16 and pseudo.isalnum()):
+            raise ValueError(
+                "Pseudo invalide. Il doit être alphanumérique et contenir entre 4 et 16 caractères"
+            )
         return pseudo
-    
+
     @staticmethod
     def valider_nom_prenom(nom: str, prenom: str) -> tuple[str, str]:
         """Valider que le nom et prénom ne contiennent que des lettres et des espaces"""
         pattern = "^[A-Za-zÀ-ÿ ]+$"  # Autorise les lettres et les espaces
-        if not ( bool(re.match(pattern, nom)) and bool(re.match(pattern, prenom)) ):
+        if not (bool(re.match(pattern, nom)) and bool(re.match(pattern, prenom))):
             raise ValueError("Nom ou prénom invalide")
         return nom, prenom
 
@@ -78,7 +85,9 @@ class Utilisateur:
         try:
             return valider_date(date_de_naissance)
         except ValueError:
-            raise ValueError("date_de_naissance doit être un objet 'date' ou un str au format YYYY-MM-DD")
+            raise ValueError(
+                "date_de_naissance doit être un objet 'date' ou un str au format YYYY-MM-DD"
+            )
 
     @staticmethod
     def valider_sexe(sexe: str) -> str:

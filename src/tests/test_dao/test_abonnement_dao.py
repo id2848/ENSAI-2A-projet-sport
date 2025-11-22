@@ -6,6 +6,7 @@ from utils.reset_database import ResetDatabase
 from business_object.abonnement import Abonnement
 from dao.abonnement_dao import AbonnementDao
 
+
 @pytest.fixture(autouse=True)
 def setup_test_environment():
     """Initialisation des données de test dans le schéma dédié aux tests"""
@@ -13,13 +14,16 @@ def setup_test_environment():
         ResetDatabase().lancer(test_dao=True)
         yield
 
+
 def test_creer_abonnement_ok():
     """Test de création d'un abonnement réussi"""
 
     # GIVEN
     id_u_suiveur = 991
     id_u_suivi = 993
-    abonnement = Abonnement(id_utilisateur_suiveur=id_u_suiveur, id_utilisateur_suivi=id_u_suivi)
+    abonnement = Abonnement(
+        id_utilisateur_suiveur=id_u_suiveur, id_utilisateur_suivi=id_u_suivi
+    )
 
     # WHEN
     res = AbonnementDao().creer(abonnement)
@@ -32,12 +36,14 @@ def test_creer_abonnement_ko():
     """Test de création d'un abonnement échouée"""
 
     # GIVEN
-    id_u_suiveur, id_u_suivi = 123, 100 # non existants
-    abonnement = Abonnement(id_utilisateur_suiveur=id_u_suiveur, id_utilisateur_suivi=id_u_suivi)
+    id_u_suiveur, id_u_suivi = 123, 100  # non existants
+    abonnement = Abonnement(
+        id_utilisateur_suiveur=id_u_suiveur, id_utilisateur_suivi=id_u_suivi
+    )
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        res = AbonnementDao().creer(abonnement)
+        AbonnementDao().creer(abonnement)
 
 
 def test_trouver_par_ids():
@@ -91,7 +97,7 @@ def test_lister_tous():
     abonnements = AbonnementDao().lister_tous()
 
     # THEN
-    assert len(abonnements) == 7 # d'après données test
+    assert len(abonnements) == 7  # d'après données test
 
 
 def test_supprimer_abonnement_ok():
@@ -102,7 +108,9 @@ def test_supprimer_abonnement_ok():
     id_utilisateur_suivi = 992
 
     # WHEN
-    suppression_ok = AbonnementDao().supprimer(id_utilisateur_suiveur, id_utilisateur_suivi)
+    suppression_ok = AbonnementDao().supprimer(
+        id_utilisateur_suiveur, id_utilisateur_suivi
+    )
 
     # THEN
     assert suppression_ok
@@ -117,7 +125,7 @@ def test_supprimer_abonnement_ko():
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        suppression_ok = AbonnementDao().supprimer(id_utilisateur_suiveur, id_utilisateur_suivi)
+        AbonnementDao().supprimer(id_utilisateur_suiveur, id_utilisateur_suivi)
 
 
 if __name__ == "__main__":

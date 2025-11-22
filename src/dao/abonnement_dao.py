@@ -9,6 +9,7 @@ from business_object.abonnement import Abonnement
 
 from exceptions import DatabaseCreationError, DatabaseDeletionError
 
+
 class AbonnementDao:
     """Classe contenant les méthodes pour accéder aux abonnements de la base de données"""
 
@@ -50,9 +51,11 @@ class AbonnementDao:
             raise DatabaseCreationError(msg_err)
 
         return abonnement
-    
+
     @log
-    def trouver_par_ids(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int) -> Abonnement | None:
+    def trouver_par_ids(
+        self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int
+    ) -> Abonnement | None:
         """Trouver un abonnement grâce aux ids du suiveur et du suivi
 
         Parameters
@@ -93,7 +96,7 @@ class AbonnementDao:
             )
 
         return abonnement
-    
+
     @log
     def lister_suivis(self, id_utilisateur: int) -> List[Abonnement]:
         """Lister tous les abonnements d'un utilisateur (personnes qu'il suit)
@@ -186,10 +189,7 @@ class AbonnementDao:
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
-                    cursor.execute(
-                        "SELECT *              "
-                        "  FROM abonnement;    "
-                    )
+                    cursor.execute("SELECT *              " "  FROM abonnement;    ")
                     res = cursor.fetchall()
         except Exception as e:
             logging.error(e)

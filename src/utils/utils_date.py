@@ -1,5 +1,6 @@
 from datetime import datetime, date
 
+
 def verifier_date(date: str) -> bool:
     """Vérifie que la date est un str au format YYYY-MM-DD"""
     try:
@@ -7,6 +8,7 @@ def verifier_date(date: str) -> bool:
         return True
     except ValueError:
         return False
+
 
 def valider_date(var_date: date | str) -> date:
     """Valider que la date est une date ou bien un str au format YYYY-MM-DD à convertir
@@ -16,6 +18,6 @@ def valider_date(var_date: date | str) -> date:
     elif isinstance(var_date, str):
         return datetime.strptime(
             var_date, "%Y-%m-%d"
-        ).date() # lève une ValueError si la date n'est pas au format YYYY-MM-DD
+        ).date()  # lève une ValueError si la date n'est pas au format YYYY-MM-DD
     else:
         raise ValueError("var_date doit être une date ou un str")

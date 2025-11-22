@@ -9,6 +9,7 @@ from business_object.activite import Activite
 
 from exceptions import DatabaseCreationError, DatabaseDeletionError, DatabaseUpdateError
 
+
 class ActiviteDao:
     """Classe contenant les méthodes pour accéder aux activités de la base de données"""
 
@@ -46,18 +47,18 @@ class ActiviteDao:
                             "date_activite": activite.date_activite,
                             "distance": activite.distance,
                             "duree": activite.duree,
-                        }
+                        },
                     )
                     res = cursor.fetchone()
         except Exception as e:
             logging.error(f"Erreur lors de la création d'une activité : {e}")
             raise
-        
+
         if res is None:
             msg_err = "Echec de la création de l'activité : aucune ligne retournée par la base"
             logging.error(msg_err)
             raise DatabaseCreationError(msg_err)
-        
+
         activite.id_activite = res["id_activite"]
         return activite
 
@@ -80,7 +81,7 @@ class ActiviteDao:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "SELECT * FROM activite WHERE id_activite = %(id_activite)s;",
-                        {"id_activite": id_activite}
+                        {"id_activite": id_activite},
                     )
                     res = cursor.fetchone()
         except Exception as e:
@@ -132,8 +133,8 @@ class ActiviteDao:
                             "sport": activite.sport,
                             "date_activite": activite.date_activite,
                             "distance": activite.distance,
-                            "duree": activite.duree
-                        }
+                            "duree": activite.duree,
+                        },
                     )
                     res = cursor.rowcount
         except Exception as e:
@@ -166,7 +167,7 @@ class ActiviteDao:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "DELETE FROM activite WHERE id_activite=%(id_activite)s;",
-                        {"id_activite": id_activite}
+                        {"id_activite": id_activite},
                     )
                     res = cursor.rowcount
         except Exception as e:
@@ -200,7 +201,7 @@ class ActiviteDao:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "SELECT * FROM activite WHERE id_utilisateur = %(id_utilisateur)s;",
-                        {"id_utilisateur": id_utilisateur}
+                        {"id_utilisateur": id_utilisateur},
                     )
                     res = cursor.fetchall()
         except Exception as e:
@@ -216,13 +217,19 @@ class ActiviteDao:
                     sport=row["sport"],
                     date_activite=row["date_activite"],
                     distance=row["distance"],
-                    duree=row["duree"]
+                    duree=row["duree"],
                 )
                 liste_activites.append(activite)
         return liste_activites
-    
+
     @log
-    def lister_activites_filtres(self, id_utilisateur: int, sport: str = None, date_debut: str = None, date_fin: str = None) -> List[Activite]:
+    def lister_activites_filtres(
+        self,
+        id_utilisateur: int,
+        sport: str = None,
+        date_debut: str = None,
+        date_fin: str = None,
+    ) -> List[Activite]:
         """Lister les activités d'un utilisateur avec filtres optionnels
 
         Parameters
@@ -241,23 +248,23 @@ class ActiviteDao:
         List[Activite]
             La liste des activités correspondant aux filtres
         """
-        
+
         query = "SELECT * FROM activite WHERE id_utilisateur = %(id_utilisateur)s"
         params = {"id_utilisateur": id_utilisateur}
 
         if sport:
             query += " AND sport = %(sport)s"
             params["sport"] = sport
-        
+
         if date_debut:
             query += " AND date_activite >= %(date_debut)s"
             params["date_debut"] = date_debut
-        
+
         if date_fin:
             query += " AND date_activite <= %(date_fin)s"
             params["date_fin"] = date_fin
 
-        query += " ORDER BY date_activite DESC;"  
+        query += " ORDER BY date_activite DESC;"
 
         res = None
         try:
@@ -278,12 +285,12 @@ class ActiviteDao:
                     sport=row["sport"],
                     date_activite=row["date_activite"],
                     distance=row["distance"],
-                    duree=row["duree"]
+                    duree=row["duree"],
                 )
                 liste_activites.append(activite)
-        
+
         return liste_activites
-    
+
     @log
     def verifier_id_existant(self, id_activite: int) -> bool:
         """Vérifier si une activité existe via son identifiant

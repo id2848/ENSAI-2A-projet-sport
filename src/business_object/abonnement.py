@@ -1,6 +1,4 @@
-from business_object.utilisateur import Utilisateur
-
-class Abonnement : 
+class Abonnement:
     """Classe représentant un abonnement entre deux utilisateurs.
     Un utilisateur (suiveur) s'abonne à un autre utilisateur (suivi).
 
@@ -25,22 +23,15 @@ class Abonnement :
     def __str__(self):
         return f"Abonnement: Utilisateur {self.id_utilisateur_suiveur} suit l'utilisateur {self.id_utilisateur_suivi}"
 
-    
+
 # Exemple d'utilisation
 if __name__ == "__main__":
     # Création d'un abonnement : utilisateur 1 suit utilisateur 2
     abonnement = Abonnement(id_utilisateur_suiveur=1, id_utilisateur_suivi=2)
-    
 
     # Création d'un abonnement : utilisateur 1 suit utilisateur 2
     abonnement = Abonnement(id_utilisateur_suiveur=1, id_utilisateur_suivi=2)
-    
+
     print(abonnement)
     print(f"Suiveur: {abonnement.id_utilisateur_suiveur}")
     print(f"Suivi: {abonnement.id_utilisateur_suivi}")
-
-    
-
-
-
-

@@ -3,16 +3,33 @@ from datetime import timedelta, date
 
 from business_object.activite import Activite
 from service.statistiques_service import StatistiquesService
-from dao.activite_dao import ActiviteDao
 
 
 liste_activites = [
-    Activite(id_activite=1, id_utilisateur=1, sport="Course", date_activite=date(2025,1,1),
-     distance=5.0, duree=timedelta(minutes=30)),
-    Activite(id_activite=2, id_utilisateur=1, sport="Course", date_activite=date(2025,1,2),
-     distance=10.0, duree=timedelta(hours=1)),
-    Activite(id_activite=3, id_utilisateur=2, sport="Natation", date_activite=date(2025,1,3),
-     distance=7.0, duree=timedelta(minutes=45))
+    Activite(
+        id_activite=1,
+        id_utilisateur=1,
+        sport="Course",
+        date_activite=date(2025, 1, 1),
+        distance=5.0,
+        duree=timedelta(minutes=30),
+    ),
+    Activite(
+        id_activite=2,
+        id_utilisateur=1,
+        sport="Course",
+        date_activite=date(2025, 1, 2),
+        distance=10.0,
+        duree=timedelta(hours=1),
+    ),
+    Activite(
+        id_activite=3,
+        id_utilisateur=2,
+        sport="Natation",
+        date_activite=date(2025, 1, 3),
+        distance=7.0,
+        duree=timedelta(minutes=45),
+    ),
 ]
 
 statistiques_service = StatistiquesService()
@@ -36,7 +53,9 @@ def test_calculer_nombre_activites_ok():
 def test_calculer_nombre_activites_ko():
     """Nombre d'activités pour un utilisateur sans activité"""
     # GIVEN
-    statistiques_service.activite_dao.lister_par_utilisateur = MagicMock(return_value=[])
+    statistiques_service.activite_dao.lister_par_utilisateur = MagicMock(
+        return_value=[]
+    )
 
     # WHEN
     res = statistiques_service.calculer_nombre_activites(99)
@@ -62,7 +81,9 @@ def test_calculer_distance_totale_ok():
 def test_calculer_distance_totale_ko():
     """Distance totale pour un utilisateur sans activité"""
     # GIVEN
-    statistiques_service.activite_dao.lister_par_utilisateur = MagicMock(return_value=[])
+    statistiques_service.activite_dao.lister_par_utilisateur = MagicMock(
+        return_value=[]
+    )
 
     # WHEN
     res = statistiques_service.calculer_distance_totale(99)
@@ -77,7 +98,9 @@ def test_calculer_duree_totale_ok():
     statistiques_service.activite_dao.lister_par_utilisateur = MagicMock(
         return_value=[a for a in liste_activites if a.id_utilisateur == 1]
     )
-    total_sec = int(timedelta(minutes=30).total_seconds() + timedelta(hours=1).total_seconds())
+    total_sec = int(
+        timedelta(minutes=30).total_seconds() + timedelta(hours=1).total_seconds()
+    )
 
     # WHEN
     res = statistiques_service.calculer_duree_totale(1)
@@ -89,7 +112,9 @@ def test_calculer_duree_totale_ok():
 def test_calculer_duree_totale_ko():
     """Durée totale pour un utilisateur sans activité"""
     # GIVEN
-    statistiques_service.activite_dao.lister_par_utilisateur = MagicMock(return_value=[])
+    statistiques_service.activite_dao.lister_par_utilisateur = MagicMock(
+        return_value=[]
+    )
 
     # WHEN
     res = statistiques_service.calculer_duree_totale(99)

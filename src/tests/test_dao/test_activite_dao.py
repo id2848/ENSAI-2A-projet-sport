@@ -7,6 +7,7 @@ from utils.reset_database import ResetDatabase
 from dao.activite_dao import ActiviteDao
 from business_object.activite import Activite
 
+
 @pytest.fixture(autouse=True)
 def setup_test_environment():
     """Initialisation des données de test dans le schéma dédié aux tests"""
@@ -24,23 +25,23 @@ def test_creer_ko_utilisateur_inexistant():
         sport="natation",
         date_activite="2025-01-01",
         distance=1.2,
-        duree=30
+        duree=30,
     )
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        creation_ok = ActiviteDao().creer(activite)
+        ActiviteDao().creer(activite)
 
 
 def test_creer_ok_utilisateur_existant():
     """Création d'une activité réussie pour un utilisateur existant"""
     # GIVEN
     activite = Activite(
-        id_utilisateur=991,  
+        id_utilisateur=991,
         sport="natation",
         date_activite="2025-01-02",
         distance=5.0,
-        duree=1800
+        duree=1800,
     )
 
     # WHEN
@@ -113,7 +114,7 @@ def test_modifier_ok():
         sport="randonnée",
         date_activite="2025-09-29",
         distance=10.0,
-        duree=50.0
+        duree=50.0,
     )
 
     # WHEN
@@ -132,19 +133,19 @@ def test_modifier_ko():
         sport="randonnée",
         date_activite="2025-01-03",
         distance=6.0,
-        duree=2000.0
+        duree=2000.0,
     )
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        modification_ok = ActiviteDao().modifier(activite)
+        ActiviteDao().modifier(activite)
 
 
 def test_supprimer_ok():
     """Suppression d'une activité existante réussie"""
     # GIVEN
     id_activite = 994
-    
+
     # WHEN
     suppression_ok = ActiviteDao().supprimer(id_activite)
 
@@ -159,7 +160,8 @@ def test_supprimer_ko():
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        suppression_ok = ActiviteDao().supprimer(id_activite)
+        ActiviteDao().supprimer(id_activite)
+
 
 def test_lister_activites_filtres_par_sport():
     """Lister les activités d'un utilisateur filtrées par sport"""
@@ -168,13 +170,16 @@ def test_lister_activites_filtres_par_sport():
     sport_filtre = "natation"  # Exemple de filtre
 
     # WHEN
-    activites = ActiviteDao().lister_activites_filtres(id_utilisateur, sport=sport_filtre)
+    activites = ActiviteDao().lister_activites_filtres(
+        id_utilisateur, sport=sport_filtre
+    )
 
     # THEN
     assert isinstance(activites, list)
     for a in activites:
         assert isinstance(a, Activite)
         assert a.sport == sport_filtre
+
 
 def test_lister_activites_filtres_par_date():
     """Lister les activités d'un utilisateur filtrées par plage de dates"""
@@ -186,13 +191,16 @@ def test_lister_activites_filtres_par_date():
     date_debut = datetime.strptime(date_debut, "%Y-%m-%d").date()
     date_fin = datetime.strptime(date_fin, "%Y-%m-%d").date()
     # WHEN
-    activites = ActiviteDao().lister_activites_filtres(id_utilisateur, date_debut=date_debut, date_fin=date_fin)
+    activites = ActiviteDao().lister_activites_filtres(
+        id_utilisateur, date_debut=date_debut, date_fin=date_fin
+    )
 
     # THEN
     assert isinstance(activites, list)
     for a in activites:
         assert isinstance(a, Activite)
         assert date_debut <= a.date_activite <= date_fin
+
 
 def test_lister_activites_filtres_par_sport_et_date():
     """Lister les activités d'un utilisateur filtrées par sport et plage de dates"""
@@ -205,7 +213,9 @@ def test_lister_activites_filtres_par_sport_et_date():
     date_debut = datetime.strptime(date_debut, "%Y-%m-%d").date()
     date_fin = datetime.strptime(date_fin, "%Y-%m-%d").date()
     # WHEN
-    activites = ActiviteDao().lister_activites_filtres(id_utilisateur, sport=sport_filtre, date_debut=date_debut, date_fin=date_fin)
+    activites = ActiviteDao().lister_activites_filtres(
+        id_utilisateur, sport=sport_filtre, date_debut=date_debut, date_fin=date_fin
+    )
 
     # THEN
     assert isinstance(activites, list)
@@ -213,6 +223,7 @@ def test_lister_activites_filtres_par_sport_et_date():
         assert isinstance(a, Activite)
         assert a.sport == sport_filtre
         assert date_debut <= a.date_activite <= date_fin
+
 
 def test_lister_activites_filtres_sans_filtre():
     """Lister toutes les activités d'un utilisateur sans appliquer de filtres"""
@@ -228,14 +239,15 @@ def test_lister_activites_filtres_sans_filtre():
         assert isinstance(a, Activite)
         assert a.id_utilisateur == id_utilisateur
 
+
 def test_verifier_id_existant():
     """Vérifier que la méthode retourne True si l'id_activite existe"""
     # GIVEN
     id_activite_existant = 991
-    
+
     # WHEN
     existe = ActiviteDao().verifier_id_existant(id_activite_existant)
-    
+
     # THEN
     assert existe is True
 
@@ -244,12 +256,13 @@ def test_verifier_id_non_existant():
     """Vérifier que la méthode retourne False si l'id_activite n'existe pas"""
     # GIVEN
     id_activite_non_existant = 99999
-    
+
     # WHEN
     existe = ActiviteDao().verifier_id_existant(id_activite_non_existant)
-    
+
     # THEN
     assert existe is False
+
 
 if __name__ == "__main__":
     pytest.main([__file__])

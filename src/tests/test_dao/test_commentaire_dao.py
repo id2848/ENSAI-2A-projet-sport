@@ -20,7 +20,12 @@ def test_creer_ok():
     """Création de Commentaire réussie"""
 
     # GIVEN
-    commentaire = Commentaire(id_activite=991, id_auteur=992, contenu='Super activité !', date_commentaire='2025-09-26')
+    commentaire = Commentaire(
+        id_activite=991,
+        id_auteur=992,
+        contenu="Super activité !",
+        date_commentaire="2025-09-26",
+    )
 
     # WHEN
     res = CommentaireDao().creer(commentaire)
@@ -34,11 +39,14 @@ def test_creer_ko():
     """Création de Commentaire échouée (id_activite, id_auteur, contenu et date_commentaire incorrects)"""
 
     # GIVEN
-    commentaire = Commentaire(id_activite='z', id_auteur='a', contenu=5871, date_commentaire='t')
+    commentaire = Commentaire(
+        id_activite="z", id_auteur="a", contenu=5871, date_commentaire="t"
+    )
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        res = CommentaireDao().creer(commentaire)
+        CommentaireDao().creer(commentaire)
+
 
 def test_lister_par_activite():
     """Vérifie que la méthode renvoie une liste de Commentaire
@@ -56,6 +64,7 @@ def test_lister_par_activite():
         assert isinstance(j, Commentaire)
     assert len(commentaires) >= 1
 
+
 def test_supprimer_ok():
     """Suppression de commentaire réussie"""
 
@@ -68,6 +77,7 @@ def test_supprimer_ok():
     # THEN
     assert suppression_ok
 
+
 def test_supprimer_ko():
     """Suppression de commentaire échouée (id inexistant)"""
 
@@ -76,7 +86,8 @@ def test_supprimer_ko():
 
     # WHEN / THEN
     with pytest.raises(Exception):
-        suppression_ok = CommentaireDao().supprimer(id_commentaire)
+        CommentaireDao().supprimer(id_commentaire)
+
 
 def test_trouver_par_id_ko():
     """Trouver un commentaire inexistant via l'id_activite"""
@@ -88,6 +99,7 @@ def test_trouver_par_id_ko():
 
     # THEN
     assert commentaire is None
+
 
 def test_trouver_par_id_ok():
     """Trouver un commentaire existant par son id"""

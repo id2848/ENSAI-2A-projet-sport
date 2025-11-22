@@ -9,16 +9,9 @@ class Jaime:
         identifiant de l'utilisateur qui aime
     """
 
-    def __init__(
-        self,
-        id_activite : int,
-        id_auteur : int
-    ):
+    def __init__(self, id_activite: int, id_auteur: int):
         self.id_activite = id_activite
         self.id_auteur = id_auteur
-        
+
     def __repr__(self) -> str:
-        return (
-            f"id_activite={self.id_activite!r}, "
-            f"id_auteur={self.id_auteur!r}, "
-        )
+        return f"id_activite={self.id_activite!r}, " f"id_auteur={self.id_auteur!r}, "

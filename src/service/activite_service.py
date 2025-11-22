@@ -16,34 +16,46 @@ from utils.utils_date import verifier_date
 
 from exceptions import NotFoundError, AlreadyExistsError
 
+
 class ActiviteService:
     """Classe contenant les méthodes de service des activités Utilisateurs"""
 
     # --- Activités ---
-    
+
     @log
-    def creer_activite(self, id_utilisateur: int, sport: str, date_activite: str, distance: float, duree: float) -> bool:
+    def creer_activite(
+        self,
+        id_utilisateur: int,
+        sport: str,
+        date_activite: str,
+        distance: float,
+        duree: float,
+    ) -> bool:
         """Crée une nouvelle activité (distance en km, durée en minutes)"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
-            raise NotFoundError(f"L'utilisateur avec l'id {id_utilisateur} n'existe pas")
+            raise NotFoundError(
+                f"L'utilisateur avec l'id {id_utilisateur} n'existe pas"
+            )
         if not verifier_date(date_activite):
-            raise ValueError(f"Le format de la date {date_activite} est incorrect. Utilisez le format YYYY-MM-DD.")
-        
+            raise ValueError(
+                f"Le format de la date {date_activite} est incorrect. Utilisez le format YYYY-MM-DD."
+            )
+
         activite = Activite(
             id_utilisateur=id_utilisateur,
             sport=sport,
             date_activite=date_activite,
             distance=distance,
-            duree=duree
+            duree=duree,
         )
-        return ActiviteDao().creer(activite) # Appel à DAO pour l'enregistrement
+        return ActiviteDao().creer(activite)  # Appel à DAO pour l'enregistrement
 
     @log
     def supprimer_activite(self, id_activite: int) -> bool:
         """Supprime une activité existante"""
         if not ActiviteDao().verifier_id_existant(id_activite):
             raise NotFoundError("Cette activité n'existe pas")
-        
+
         return ActiviteDao().supprimer(id_activite)
 
     @log
@@ -51,25 +63,29 @@ class ActiviteService:
         """Modifie une activité existante"""
         if not ActiviteDao().verifier_id_existant(id_activite):
             raise NotFoundError("Cette activité n'existe pas")
-        
-        activite = ActiviteDao().trouver_par_id(id_activite=id_activite)  # Récupère l'activité par son ID
+
+        activite = ActiviteDao().trouver_par_id(
+            id_activite=id_activite
+        )  # Récupère l'activité par son ID
 
         nouveau_activite = Activite(
             id_utilisateur=activite.id_utilisateur,
-            sport=sport, # Modification du sport de l'activité
+            sport=sport,  # Modification du sport de l'activité
             date_activite=activite.date_activite,
             distance=activite.distance,
-            duree=activite.duree
+            duree=activite.duree,
         )
 
-        return ActiviteDao().modifier(nouveau_activite) # Appel à DAO pour modification dans la base de données
-    
+        return ActiviteDao().modifier(
+            nouveau_activite
+        )  # Appel à DAO pour modification dans la base de données
+
     @log
     def trouver_activite_par_id(self, id_activite: int):
         """Trouver une activité par son id"""
         if not ActiviteDao().verifier_id_existant(id_activite):
             raise NotFoundError("Cette activité n'existe pas")
-        
+
         return ActiviteDao().trouver_par_id(id_activite=id_activite)
 
     @log
@@ -77,23 +93,37 @@ class ActiviteService:
         """Liste toutes les activités d'un utilisateur donné"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
             raise NotFoundError("Cet utilisateur n'existe pas")
-        
+
         return ActiviteDao().lister_par_utilisateur(id_utilisateur=id_utilisateur)
 
     @log
-    def lister_activites_filtres(self, id_utilisateur: int, sport: str = None, date_debut: str = None, date_fin: str = None) -> List[Activite]:
+    def lister_activites_filtres(
+        self,
+        id_utilisateur: int,
+        sport: str = None,
+        date_debut: str = None,
+        date_fin: str = None,
+    ) -> List[Activite]:
         """Liste les activités d'un utilisateur avec des filtres optionnels (sport, date_debut, date_fin)"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
             raise NotFoundError("Cet utilisateur n'existe pas")
         if date_debut is not None and not verifier_date(date_debut):
-            raise ValueError(f"Le format de la date {date_debut} est incorrect. Utilisez le format YYYY-MM-DD.")
+            raise ValueError(
+                f"Le format de la date {date_debut} est incorrect. Utilisez le format YYYY-MM-DD."
+            )
         if date_fin is not None and not verifier_date(date_fin):
-            raise ValueError(f"Le format de la date {date_fin} est incorrect. Utilisez le format YYYY-MM-DD.")
+            raise ValueError(
+                f"Le format de la date {date_fin} est incorrect. Utilisez le format YYYY-MM-DD."
+            )
         if sport is not None:
             sport = Activite.valider_sport(sport)
-        
-        return ActiviteDao().lister_activites_filtres(id_utilisateur=id_utilisateur, sport=sport, date_debut=date_debut, date_fin=date_fin)
 
+        return ActiviteDao().lister_activites_filtres(
+            id_utilisateur=id_utilisateur,
+            sport=sport,
+            date_debut=date_debut,
+            date_fin=date_fin,
+        )
 
     # --- Jaimes ---
 
@@ -106,7 +136,7 @@ class ActiviteService:
             raise NotFoundError("Cet utilisateur n'existe pas")
         if JaimeDao().existe(id_activite, id_utilisateur):
             raise AlreadyExistsError("Ce jaime existe déjà")
-        
+
         jaime = Jaime(id_activite=id_activite, id_auteur=id_utilisateur)
         return JaimeDao().creer(jaime)
 
@@ -121,7 +151,7 @@ class ActiviteService:
             raise NotFoundError("Ce jaime n'existe pas")
 
         return JaimeDao().supprimer(id_activite, id_utilisateur)
-    
+
     @log
     def jaime_existe(self, id_activite: int, id_utilisateur: int) -> bool:
         """Vérifier si un jaime existe dans la base de données"""
@@ -129,33 +159,34 @@ class ActiviteService:
             raise NotFoundError("Cette activité n'existe pas")
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
             raise NotFoundError("Cet utilisateur n'existe pas")
-        
+
         return JaimeDao().existe(id_activite, id_utilisateur)
-    
+
     @log
     def compter_jaimes_par_activite(self, id_activite: int) -> int:
         """Compte le nombre de jaimes pour une activité donnée."""
         if not ActiviteDao().verifier_id_existant(id_activite):
             raise NotFoundError("Cette activité n'existe pas")
-        
-        return JaimeDao().compter_par_activite(id_activite)
 
+        return JaimeDao().compter_par_activite(id_activite)
 
     # --- Commentaires ---
 
     @log
-    def ajouter_commentaire(self, id_activite: int, id_utilisateur: int, contenu: str) -> Commentaire:
+    def ajouter_commentaire(
+        self, id_activite: int, id_utilisateur: int, contenu: str
+    ) -> Commentaire:
         """Ajoute un commentaire à une activité"""
         if not ActiviteDao().verifier_id_existant(id_activite):
             raise NotFoundError("Cette activité n'existe pas")
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
             raise NotFoundError("Cet utilisateur n'existe pas")
-        
+
         commentaire = Commentaire(
             id_activite=id_activite,
             id_auteur=id_utilisateur,
             contenu=contenu,
-            date_commentaire=datetime.now()
+            date_commentaire=datetime.now(),
         )
         return CommentaireDao().creer(commentaire)
 
@@ -173,14 +204,14 @@ class ActiviteService:
         """Lister tous les commentaires d'une activité"""
         if not ActiviteDao().verifier_id_existant(id_activite):
             raise NotFoundError("Cette activité n'existe pas")
-        
+
         return CommentaireDao().lister_par_activite(id_activite=id_activite)
-    
+
     @log
     def trouver_commentaire_par_id(self, id_commentaire: int) -> Commentaire:
         """Trouver un commentaire par son id"""
         commentaire = CommentaireDao().trouver_par_id(id_commentaire)
         if not commentaire:
             raise NotFoundError("Ce commentaire n'existe pas")
-        
+
         return commentaire
