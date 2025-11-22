@@ -94,7 +94,7 @@ async def redirect_to_docs():
 
 # --- Endpoints Gestion des activités ---
 
-@app.post("/activites", tags=["Activité"])
+@app.post("/activites", tags=["Activités"])
 async def creer_activite(file: UploadFile = File(...), sport: str = "randonnée", user = Depends(get_current_user)):
     """Créer une nouvelle activité avec un fichier GPX pour l'utilisateur connecté."""
     # Parsing GPX
@@ -116,7 +116,7 @@ async def creer_activite(file: UploadFile = File(...), sport: str = "randonnée"
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.put("/activites/{id_activite}", tags=["Activité"])
+@app.put("/activites/{id_activite}", tags=["Activités"])
 def modifier_activite(id_activite: int, sport: str, user = Depends(get_current_user)):
     """Modifier une activité existante appartenant à l'utilisateur connecté."""
     # Vérification appartenance
@@ -135,7 +135,7 @@ def modifier_activite(id_activite: int, sport: str, user = Depends(get_current_u
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.delete("/activites/{id_activite}", tags=["Activité"])
+@app.delete("/activites/{id_activite}", tags=["Activités"])
 def supprimer_activite(id_activite: int, user = Depends(get_current_user)):
     """Supprimer une activité appartenant à l'utilisateur connecté."""
     # Vérification appartenance
@@ -152,7 +152,7 @@ def supprimer_activite(id_activite: int, user = Depends(get_current_user)):
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/activites/{id_utilisateur}", tags=["Activité"])
+@app.get("/activites/{id_utilisateur}", tags=["Activités"])
 def activites_par_utilisateur(id_utilisateur: int, user = Depends(get_current_user)):
     """Lister les activités d'un utilisateur donné."""
     try:
@@ -160,7 +160,7 @@ def activites_par_utilisateur(id_utilisateur: int, user = Depends(get_current_us
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/activites-filtres/{id_utilisateur}", tags=["Activité"])
+@app.get("/activites-filtres/{id_utilisateur}", tags=["Activités"])
 def activites_par_utilisateur_filtres(
     id_utilisateur: int,
     sport: str = None,
@@ -186,7 +186,7 @@ def activites_par_utilisateur_filtres(
 
 # --- Endpoints Utilisateurs ---
 
-@app.get("/utilisateurs/{id_utilisateur}", tags=["Utilisateur"])
+@app.get("/utilisateurs/{id_utilisateur}", tags=["Utilisateurs"])
 def consulter_utilisateur_par_id(id_utilisateur: int, user = Depends(get_current_user)):
     """Récupérer un utilisateur grâce à son ID."""
     try:
@@ -194,7 +194,7 @@ def consulter_utilisateur_par_id(id_utilisateur: int, user = Depends(get_current
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/utilisateurs/pseudo/{pseudo}", tags=["Utilisateur"])
+@app.get("/utilisateurs/pseudo/{pseudo}", tags=["Utilisateurs"])
 def consulter_utilisateur_par_pseudo(pseudo: str, user = Depends(get_current_user)):
     """Récupérer un utilisateur grâce à son pseudo."""
     try:
@@ -202,7 +202,7 @@ def consulter_utilisateur_par_pseudo(pseudo: str, user = Depends(get_current_use
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/utilisateurs", tags=["Utilisateur"])
+@app.get("/utilisateurs", tags=["Utilisateurs"])
 def lister_utilisateurs(user = Depends(get_current_user)):
     """Lister tous les utilisateurs."""
     return UtilisateurService().lister_utilisateurs() # pas de paramètres donc pas d'erreur côté client
@@ -210,7 +210,7 @@ def lister_utilisateurs(user = Depends(get_current_user)):
 
 # --- Endpoints Jaimes ---
 
-@app.post("/jaimes", tags=["Jaime"])
+@app.post("/jaimes", tags=["Jaimes"])
 def ajouter_jaime(id_activite: int, user = Depends(get_current_user)):
     """Ajouter un jaime à une activité pour l'utilisateur connecté."""
     try:
@@ -221,7 +221,7 @@ def ajouter_jaime(id_activite: int, user = Depends(get_current_user)):
     except AlreadyExistsError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
-@app.delete("/jaimes/{id_activite}", tags=["Jaime"])
+@app.delete("/jaimes/{id_activite}", tags=["Jaimes"])
 def supprimer_jaime(id_activite: int, user = Depends(get_current_user)):
     """Supprimer le jaime appartenant à l'utilisateur connecté d'une activité.""" 
     try:
@@ -230,7 +230,7 @@ def supprimer_jaime(id_activite: int, user = Depends(get_current_user)):
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/jaimes/existe", tags=["Jaime"])
+@app.get("/jaimes/existe", tags=["Jaimes"])
 def jaime_existe(id_activite: int, id_auteur: int, user = Depends(get_current_user)):
     """Vérifier si un jaime existe pour une activité et un auteur donné."""
     try:
@@ -238,7 +238,7 @@ def jaime_existe(id_activite: int, id_auteur: int, user = Depends(get_current_us
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/jaimes/compter", tags=["Jaime"])
+@app.get("/jaimes/compter", tags=["Jaimes"])
 def compter_jaimes(id_activite: int, user = Depends(get_current_user)):
     """Compter le nombre de jaimes pour une activité donnée."""
 
@@ -251,7 +251,7 @@ def compter_jaimes(id_activite: int, user = Depends(get_current_user)):
 
 # --- Endpoints Commentaires ---
 
-@app.post("/commentaires", tags=["Commentaire"])
+@app.post("/commentaires", tags=["Commentaires"])
 def ajouter_commentaire(id_activite: int, commentaire: str, user = Depends(get_current_user)):
     """Ajouter un commentaire à une activité pour l'utilisateur connecté."""
     try:
@@ -260,7 +260,7 @@ def ajouter_commentaire(id_activite: int, commentaire: str, user = Depends(get_c
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.delete("/commentaires/{id_commentaire}", tags=["Commentaire"])
+@app.delete("/commentaires/{id_commentaire}", tags=["Commentaires"])
 def supprimer_commentaire(id_commentaire: int, user = Depends(get_current_user)):
     """Supprimer un commentaire appartenant à l'utilisateur connecté."""
     # Vérification appartenance
@@ -277,7 +277,7 @@ def supprimer_commentaire(id_commentaire: int, user = Depends(get_current_user))
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/commentaires/{id_activite}", tags=["Commentaire"])
+@app.get("/commentaires/{id_activite}", tags=["Commentaires"])
 def lister_commentaires(id_activite: int, user = Depends(get_current_user)):
     """Lister les commentaires d'une activité donnée."""
     try:
@@ -288,7 +288,7 @@ def lister_commentaires(id_activite: int, user = Depends(get_current_user)):
 
 # --- Endpoints Abonnements ---
 
-@app.post("/abonnements", tags=["Abonnement"])
+@app.post("/abonnements", tags=["Abonnements"])
 def creer_abonnement(id_utilisateur_suivi: int, user = Depends(get_current_user)):
     """S'abonner à un utilisateur par l'utilisateur connecté."""
     try:
@@ -299,7 +299,7 @@ def creer_abonnement(id_utilisateur_suivi: int, user = Depends(get_current_user)
     except AlreadyExistsError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
-@app.delete("/abonnements", tags=["Abonnement"])
+@app.delete("/abonnements", tags=["Abonnements"])
 def supprimer_abonnement(id_utilisateur_suivi: int, user = Depends(get_current_user)):
     """Se désabonner d'un utilisateur par l'utilisateur connecté."""
     try:
@@ -309,7 +309,7 @@ def supprimer_abonnement(id_utilisateur_suivi: int, user = Depends(get_current_u
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/abonnements/existe", tags=["Abonnement"])
+@app.get("/abonnements/existe", tags=["Abonnements"])
 def abonnement_existe(id_utilisateur_suiveur: int, id_utilisateur_suivi: int, user = Depends(get_current_user)):
     """Vérifier si un abonnement existe entre deux utilisateurs."""
     try:
@@ -317,7 +317,7 @@ def abonnement_existe(id_utilisateur_suiveur: int, id_utilisateur_suivi: int, us
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/abonnements/suivis/{id_utilisateur}", tags=["Abonnement"])
+@app.get("/abonnements/suivis/{id_utilisateur}", tags=["Abonnements"])
 def lister_abonnements_suivis(id_utilisateur: int, user = Depends(get_current_user)):
     """Lister les utilisateurs suivis par l'utilisateur donné."""
     try:
@@ -325,7 +325,7 @@ def lister_abonnements_suivis(id_utilisateur: int, user = Depends(get_current_us
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.get("/abonnements/suiveurs/{id_utilisateur}", tags=["Abonnement"])
+@app.get("/abonnements/suiveurs/{id_utilisateur}", tags=["Abonnements"])
 def lister_abonnements_suiveurs(id_utilisateur: int, user = Depends(get_current_user)):
     """Lister les utilisateurs qui suivent l'utilisateur."""
     try:
@@ -391,7 +391,7 @@ async def upload_gpx(file: UploadFile = File(...)):
     try:
         parsed_activite = parse_gpx(content)
     except Exception as e:
-        return {"message": "Erreur lors du parsing du fichier GPX"}
+        raise HTTPException(status_code=400, detail="Erreur lors du parsing du fichier GPX")
     return {"message": "Fichier GPX analysé", "activite": parsed_activite}
 
 

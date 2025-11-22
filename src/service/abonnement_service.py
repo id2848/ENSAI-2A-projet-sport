@@ -1,6 +1,6 @@
 import logging
 
-from tabulate import tabulate
+from typing import List
 
 from utils.log_decorator import log
 
@@ -45,8 +45,8 @@ class AbonnementService:
         return AbonnementDao().supprimer(id_utilisateur_suiveur, id_utilisateur_suivi)
 
     @log
-    def lister_utilisateurs_suivis(self, id_utilisateur: int):
-        """Lister tous les utilisateurs suivis par un utilisateur donné"""
+    def lister_utilisateurs_suivis(self, id_utilisateur: int) -> List[int]:
+        """Lister tous les ids des utilisateurs suivis par un utilisateur donné"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
             raise NotFoundError(f"L'utilisateur avec l'id {id_utilisateur} n'existe pas")
         
@@ -57,8 +57,8 @@ class AbonnementService:
         return utilisateurs_suivis
 
     @log
-    def lister_utilisateurs_suiveurs(self, id_utilisateur: int):
-        """Lister tous les utilisateurs suiveurs par un utilisateur donné"""
+    def lister_utilisateurs_suiveurs(self, id_utilisateur: int) -> List[int]:
+        """Lister tous les ids des utilisateurs suiveurs par un utilisateur donné"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
             raise NotFoundError(f"L'utilisateur avec l'id {id_utilisateur} n'existe pas")
         
