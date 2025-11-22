@@ -71,7 +71,7 @@ class ActiviteService:
         return ActiviteDao().modifier(
             nouveau_activite
         )  # Appel à DAO pour modification dans la base de données
-    
+
     @log
     def supprimer_activite(self, id_activite: int) -> bool:
         """Supprime une activité existante"""
