@@ -5,7 +5,6 @@ from typing import List
 
 from dao.db_connection import DBConnection
 
-from business_object.utilisateur import Utilisateur
 from business_object.activite import Activite
 
 from exceptions import DatabaseCreationError, DatabaseDeletionError, DatabaseUpdateError
@@ -15,7 +14,18 @@ class ActiviteDao:
 
     @log
     def creer(self, activite: Activite) -> Activite:
-        """Création d'une activité dans la base de données"""
+        """Création d'une activité dans la base de données
+
+        Parameters
+        ----------
+        activite : Activite
+            L'activité à insérer dans la base
+
+        Returns
+        -------
+        Activite
+            L'activité insérée, avec son identifiant mis à jour
+        """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -53,7 +63,18 @@ class ActiviteDao:
 
     @log
     def trouver_par_id(self, id_activite: int) -> Activite | None:
-        """Trouver une activité par son id"""
+        """Trouver une activité par son identifiant
+
+        Parameters
+        ----------
+        id_activite : int
+            L'identifiant de l'activité recherchée
+
+        Returns
+        -------
+        Activite | None
+            L'activité correspondante si trouvée, sinon None
+        """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -80,7 +101,18 @@ class ActiviteDao:
 
     @log
     def modifier(self, activite: Activite) -> bool:
-        """Modifier une activité existante dans la base de données"""
+        """Modifier une activité existante dans la base de données
+
+        Parameters
+        ----------
+        activite : Activite
+            L’activité contenant les nouvelles valeurs à mettre à jour
+
+        Returns
+        -------
+        bool
+            True si la modification a bien été effectuée
+        """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -117,7 +149,18 @@ class ActiviteDao:
 
     @log
     def supprimer(self, id_activite: int) -> bool:
-        """Supprimer une activité de la base de données"""
+        """Supprimer une activité de la base de données
+
+        Parameters
+        ----------
+        id_activite : int
+            L'identifiant de l'activité à supprimer
+
+        Returns
+        -------
+        bool
+            True si la suppression a été réalisée
+        """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -139,7 +182,18 @@ class ActiviteDao:
 
     @log
     def lister_par_utilisateur(self, id_utilisateur: int) -> List[Activite]:
-        """Lister toutes les activités d'un utilisateur"""
+        """Lister toutes les activités d'un utilisateur
+
+        Parameters
+        ----------
+        id_utilisateur : int
+            Identifiant de l'utilisateur dont on veut récupérer les activités
+
+        Returns
+        -------
+        List[Activite]
+            La liste des activités associées à l’utilisateur (liste vide si aucune)
+        """
         res = None
         try:
             with DBConnection().connection as connection:
@@ -169,7 +223,24 @@ class ActiviteDao:
     
     @log
     def lister_activites_filtres(self, id_utilisateur: int, sport: str = None, date_debut: str = None, date_fin: str = None) -> List[Activite]:
-        """Lister les activités d'un utilisateur avec des filtres optionnels (sport, date de début, date de fin)."""
+        """Lister les activités d'un utilisateur avec filtres optionnels
+
+        Parameters
+        ----------
+        id_utilisateur : int
+            Identifiant de l'utilisateur
+        sport : str, optional
+            Filtre sur le type de sport, par défaut None
+        date_debut : str, optional
+            Date minimale (incluse) au format YYYY-MM-DD, par défaut None
+        date_fin : str, optional
+            Date maximale (incluse) au format YYYY-MM-DD, par défaut None
+
+        Returns
+        -------
+        List[Activite]
+            La liste des activités correspondant aux filtres
+        """
         
         query = "SELECT * FROM activite WHERE id_utilisateur = %(id_utilisateur)s"
         params = {"id_utilisateur": id_utilisateur}
@@ -215,7 +286,18 @@ class ActiviteDao:
     
     @log
     def verifier_id_existant(self, id_activite: int) -> bool:
-        """Vérifier si une activité existe avec un id donné"""
+        """Vérifier si une activité existe via son identifiant
+
+        Parameters
+        ----------
+        id_activite : int
+            Identifiant de l'activité à vérifier
+
+        Returns
+        -------
+        bool
+            True si une activité correspondant à l’id existe, False sinon
+        """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:

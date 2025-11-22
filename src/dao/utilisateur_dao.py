@@ -14,7 +14,20 @@ class UtilisateurDao:
 
     @log
     def creer(self, utilisateur: Utilisateur, mot_de_passe: str) -> bool:
-        """Création d'un utilisateur et de ses credentials associés"""
+        """Création d'un utilisateur et de ses credentials associés dans la base de données
+
+        Parameters
+        ----------
+        utilisateur : Utilisateur
+            L'objet Utilisateur contenant les informations personnelles à insérer
+        mot_de_passe : str
+            Le mot de passe en clair qui sera hashé et stocké dans les credentials
+
+        Returns
+        -------
+        bool
+            True si l'utilisateur et ses credentials ont été créés avec succès
+        """
         try:
             # Générer un sel et le hash correspondant
             sel = generer_salt()
@@ -65,7 +78,6 @@ class UtilisateurDao:
             logging.error(f"Erreur lors de la création de l'utilisateur {utilisateur.pseudo}: {e}")
             raise
 
-
     @log
     def trouver_par_pseudo(self, pseudo: str) -> Utilisateur | None:
         """Trouver un utilisateur grâce à son pseudo
@@ -106,7 +118,18 @@ class UtilisateurDao:
 
     @log
     def trouver_par_id(self, id_utilisateur: int) -> Utilisateur | None:
-        """Trouver un utilisateur par son ID"""
+        """Trouver un utilisateur par son identifiant
+
+        Parameters
+        ----------
+        id_utilisateur : int
+            L'identifiant de l'utilisateur recherché
+
+        Returns
+        -------
+        Utilisateur | None
+            L'objet Utilisateur correspondant si trouvé, sinon None
+        """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -253,7 +276,18 @@ class UtilisateurDao:
 
     @log
     def verifier_pseudo_existant(self, pseudo: str) -> bool:
-        """Vérifier si un pseudo est déjà utilisé dans la base de données"""
+        """Vérifier si un pseudo est déjà utilisé dans la base de données
+
+        Parameters
+        ----------
+        pseudo : str
+            Le pseudo dont on veut vérifier l’existence
+
+        Returns
+        -------
+        bool
+            True si le pseudo existe déjà, False sinon
+        """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -269,7 +303,18 @@ class UtilisateurDao:
     
     @log
     def verifier_id_existant(self, id_utilisateur: int) -> bool:
-        """Vérifier si un utilisateur existe avec un id donné"""
+        """Vérifier si un utilisateur existe via son identifiant
+
+        Parameters
+        ----------
+        id_utilisateur : int
+            Identifiant de l’utilisateur à vérifier
+
+        Returns
+        -------
+        bool
+            True si l’utilisateur existe, False sinon
+        """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -285,7 +330,21 @@ class UtilisateurDao:
 
     @log
     def se_connecter(self, pseudo: str, mot_de_passe: str) -> Utilisateur | None:
-        """Authentification d'un utilisateur via pseudo et mot de passe"""
+        """Authentification d'un utilisateur via pseudo et mot de passe
+
+        Parameters
+        ----------
+        pseudo : str
+            Le pseudo de l’utilisateur tentant de se connecter
+        mot_de_passe : str
+            Le mot de passe fourni lors de la connexion
+
+        Returns
+        -------
+        Utilisateur | None
+            L’objet Utilisateur correspondant si l’authentification réussit.
+            None n’est jamais retourné car une exception est levée en cas d’échec.
+        """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:

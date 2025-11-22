@@ -1,6 +1,5 @@
 class Credentials:
-    """
-    Classe représentant les infos d'authentification d'un utilisateur
+    """Classe représentant les infos d'authentification d'un utilisateur
     (Non utilisée en pratique, seulement indiquée à titre de référence)
 
     Attributes

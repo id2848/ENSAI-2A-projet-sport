@@ -1,6 +1,5 @@
 class Jaime:
-    """
-    Classe représentant un Jaime
+    """Classe représentant un Jaime
 
     Attributes
     ----------

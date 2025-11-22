@@ -6,8 +6,7 @@ from utils.utils_date import valider_date
 
 
 class Utilisateur:
-    """
-    Classe représentant un Utilisateur
+    """Classe représentant un Utilisateur
 
     Attributes
     ----------

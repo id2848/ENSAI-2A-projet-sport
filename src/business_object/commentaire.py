@@ -3,8 +3,7 @@ from typing import Optional
 
 
 class Commentaire:
-    """
-    Classe représentant un Commentaire
+    """Classe représentant un Commentaire
 
     Attributes
     ----------

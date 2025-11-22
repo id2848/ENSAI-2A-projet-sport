@@ -58,7 +58,7 @@ class CommentaireDao:
     
     @log
     def lister_par_activite(self, id_activite: int) -> List[Commentaire]:
-        """lister tous les commentaires
+        """Lister tous les commentaires
 
         Parameters
         ----------
@@ -138,7 +138,18 @@ class CommentaireDao:
 
     @log
     def trouver_par_id(self, id_commentaire: int) -> Commentaire | None:
-        """Trouver un commentaire par son id"""
+        """Trouver un commentaire par son identifiant
+
+        Parameters
+        ----------
+        id_commentaire : int
+            L'identifiant du commentaire recherché
+
+        Returns
+        -------
+        Commentaire | None
+            Le commentaire correspondant si trouvé, sinon None
+        """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:

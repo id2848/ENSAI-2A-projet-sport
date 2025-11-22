@@ -1,25 +1,28 @@
 from business_object.utilisateur import Utilisateur
 
 class Abonnement : 
-
-    """
-    Classe représentant un abonnement entre deux utilisateurs.
+    """Classe représentant un abonnement entre deux utilisateurs.
     Un utilisateur (suiveur) s'abonne à un autre utilisateur (suivi).
+
+    Attributes
+    ----------
+    id_utilisateur_suiveur : int
+        Identifiant de l'utilisateur qui suit.
+    id_utilisateur_suivi : int
+        Identifiant de l'utilisateur qui est suivi.
     """
 
     def __init__(self, id_utilisateur_suiveur: int, id_utilisateur_suivi: int):
-        """
-        Initialise un nouvel abonnement.
-        
-        Arguments:
-            id_utilisateur_suiveur: ID de l'utilisateur qui suit
-            id_utilisateur_suivi: ID de l'utilisateur qui est suivi
-        """
         self.id_utilisateur_suiveur = id_utilisateur_suiveur
         self.id_utilisateur_suivi = id_utilisateur_suivi
 
+    def __repr__(self):
+        return (
+            f"Abonnement(id_utilisateur_suiveur={self.id_utilisateur_suiveur!r}, "
+            f"id_utilisateur_suivi={self.id_utilisateur_suivi!r})"
+        )
+
     def __str__(self):
-        """Retourne une représentation lisible de l'abonnement."""
         return f"Abonnement: Utilisateur {self.id_utilisateur_suiveur} suit l'utilisateur {self.id_utilisateur_suivi}"
 
     

@@ -5,8 +5,7 @@ from typing import Optional
 from utils.utils_date import valider_date
 
 class Activite: 
-    """
-    Classe représentant les différentes activités que l'utilisateur peut faire. 
+    """Classe représentant les différentes activités que l'utilisateur peut faire. 
 
     Attributes
     ----------
