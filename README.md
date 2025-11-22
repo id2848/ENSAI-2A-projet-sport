@@ -171,10 +171,10 @@ Les logs permettent de suivre l'exécution du backend. Ils sont configurés via 
 Exemple de log lors d'une connexion :
 
 ```
-INFO     - JoueurService.se_connecter('pseudo', '***') - DEBUT
-INFO     -    JoueurDao.se_connecter - SUCCES
-INFO     - JoueurService.se_connecter - FIN
-```
-
-```
+INFO     -         UtilisateurService.se_connecter('johndoe', '*****') - DEBUT
+INFO     -             UtilisateurDao.se_connecter('johndoe', '*****') - DEBUT
+INFO     -             UtilisateurDao.se_connecter('johndoe', '*****') - FIN
+INFO     -                └─> Sortie : Utilisateur(id_utilisateur=991, pseudo='johndoe', nom='Doe', prenom='John', date_de_naissance=datetime.date(1990, 1, 1), sexe='homme')
+INFO     -         UtilisateurService.se_connecter('johndoe', '*****') - FIN
+INFO     -            └─> Sortie : Utilisateur(id_utilisateur=991, pseudo='johndoe', nom='Doe', prenom='John', date_de_naissance=datetime.date(1990, 1, 1), sexe='homme')
 ```
