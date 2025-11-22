@@ -1,6 +1,6 @@
 import streamlit as st
 import requests
-from typing import Any
+from typing import Any, List
 from datetime import datetime
 
 # --- URLs API ---
@@ -33,8 +33,8 @@ if "username" not in st.session_state:
 if "password" not in st.session_state:
     st.session_state["password"] = None
 
-st.set_page_config(page_title="Webservice Sports ENSAI", layout="wide")
-st.title("Webservice Sports ENSAI")
+st.set_page_config(page_title="Réseau social Sports ENSAI", layout="wide")
+st.title("Réseau social Sports ENSAI")
 
 # --- Utility helpers ---
 def auth_tuple() -> tuple[str, str] | None:
@@ -67,7 +67,7 @@ def normalize_activity(activite_raw: dict) -> dict:
         except Exception:
             dist = None
     if isinstance(dist, (int, float)):
-        if dist > 1000: # Heuristic: si > 1000, c'est surement en mètres
+        if dist > 1000: # Heuristique: si > 1000, c'est surement en mètres (mais normalement km)
             dist = dist / 1000.0
     a['distance'] = dist if dist is not None else 0.0
     
@@ -78,7 +78,7 @@ def normalize_activity(activite_raw: dict) -> dict:
         except Exception:
             duree = None
     if isinstance(duree, (int, float)):
-        # Si très grand, supposé en secondes
+        # Si très grand, supposé en secondes (mais normalement minutes)
         if duree > 10000:
             duree = duree / 60.0
     a['duree'] = duree if duree is not None else 0.0
@@ -87,7 +87,7 @@ def normalize_activity(activite_raw: dict) -> dict:
     a['nom'] = extract_activity_field(activite_raw, 'nom', 'name', default='')
     return a
 
-# --- 1. Auth & Inscription ---
+# --- 1. Authentification et Inscription ---
 def auth_screen():
     tab_conn, tab_insc = st.tabs(["Connexion", "Inscription"])
     
@@ -209,7 +209,7 @@ def gpx_analyse_et_creation():
                 st.error(f"Erreur : {e}")
 
 # --- 3. Afficher les Activités ---
-def display_activity_list(activites_list: list[dict], show_delete_button: bool = False, key_prefix: str = ""):
+def display_activity_list(activites_list: List[dict], show_delete_button: bool = False, key_prefix: str = ""):
     if not activites_list:
         st.info("Aucune activité à afficher.")
         return
@@ -409,7 +409,7 @@ def afficher_recherche_profil():
     if 'profil_trouve' in st.session_state:
         profil = st.session_state['profil_trouve']
         st.markdown(f"### Profil de {profil['pseudo']}")
-        st.write(f"Nom : {profil.get('nom')} {profil.get('prenom')}")
+        st.write(f"Nom : {profil.get('prenom')} {profil.get('nom')}")
         
         # Bouton Suivre / Ne plus suivre
         current_uid = st.session_state["user_id"]
@@ -472,7 +472,7 @@ def afficher_statistiques():
         dist = stats_total.get('distance_totale', 0)
         duree = stats_total.get('duree_totale', 0)
         duree_min = float(duree) / 60.0 if duree else 0.0
-        
+
         col1, col2 = st.columns(2)
         col1.metric("Distance totale (km)", f"{dist} km")
         col2.metric("Durée totale", f"{duree_min} minutes")
@@ -505,7 +505,7 @@ def afficher_statistiques():
     if 'weekly_stats' in st.session_state:
         s = st.session_state['weekly_stats']
         st.info(f"Affichage des statistiques pour la semaine du {st.session_state.get('weekly_stats_date','?')}")
-        # API renvoies: nombre_activites_semaine, distance_semaine, duree_semaine
+        # API renvoie: nombre_activites_semaine, distance_semaine, duree_semaine
         nbw = s.get('nombre_activites_semaine', {})
         distw = s.get('distance_semaine', 0)
         dureew = s.get('duree_semaine', 0)

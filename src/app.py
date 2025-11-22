@@ -17,7 +17,7 @@ from service.fil_dactualite_service import Fildactualite
 from utils.gpx_parser import parse_gpx
 from utils.utils_date import verifier_date
 
-from exceptions import NotFoundError, AlreadyExistsError
+from exceptions import NotFoundError, AlreadyExistsError, InvalidPasswordError
 
 # --- Configuration ---
 
@@ -29,30 +29,18 @@ initialiser_logs("Webservice")
 
 security = HTTPBasic()
 
-USERS = {
-    "alice": {"id_utilisateur": 991, "password": "wonderland", "prenom": "Alice"},
-    "bob":   {"id_utilisateur": 992, "password": "builder", "prenom": "Bob"},
-}
-
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     username = credentials.username
     password = credentials.password
 
-    """try:
+    try:
         return UtilisateurService().se_connecter(username, password)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except NotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except InvalidPasswordError as e:
-        raise HTTPException(status_code=401, detail=str(e))"""
-    user = USERS.get(username)
-    if not user or not secrets.compare_digest(password, user["password"]):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Identifiants invalides",
-        )
-    return user
+        raise HTTPException(status_code=401, detail=str(e))
 
 # ----------------------------------------------------------
 
@@ -64,7 +52,7 @@ def me(user = Depends(get_current_user)):
     return user
 
 @app.get("/logout", tags=["Authentification"])
-async def logout(creds: HTTPBasicCredentials = Depends(get_current_user)):
+async def logout():
     """Se déconnecter de son compte utilisateur"""
     return HTMLResponse(content="Vous vous êtes déconnecté", status_code=status.HTTP_401_UNAUTHORIZED)
 
