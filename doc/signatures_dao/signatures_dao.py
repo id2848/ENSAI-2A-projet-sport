@@ -2,7 +2,8 @@
 # signatures_dao.py
 # -----------------
 # Ce fichier définit les signatures des DAO du projet.
-# Il n'est pas implémenté, il sert uniquement de référence.
+# Il n'est pas implémenté, il sert uniquement de référence
+# pour les développeurs.
 # =========================================================
 
 
