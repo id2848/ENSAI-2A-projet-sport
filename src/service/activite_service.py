@@ -1,15 +1,12 @@
 from typing import List
-from datetime import date, datetime
+from datetime import datetime
 
 from utils.log_decorator import log
 
-from business_object.utilisateur import Utilisateur
-from business_object.abonnement import Abonnement
 from business_object.activite import Activite
 from business_object.commentaire import Commentaire
 from business_object.jaime import Jaime
 
-from dao.abonnement_dao import AbonnementDao
 from dao.utilisateur_dao import UtilisateurDao
 from dao.activite_dao import ActiviteDao
 from dao.commentaire_dao import CommentaireDao
@@ -19,13 +16,12 @@ from utils.utils_date import verifier_date
 
 from exceptions import NotFoundError, AlreadyExistsError
 
-import logging
-
 class ActiviteService:
     """Classe contenant les méthodes de service des activités Utilisateurs"""
 
     # --- Activités ---
     
+    @log
     def creer_activite(self, id_utilisateur: int, sport: str, date_activite: str, distance: float, duree: float) -> bool:
         """Crée une nouvelle activité (distance en km, durée en minutes)"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
@@ -42,6 +38,7 @@ class ActiviteService:
         )
         return ActiviteDao().creer(activite) # Appel à DAO pour l'enregistrement
 
+    @log
     def supprimer_activite(self, id_activite: int) -> bool:
         """Supprime une activité existante"""
         if not ActiviteDao().verifier_id_existant(id_activite):
@@ -49,6 +46,7 @@ class ActiviteService:
         
         return ActiviteDao().supprimer(id_activite)
 
+    @log
     def modifier_activite(self, id_activite: int, sport: str) -> bool:
         """Modifie une activité existante"""
         if not ActiviteDao().verifier_id_existant(id_activite):
@@ -64,8 +62,9 @@ class ActiviteService:
             duree=activite.duree
         )
 
-        return ActiviteDao().modifier(activite) # Appel à DAO pour modification dans la base de données
+        return ActiviteDao().modifier(nouveau_activite) # Appel à DAO pour modification dans la base de données
     
+    @log
     def trouver_activite_par_id(self, id_activite: int):
         """Trouver une activité par son id"""
         if not ActiviteDao().verifier_id_existant(id_activite):
@@ -73,6 +72,7 @@ class ActiviteService:
         
         return ActiviteDao().trouver_par_id(id_activite=id_activite)
 
+    @log
     def lister_activites(self, id_utilisateur: int) -> List[Activite]:
         """Liste toutes les activités d'un utilisateur donné"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
@@ -80,6 +80,7 @@ class ActiviteService:
         
         return ActiviteDao().lister_par_utilisateur(id_utilisateur=id_utilisateur)
 
+    @log
     def lister_activites_filtres(self, id_utilisateur: int, sport: str = None, date_debut: str = None, date_fin: str = None) -> List[Activite]:
         """Liste les activités d'un utilisateur avec des filtres optionnels (sport, date_debut, date_fin)"""
         if not UtilisateurDao().verifier_id_existant(id_utilisateur):
@@ -96,6 +97,7 @@ class ActiviteService:
 
     # --- Jaimes ---
 
+    @log
     def ajouter_jaime(self, id_activite: int, id_utilisateur: int) -> Jaime:
         """Ajoute un "j'aime" à une activité"""
         if not ActiviteDao().verifier_id_existant(id_activite):
@@ -108,6 +110,7 @@ class ActiviteService:
         jaime = Jaime(id_activite=id_activite, id_auteur=id_utilisateur)
         return JaimeDao().creer(jaime)
 
+    @log
     def supprimer_jaime(self, id_activite: int, id_utilisateur: int) -> bool:
         """Supprime un "j'aime" d'une activité"""
         if not ActiviteDao().verifier_id_existant(id_activite):
@@ -118,7 +121,8 @@ class ActiviteService:
             raise NotFoundError("Ce jaime n'existe pas")
 
         return JaimeDao().supprimer(id_activite, id_utilisateur)
-        
+    
+    @log
     def jaime_existe(self, id_activite: int, id_utilisateur: int) -> bool:
         """Vérifier si un jaime existe dans la base de données"""
         if not ActiviteDao().verifier_id_existant(id_activite):
@@ -128,6 +132,7 @@ class ActiviteService:
         
         return JaimeDao().existe(id_activite, id_utilisateur)
     
+    @log
     def compter_jaimes_par_activite(self, id_activite: int) -> int:
         """Compte le nombre de jaimes pour une activité donnée."""
         if not ActiviteDao().verifier_id_existant(id_activite):
